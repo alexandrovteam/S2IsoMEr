@@ -273,8 +273,8 @@ initEnrichment <- function(scmatrix,
     stop("annotations not in the right format")
   }
 
-   if(isobars & pathway[[1]][1] == "LION"){
-
+   if(isobars){
+     #TODO change the IF condition above to accomodate metabolites not just lion
 
      cat("Parsing potential isobars...\n\n")
 
