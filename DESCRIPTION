@@ -5,7 +5,12 @@ Authors@R:
     person("Martijn", "Molenaar", role = "cre", email = "m.r.molenaar@protonmail.com",
            comment = c(ORCID = "0000-0001-5221-608X"))
 Description: metabolite set enrichment analysis using bootstrapping of molecule isomers.
-Imports: pbapply, tidyr, rmarkdown
+Imports: 
+    pbapply,
+    tidyr,
+    rmarkdown,
+    fgsea,
+    BWStest
 Depends: 
     ggplot2,
     dplyr,
