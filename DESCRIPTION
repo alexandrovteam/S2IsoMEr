@@ -10,7 +10,11 @@ Imports:
     tidyr,
     rmarkdown,
     fgsea,
-    BWStest
+    BWStest,
+    decoupleR,
+    withr,
+    future.apply,
+    future
 Depends: 
     ggplot2,
     dplyr,
