@@ -14,7 +14,9 @@ Imports:
     decoupleR,
     withr,
     future.apply,
-    future
+    future,
+    utils,
+    rlang
 Depends: 
     ggplot2,
     dplyr,

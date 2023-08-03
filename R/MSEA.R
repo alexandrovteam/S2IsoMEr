@@ -47,7 +47,7 @@ simple_fgsea = function(pathways,
 
 }
 
-
+#' @export
 Run_simple_MSEA = function(object, ranking_by = c("t.test", "wilcox.test",
                                                   "BWS", "logFC"),
                            min_pathway_size = 3){
@@ -93,6 +93,7 @@ Run_simple_MSEA = function(object, ranking_by = c("t.test", "wilcox.test",
   }
   return(enrichment_analysis)
 }
+#' @export
 Run_bootstrap_MSEA = function(object,min_pathway_size = 3){
   if(!all(c(object$condition.x, object$condition.y) ==   object$rankings$comparison)){
     message("condition comparison of the ranking is not the same as set conditions")

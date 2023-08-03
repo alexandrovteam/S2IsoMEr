@@ -1,4 +1,68 @@
-decouple_ORA_wrapper = function(marker_list,term_list, n_background, seed = 42){
+
+.ora_analysis <- function(regulons, targets, n_background, ...) {
+
+  # NSE vs. R CMD check workaround
+  p.value <- NULL
+
+  tidyr::expand_grid(source = names(regulons), condition = names(targets)) %>%
+    dplyr::rowwise(source, condition) %>%
+    dplyr::summarise(.ora_fisher_exact_test(
+      expected = regulons[[source]],
+      observed = targets[[condition]],
+      n_background = n_background,
+      ...
+    ),
+    .groups = "drop"
+    ) %>%
+    dplyr::select(source, condition,
+           p_value = p.value, everything()
+    ) %>%
+    dplyr::mutate(score = -log10(p_value)) %>%
+    tibble::add_column(statistic = "ora", .before = 1) %>%
+    dplyr::select(statistic, source, condition, score, p_value)
+}
+.ora_fisher_exact_test <- function(expected, observed, n_background, ...) {
+  rlang::exec(
+    .fn = stats::fisher.test,
+    x = ora_conting_decoupleR(expected, observed, n_background, as_matrix = T),
+    y = NULL,
+    alternative='greater',
+    !!!list(...)
+  ) %>%
+    broom::glance()
+}
+ora_conting_decoupleR = function(expected, observed, n_background, as_matrix = T) {
+  true_positive <- intersect(observed, expected) %>% length()
+  false_negative <- setdiff(expected, observed) %>% length()
+  false_positive <- setdiff(observed, expected) %>% length()
+  true_negative <- (n_background -
+                      true_positive - false_positive - false_negative)
+  if (as_matrix){
+    conting = c(true_positive, false_positive, false_negative, true_negative) %>%
+      matrix(nrow = 2, ncol = 2, byrow = FALSE)
+  }
+  else{
+    conting = data.frame(TP = true_positive, FP = false_positive,
+                         FN = false_negative , TN = true_negative)
+  }
+  return(conting)
+}
+
+get_conting_data = function(regulons, targets, n_background){
+  tidyr::expand_grid(source = names(regulons), condition = names(targets)) %>%
+    dplyr::rowwise(source, condition) %>%
+    dplyr::summarise(ora_conting_decoupleR(
+      expected = regulons[[source]],
+      observed = targets[[condition]],
+      n_background = n_background,as_matrix = F
+    ),
+    .groups = "drop"
+    ) %>%
+    dplyr::select(source, condition, TP, FP, FN, TN)
+}
+
+decouple_ORA_wrapper = function(marker_list,term_list, n_background,
+                                min_intersect = 3, seed = 42){
   # n_up = nrow(input_mat)
   # n_bottom = 0
 
@@ -6,13 +70,15 @@ decouple_ORA_wrapper = function(marker_list,term_list, n_background, seed = 42){
   #   targets <- decoupleR:::.ora_slice_targets(input_mat, n_up, n_bottom, with_ties)
   # })
 
-  ORA_res = decoupleR:::.ora_analysis(regulons = term_list, targets = marker_list,
+  ORA_res = .ora_analysis(regulons = term_list, targets = marker_list,
                                       n_background = n_background)
-  return(ORA_res)
+  ORA_conting = get_conting_data(regulons = term_list, targets = marker_list,
+                                 n_background = n_background)
+  ORA_conting = ORA_conting[which(ORA_conting$TP > min_intersect),]
+  return(list(ORA_res, ORA_conting))
 }
 
 hyper_geom_enrich = function(query,term_list, universe = NULL,
-                             fisher_alternative = "greater",
                              min_path_size = 3){
   if (!is.null(universe)){
     all_bg_mols = universe
@@ -71,7 +137,7 @@ get_metabo_iso = function(sf_vec, consider_isobars = T,
       res
     })
   is_adduct = any(c(paste0("pos", annotation_adduct),
-                    paste0("neg", annotation_adduct)) %in% colnames(metabo_exact_masses))
+                    paste0("neg", annotation_adduct)) %in% colnames(exact_masses))
   if (consider_isobars &
       is_adduct &
       polarization_mode %in% c("negative", "positive")){
@@ -183,6 +249,7 @@ metabo_bootstrap = function(annot_list, annot_weights = NULL,
 
     })
   })
+  names(bootstrapped_sublist) = c(1:length(bootstrapped_sublist))
   return(bootstrapped_sublist)
 }
 
@@ -206,25 +273,32 @@ simplify_hypergeom_bootstrap = function(bootstrap_list,term_list,universe = NULL
   enrich_res = decouple_ORA_wrapper(marker_list = bootstrap_list, term_list = term_list,
                                     n_background = ifelse(is.null(universe),
                                                           length(unique(unlist(term_list))),
-                                                          length(unique(unlist(universe)))))
+                                                          length(unique(unlist(universe)))),
+                                    min_intersect = min_annot)
+
+  boot_conting_res = enrich_res[[2]]
+  enrich_res = enrich_res[[1]]
+
   colnames(enrich_res)[which(colnames(enrich_res) == "source")] = "term"
   colnames(enrich_res)[which(colnames(enrich_res) == "condition")] = "bootstrap"
 
+  colnames(boot_conting_res)[which(colnames(boot_conting_res) == "source")] = "term"
+  colnames(boot_conting_res)[which(colnames(boot_conting_res) == "condition")] = "bootstrap"
 
-  boot_conting_res = pbapply::pblapply(seq(length(bootstrap_list)),function(n_i){
-    enrich_res = hyper_geom_enrich(query = unique(bootstrap_list[[n_i]]),
-                                   term_list = term_list, universe = universe,
-                                   core_metabo_only = core_metabo_only)
-    enrich_res$bootstrap = n_i
-    #enrich_res = enrich_res %>% dplyr::filter(!is.na(OR), !is.na(pval))
-    if(nrow(enrich_res) == 0){
-      return(NULL)
-    }
-    else{
-      return(enrich_res)
-    }
-  })
-  boot_conting_res = boot_conting_res %>% dplyr::bind_rows()
+
+  # boot_conting_res = pbapply::pblapply(seq(length(bootstrap_list)),function(n_i){
+  #   enrich_res = hyper_geom_enrich(query = unique(bootstrap_list[[n_i]]),
+  #                                  term_list = term_list, universe = universe)
+  #   enrich_res$bootstrap = n_i
+  #   #enrich_res = enrich_res %>% dplyr::filter(!is.na(OR), !is.na(pval))
+  #   if(nrow(enrich_res) == 0){
+  #     return(NULL)
+  #   }
+  #   else{
+  #     return(enrich_res)
+  #   }
+  # })
+  # boot_conting_res = boot_conting_res %>% dplyr::bind_rows()
 
   observed = boot_conting_res$TP / (boot_conting_res$TP + boot_conting_res$FP)
   expected = (boot_conting_res$TP + boot_conting_res$FN) / (boot_conting_res$TP + boot_conting_res$FP +
@@ -232,18 +306,19 @@ simplify_hypergeom_bootstrap = function(bootstrap_list,term_list,universe = NULL
   boot_conting_res$OR = observed / expected
 
 
-  boot_enrich_res = boot_conting_res %>% dplyr::left_join(enrich_res, by = c("term","bootstrap"))
-
-  boot_enrich_res = boot_enrich_res %>%
-    mutate(padj = p.adjust(p_value, "BH")) %>%
-    dplyr::filter(TP >= min_annot, p_value < alpha_cutoff)
-
-  boot_enrich_res <- boot_enrich_res %>%
+  boot_enrich_res = boot_conting_res %>%
+    dplyr::left_join(enrich_res, by = c("term","bootstrap")) %>%
+    dplyr::mutate(padj = p.adjust(p_value, "BH")) %>%
     dplyr::group_by(term) %>%
     dplyr::mutate(fraction = length(term) / length(bootstrap_list)) %>%
-    dplyr::filter(fraction > boot_fract_cutoff)
+    dplyr::ungroup()
 
-  final_enrich_res <- boot_enrich_res %>% group_by(bootstrap) %>%
+  final_enrich_res = boot_enrich_res %>%
+    dplyr::filter(TP >= min_annot, p_value < alpha_cutoff,
+                  fraction > boot_fract_cutoff)
+
+  final_enrich_res <- final_enrich_res %>%
+    group_by(bootstrap) %>%
     dplyr::mutate(q.value = p.adjust(p_value, method = "fdr"))  %>%
     dplyr::group_by(term) %>%
     dplyr::summarise(n = median(TP, na.rm = T),
@@ -264,49 +339,42 @@ simplify_hypergeom_bootstrap = function(bootstrap_list,term_list,universe = NULL
               "clean_enrich_res" = final_enrich_res))
 
 }
-
+#' @export
 Run_simple_ORA = function(marker_list, background, custom_universe = NULL,
                           alpha_cutoff = 0.05, min_intersection = 3){
+
+  if (!is.null(custom_universe)){
+    pathway_list_slim <- sapply(background, function(i){
+      i[i %in% custom_universe]
+    }, simplify = F)
+    background <- pathway_list_slim[sapply(pathway_list_slim, length) > 0]
+  }
+
   if (!is.list(marker_list)){
     q = sub("[-+].*","", marker_list) %>% unique()
-    ORA_conting = hyper_geom_enrich(query = q, term_list = background,
-                               universe = custom_universe)
+    # ORA_conting = hyper_geom_enrich(query = q, term_list = background,
+    #                            universe = custom_universe)
     ORA_res = decouple_ORA_wrapper(marker_list = list("Condition" = q),
                                    term_list = background,
-                                   n_background = ifelse(is.null(custom_universe),
-                                                         length(unique(unlist(term_list))),
-                                                         length(unique(unlist(custom_universe)))))
-    ORA_final = ORA_conting %>% dplyr::left_join(ORA_res, by = c("term" = "source"))
-    ORA_final = ORA_final %>%
-      mutate(padj = p.adjust(p_value, "BH")) %>%
-      dplyr::filter(TP >= min_intersection, p_value < alpha_cutoff)
-    return(ORA_final)
+                                   n_background = length(unique(unlist(background))),
+                                   min_intersect = min_intersection)
   }
   else{
     ORA_res = decouple_ORA_wrapper(marker_list = marker_list,
                                    term_list = background,
-                                   n_background = ifelse(is.null(custom_universe),
-                                                         length(unique(unlist(term_list))),
-                                                         length(unique(unlist(custom_universe)))))
-    ORA_conting_all = list()
-    for (grp in 1:length(marker_list)){
-      q = marker_list[[grp]]
-      q = sub("[-+].*","", q) %>% unique()
-      ORA_conting = hyper_geom_enrich(query = q, term_list = background,
-                                 universe = custom_universe)
-      ORA_conting_all[[names(marker_list)[grp]]] = ORA_conting
-    }
-    ORA_conting_all = ORA_conting_all %>% dplyr::bind_rows(.id = "Group")
-    ORA_final = ORA_conting_all %>% dplyr::left_join(ORA_res, by = c("term" = "source"))
-    ORA_final = ORA_final %>%
-      mutate(padj = p.adjust(p_value, "BH")) %>%
-      dplyr::filter(TP >= min_intersection, p_value < alpha_cutoff)
-
-    return(ORA_final)
+                                   n_background = length(unique(unlist(background))),
+                                   min_intersect = min_intersection)
   }
+  ORA_conting = ORA_res[[2]]
+  ORA_res = ORA_res[[1]]
+  ORA_final = ORA_conting %>% dplyr::left_join(ORA_res)
+  ORA_final = ORA_final %>%
+    mutate(padj = p.adjust(p_value, "BH")) %>%
+    dplyr::filter(TP >= min_intersection, p_value < alpha_cutoff)
+  return(ORA_final)
 }
 
-
+#' @export
 Run_bootstrap_ORA = function(marker_list, background, custom_universe = NULL,
                              alpha_cutoff = 0.05, min_intersection = 3,
                              consider_isobars = T,polarization_mode = NA, mass_range_ppm = 3,
@@ -328,6 +396,12 @@ Run_bootstrap_ORA = function(marker_list, background, custom_universe = NULL,
 
     iso_list = get_metabo_iso(sf_vec = q, consider_isobars = consider_isobars, polarization_mode = polarization_mode,
                               mass_range_ppm = mass_range_ppm, only_HMDB = only_HMDB)
+
+    if(!is.null(custom_universe)){
+      univ_iso = get_metabo_iso(sf_vec = custom_universe, consider_isobars = consider_isobars, polarization_mode = polarization_mode,
+                                mass_range_ppm = mass_range_ppm, only_HMDB = only_HMDB)
+      custom_universe = univ_iso %>% unlist() %>% unique()
+    }
 
     boot_list = metabo_bootstrap(annot_list = iso_list, annot_weights = annot_weights,
                                  n_bootstraps = n_bootstraps, sample_core_metab_only = sample_core_metab_only)
