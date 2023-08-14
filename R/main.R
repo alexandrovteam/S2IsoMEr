@@ -320,7 +320,7 @@ initEnrichment <- function(scmatrix,
 print.bmetenrich <- function(object){
   cat("single-cell metabolomics matrix of", dim(object$scmatrix)[1], "metabolites and",
       dim(object$scmatrix)[2], "cells\n")
-  cat("active pathway:", object$pathway,"\n\n")
+  cat("active pathway:", object$background_type ,"\n\n")
 
   cat("conditions:", paste(unique(object$conditions), collapse = ", "),"\n\n")
 
