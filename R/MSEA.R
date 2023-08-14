@@ -48,10 +48,9 @@ simple_fgsea = function(pathways,
 }
 
 #' @export
-Run_simple_MSEA = function(object, ranking_by = c("t.test", "wilcox.test",
-                                                  "BWS", "logFC"),
-                           min_pathway_size = 3){
-  object = rankScore.bmetenrich(object = object, ranking.by = match.arg(ranking_by))
+Run_simple_MSEA = function(object,min_pathway_size = 3){
+  object = rankScore.bmetenrich(object = object, ranking.by = NULL,
+                                alternative = "greater")
   scmat_data = object$scmatrix[object$rankings$rank,]
   bg = object$pathway_list
 
@@ -81,9 +80,17 @@ Run_simple_MSEA = function(object, ranking_by = c("t.test", "wilcox.test",
     }, simplify = F) %>% bind_rows()
   }
   else{
-    mols = rownames(scmat)
-    mols_ranks = enrich_obj$rankings$statistic
+    mols = names(object$annotations)
+    mols_ranks = object$rankings$statistic
+    if (any(is.infinite(mols_ranks))){
+      min_rank = min(mols_ranks[!is.infinite(mols_ranks)])
+      max_rank = max(mols_ranks[!is.infinite(mols_ranks)])
+      mols_ranks[is.infinite(mols_ranks) & mols_ranks < 0] = min_rank - 1
+      mols_ranks[is.infinite(mols_ranks) & mols_ranks > 0] = max_rank + 1
+    }
     names(mols_ranks) = mols
+    mols_ranks = mols_ranks[order(abs(mols_ranks), decreasing = T)]
+    mols_ranks = mols_ranks[!duplicated(names(mols_ranks))]
     mols_ranks = mols_ranks[order(mols_ranks)]
 
     fgsea_res = simple_fgsea(pathways = bg,
@@ -91,6 +98,11 @@ Run_simple_MSEA = function(object, ranking_by = c("t.test", "wilcox.test",
                                minSize  = min_pathway_size, scoreType = "std")
     enrichment_analysis = fgsea_res
   }
+
+  enrichment_analysis = enrichment_analysis %>%
+    dplyr::select(pathway, NES,pval,padj,size) %>%
+    dplyr::filter(pathway != "all")
+  colnames(enrichment_analysis)[1] = "term"
   return(enrichment_analysis)
 }
 #' @export
