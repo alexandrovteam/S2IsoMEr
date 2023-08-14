@@ -1,10 +1,14 @@
-#TODO Make .ora_analysis and get_conting_data faster
-
 
 .ora_analysis <- function(regulons, targets, universe, ...) {
 
   # NSE vs. R CMD check workaround
   p.value <- NULL
+
+  message("\nRunning ORA analysis ... \n")
+
+  n = length(names(regulons)) * length(names(targets))
+
+  pb = progress::progress_bar$new(total = n, incomplete = " ")
 
   tidyr::expand_grid(source = names(regulons), condition = names(targets)) %>%
     dplyr::rowwise(source, condition) %>%
@@ -14,6 +18,7 @@
         observed = targets[[condition]],
         universe = universe
       ),
+      pbar = pb,
       ...
     ),
     .groups = "drop"
@@ -23,19 +28,24 @@
     ) %>%
     dplyr::mutate(score = -log10(p_value)) %>%
     tibble::add_column(statistic = "ora", .before = 1) %>%
-    dplyr::select(statistic, source, condition, score, p_value)
+    dplyr::select(statistic, source, condition, score, p_value,
+                  TP, FP, FN, TN)
 }
-.ora_fisher_exact_test <- function(dat, ...) {
+.ora_fisher_exact_test <- function(dat,pbar, ...) {
+  pbar$tick()
+  conting = ora_conting_decoupleR(dat, as_matrix = F) %>% as_tibble()
   rlang::exec(
     .fn = stats::fisher.test,
-    x = ora_conting_decoupleR(dat, as_matrix = T),
+    x = matrix(as.integer(conting), nrow = 2, ncol = 2),
     y = NULL,
     alternative='greater',
     !!!list(...)
   ) %>%
-    broom::glance()
+    broom::glance() %>%
+    cbind(conting)
 }
 ora_conting_decoupleR = function(dat, as_matrix = T) {
+
   observed = dat[["obs"]]
   expected = dat[["exp"]]
   n_background = dat[["n_bg"]]
@@ -55,21 +65,6 @@ ora_conting_decoupleR = function(dat, as_matrix = T) {
   }
   return(conting)
 }
-get_conting_data = function(regulons, targets, universe){
-  tidyr::expand_grid(source = names(regulons), condition = names(targets)) %>%
-    dplyr::rowwise(source, condition) %>%
-    dplyr::summarise(ora_conting_decoupleR(
-      dat = adjust_conting_iso(
-        expected = regulons[[source]],
-        observed = targets[[condition]],
-        universe = universe
-      ),
-      as_matrix = F
-    ),
-    .groups = "drop"
-    ) %>%
-    dplyr::select(source, condition, TP, FP, FN, TN)
-}
 decouple_ORA_wrapper = function(marker_list,term_list, universe,
                                 min_intersect = 3, seed = 42){
   # n_up = nrow(input_mat)
@@ -81,28 +76,38 @@ decouple_ORA_wrapper = function(marker_list,term_list, universe,
 
   ORA_res = .ora_analysis(regulons = term_list, targets = marker_list,
                           universe = universe)
-  ORA_conting = get_conting_data(regulons = term_list, targets = marker_list,
-                                 universe = universe)
-  #ORA_conting = ORA_conting[which(ORA_conting$TP > min_intersect),]
+
+  ORA_conting = ORA_res %>% dplyr::select(source, condition, TP, FP, FN, TN)
+  ORA_res = ORA_res %>% dplyr::select(statistic, source, condition, score, p_value)
+
   return(list(ORA_res, ORA_conting))
 }
 
 adjust_conting_iso = function(observed, expected,universe){
-  if (check_feat_type(observed) == "sf"){
-    return(list("obs" = observed,
-                "exp" = expected,
-                "n_bg" = unique(universe)))
-  }
+  # if (check_feat_type(observed) == "sf"){
+  #   return(list("obs" = observed,
+  #               "exp" = expected,
+  #               "n_bg" = unique(universe)))
+  # }
   FN = setdiff(expected, observed)
   TP = intersect(expected, observed)
 
-  obs_iso = metaspace_databases[which(metaspace_databases$name %in% observed),]
+  # obs_iso = metaspace_databases[which(metaspace_databases$name %in% observed),]
+  obs_iso = metaspace_databases[metaspace_databases$name %fin% observed,]
 
-  TP_iso = obs_iso[which(obs_iso$name %in% TP),]
-  univ_iso = metaspace_databases[which(metaspace_databases$name %in% universe),]
 
-  FN_iso = metaspace_databases[which(metaspace_databases$name %in% FN),]
-  FN_iso = FN_iso[which(FN_iso$formula %nin% TP_iso$formula),]
+  # TP_iso = obs_iso[which(obs_iso$name %in% TP),]
+  TP_iso = obs_iso[obs_iso$name %fin% TP,]
+
+  # univ_iso = metaspace_databases[which(metaspace_databases$name %in% universe),]
+  univ_iso = metaspace_databases[metaspace_databases$name %fin% universe,]
+
+
+  # FN_iso = metaspace_databases[which(metaspace_databases$name %in% FN),]
+  # FN_iso = FN_iso[which(FN_iso$formula %nin% TP_iso$formula),]
+
+  FN_iso = metaspace_databases[metaspace_databases$name %fin% FN,]
+  FN_iso = FN_iso[FN_iso$formula %nin% TP_iso$formula,]
 
   # TN_iso = univ_iso[which(univ_iso$formula %nin% unique(c(FN_iso$formula,
   #                                                     obs_iso$formula))),]

@@ -16,7 +16,10 @@ Imports:
     future.apply,
     future,
     utils,
-    rlang
+    rlang,
+    ggpubr,
+    progress,
+    fastmatch
 Depends: 
     ggplot2,
     dplyr,

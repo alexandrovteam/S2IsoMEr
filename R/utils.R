@@ -1,4 +1,8 @@
-"%nin%" = Negate("%in%")
+`%fin%` <- function(x, table) {
+  fastmatch::fmatch(x, table, nomatch = 0L) > 0L
+}
+
+"%nin%" = Negate("%fin%")
 
 to_ORA_query = function(dat, metadata = NULL, DE_data = T,
                         min.pct.exp = 0.5){
@@ -59,7 +63,7 @@ list_backgrounds = function(feat_type){
 }
 
 check_feat_type = function(feats){
-  if (any(feats %in% metaspace_databases$name)){
+  if (length(intersect(feats,metaspace_databases$name)) > 1 ){
     feat_type = "name"
   }
   else{
