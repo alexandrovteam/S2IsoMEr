@@ -19,7 +19,10 @@ Imports:
     rlang,
     ggpubr,
     progress,
-    fastmatch
+    fastmatch,
+    pheatmap,
+    RColorBrewer,
+    ggridges
 Depends: 
     ggplot2,
     dplyr,
