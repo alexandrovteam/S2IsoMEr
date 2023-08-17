@@ -102,11 +102,19 @@ Run_simple_MSEA = function(object,min_pathway_size = 3){
   enrichment_analysis = enrichment_analysis %>%
     dplyr::select(pathway, NES,pval,padj,size) %>%
     dplyr::filter(pathway != "all")
-  colnames(enrichment_analysis)[1] = "term"
-  return(enrichment_analysis)
+  colnames(enrichment_analysis)[1] = "Term"
+
+  enrichment_analysis$Term <-
+    object$LUT$name[match(enrichment_analysis$Term, object$LUT$ID)]
+
+  object$enrichment_analysis <- list(table = enrichment_analysis,
+                                     comparison = object$rankings$comparison)
+
+  return(object)
 }
 #' @export
-Run_bootstrap_MSEA = function(object,min_pathway_size = 3){
+Run_bootstrap_MSEA = function(object,n_bootstraps = 50,min_pathway_size = 3){
+
   if(!all(c(object$condition.x, object$condition.y) ==   object$rankings$comparison)){
     message("condition comparison of the ranking is not the same as set conditions")
     message("run rankScore before enrichment analysis")
@@ -114,11 +122,14 @@ Run_bootstrap_MSEA = function(object,min_pathway_size = 3){
                 "run rankScore before enrichment analysis"))
   }
 
+  object = rankScore.bmetenrich(object = object, ranking.by = NULL,
+                                alternative = "greater")
+
   cat("\n")
   cat("Bootstrapping...")
   cat("\n")
 
-  bootstrapped_sublist <- pbapply::pbsapply(seq(n),       ## bootstrapping
+  bootstrapped_sublist <- pbapply::pbsapply(seq(n_bootstraps),       ## bootstrapping
                                             function(n_i) {
                                               sapply(seq(dim(object$scmatrix)[1]), function(row_number_i) {
 
@@ -196,7 +207,7 @@ Run_bootstrap_MSEA = function(object,min_pathway_size = 3){
   cat("\n")
   if (object$gsea.method == "ks_signed"){
     enrichment_analysis <-
-      pbapply::pbsapply(seq(n), function(bootstrap_i){
+      pbapply::pbsapply(seq(n_bootstraps), function(bootstrap_i){
         sapply(names(pathway_list_slim), function(term){
 
           members_logi <- bootstrapped_sublist[[bootstrap_i]] %in% pathway_list_slim[[term]]
@@ -227,31 +238,45 @@ Run_bootstrap_MSEA = function(object,min_pathway_size = 3){
   }
   else if (object$gsea.method == "fgsea"){
     enrichment_analysis <-
-      pbapply::pblapply(seq(n), function(bootstrap_i){
-        boot_mols = bootstrap_list[,bootstrap_i]
+      pbapply::pblapply(seq(n_bootstraps), function(bootstrap_i){
+
+        boot_mols = bootstrapped_sublist[,bootstrap_i]
         boot_mols[is.na(boot_mols)] = names(object$rankings$statistic)[sapply(object$annotations,
                                                                               length) == 0]
         boot_ranks = object$rankings$statistic
+        if (any(is.infinite(boot_ranks))){
+          min_rank = min(boot_ranks[!is.infinite(boot_ranks)])
+          max_rank = max(boot_ranks[!is.infinite(boot_ranks)])
+          boot_ranks[is.infinite(boot_ranks) & boot_ranks < 0] = min_rank - 1
+          boot_ranks[is.infinite(boot_ranks) & boot_ranks > 0] = max_rank + 1
+        }
         names(boot_ranks) = boot_mols
+        boot_ranks = boot_ranks[order(abs(boot_ranks), decreasing = T)]
+        boot_ranks = boot_ranks[!duplicated(names(boot_ranks))]
         boot_ranks = boot_ranks[order(boot_ranks)]
 
         fgsea_res = simple_fgsea(pathways = pathway_list_slim,
                                  stats    = boot_ranks,
                                  minSize  = min_pathway_size,
                                  scoreType = ifelse(any(boot_ranks < 0), "std", "pos"))
-        fgsea_res$bootstrap = boot
+        fgsea_res$bootstrap = bootstrap_i
+        fgsea_res
       }) %>% dplyr::bind_rows()
-    colnames(enrichment_analysis)[which(colnames(enrichment_analysis) == "pval")] = "p.value"
+    colnames(enrichment_analysis)[which(colnames(enrichment_analysis) == "pval")] = "p_value"
     colnames(enrichment_analysis)[which(colnames(enrichment_analysis) == "size")] = "n"
     colnames(enrichment_analysis)[which(colnames(enrichment_analysis) == "pathway")] = "Term"
   }
 
+  enrichment_analysis = enrichment_analysis %>%
+    dplyr::group_by(Term) %>%
+    dplyr::mutate(fraction = length(Term) / length(bootstrapped_sublist)) %>%
+    dplyr::ungroup()
 
-  enrichment_analysis$Term <-                    ## match LION name to LION ID
+  enrichment_analysis$Term <-
     object$LUT$name[match(enrichment_analysis$Term, object$LUT$ID)]
 
   object$enrichment_analysis <- list(table = enrichment_analysis,
-                                     n_bootstraps = n,
+                                     n_bootstraps = n_bootstraps,
                                      fraction_matched_to_pathway = fraction_matched_to_pathway,
                                      comparison = object$rankings$comparison)
   return(object)
