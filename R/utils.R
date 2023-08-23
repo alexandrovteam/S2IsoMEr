@@ -4,6 +4,16 @@
 
 "%nin%" = Negate("%fin%")
 
+mismatch_df = function (x, y, on = NULL){
+  if (is.null(on)) {
+    on <- dplyr::intersect(names(x), names(y))
+    message("Matching on: ", paste(on, collapse = ", "))
+  }
+  keys <- plyr::join.keys(x, y, on)
+  x[keys$x %nin% keys$y, , drop = FALSE]
+}
+
+
 to_ORA_query = function(dat, metadata = NULL, DE_data = T,
                         min.pct.exp = 0.5){
   if (DE_data){
