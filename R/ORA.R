@@ -1,3 +1,5 @@
+#TODO make sure all variable names are the same between simple and bootstraps
+
 
 .ora_analysis <- function(regulons, targets, universe, ...) {
 
@@ -381,6 +383,9 @@ Run_simple_ORA = function(marker_list, background, custom_universe = NULL,
   ORA_final = ORA_final %>%
     mutate(padj = p.adjust(p_value, "BH")) %>%
     dplyr::filter(TP >= min_intersection, p_value < alpha_cutoff)
+
+  colnames(ORA_final)[which(colnames(ORA_final) == "source")] = "term"
+
   return(ORA_final)
 }
 
