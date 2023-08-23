@@ -8,6 +8,11 @@ initEnrichment(
   scmatrix,
   conditions,
   enrichment_type = c("ORA", "MSEA"),
+  annot_db = "HMDB",
+  annot_custom_db = NULL,
+  endogenous_only = T,
+  pathway_assoc_only = F,
+  remove_expected_predicted = T,
   annotations = NULL,
   annotation.weights = NULL,
   consider_isomers = TRUE,
@@ -31,6 +36,16 @@ initEnrichment(
 \item{conditions}{A vector of length m with condition identifiers.}
 
 \item{enrichment_type}{A character specifying whether Overrepresentation analysis (ORA) or Metabolite Set Enrichment Analysis (MSEA) is performed}
+
+\item{annot_db}{A character or character vector specifying which annotation database(s) were used. Current databases include ("CoreMetabolome", "HMDB","SwissLipids","LipidMaps"). Multiple databases can be selected}
+
+\item{annot_custom_db}{An optional dataframe from which the isomers will be sampled. It should have 2 columns : formula and molecule name. If provided, \code{annot_db} will be ignored.}
+
+\item{endogenous_only}{A logical indicating whether to only consider endogenous metabolites (default = TRUE).}
+
+\item{pathway_assoc_only}{A logical indicating whether to only consider metabolites associated with a biological pathway (default = FALSE)}
+
+\item{remove_expected_predicted}{A logical indicating whether to remove expected and predicted isomers based on HMDB status (default = TRUE)}
 
 \item{annotations}{An optional custom list of length n, with each element contains a vector of isomer names. If not specified,
 bmetenrichr uses the CoreMetabolome, LIPIDMAPS, SwissLipids, and HMDB databases from METASPACE (https://metaspace2020.eu/) to generate an annotation list automatically.}

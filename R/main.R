@@ -8,6 +8,11 @@
 #' @param scmatrix A numeric matrix of n metabolites (rows) and m cells or measurments (columns).
 #' @param conditions A vector of length m with condition identifiers.
 #' @param enrichment_type A character specifying whether Overrepresentation analysis (ORA) or Metabolite Set Enrichment Analysis (MSEA) is performed
+#' @param annot_db A character or character vector specifying which annotation database(s) were used. Current databases include ("CoreMetabolome", "HMDB","SwissLipids","LipidMaps"). Multiple databases can be selected
+#' @param annot_custom_db An optional dataframe from which the isomers will be sampled. It should have 2 columns : formula and molecule name. If provided, `annot_db` will be ignored.
+#' @param endogenous_only A logical indicating whether to only consider endogenous metabolites (default = TRUE).
+#' @param pathway_assoc_only A logical indicating whether to only consider metabolites associated with a biological pathway (default = FALSE)
+#' @param remove_expected_predicted A logical indicating whether to remove expected and predicted isomers based on HMDB status (default = TRUE)
 #' @param annotations An optional custom list of length n, with each element contains a vector of isomer names. If not specified,
 #' bmetenrichr uses the CoreMetabolome, LIPIDMAPS, SwissLipids, and HMDB databases from METASPACE (https://metaspace2020.eu/) to generate an annotation list automatically.
 #' @param annotation.weights An optional list of length n, each element contains a vector of isomer weights. Only when annotations is provided as list.
@@ -41,6 +46,11 @@
 initEnrichment <- function(scmatrix,
                            conditions,
                            enrichment_type = c("ORA", "MSEA"),
+                           annot_db = "HMDB",
+                           annot_custom_db = NULL,
+                           endogenous_only = T,
+                           pathway_assoc_only = F,
+                           remove_expected_predicted = T,
                            annotations = NULL,
                            annotation.weights = NULL,
                            consider_isomers = TRUE,
@@ -107,6 +117,22 @@ initEnrichment <- function(scmatrix,
     }
   }
 
+  if (is.null(annot_custom_db) & annot_db %nin% c("CoreMetabolome",
+                                                  "HMDB","SwissLipids","LipidMaps")){
+    stop("Annotation database is invalid and no custom database was provided\n Please check the documentation for more info")
+  }
+
+  if ((molecule_type == "Lipid" & annot_db %in% c("CoreMetabolome", "HMDB")) ||
+      (molecule_type == "Metabo" & annot_db %in% c("LipidMaps", "SwissLipids"))){
+    warning("Background molecule type doesn't match choice of annotation database\n
+            Results might be unreliable, interpret with caution")
+  }
+  if (molecule_type == "Lipid" & endogenous_only){
+    warning("Endogenous only has less coverage with lipids \n
+            We recommend switching it to FALSE for lipid annotations")
+  }
+
+
   feat_type = check_feat_type(rownames(scmatrix))
 
   if (any(c(consider_isobars, consider_isomers))){
@@ -161,23 +187,55 @@ initEnrichment <- function(scmatrix,
     cat("\nParsing isomers...\n")
 
 
-    #NOTE Adding Isomers for Metabo and Lipids
+    if (!is.null(annot_custom_db)){
+      iso_bg = annot_custom_db
+      iso_bg$db = "CustomDB"
+    }
+    else{
+      metasp_r_idx = c()
+      for (i in annot_db){
+        if (i == "LipidMaps"){
+          if (background_type == "LION"){
+            indices = stringr::str_which(metaspace_databases$db,
+                                        "LION_LipidMaps")
+          }
+          else{
+            indices = stringr::str_which(metaspace_databases$db,
+                                         "Ramp_LipidMaps")
+          }
+        }
+        else{
+          indices = switch(i, "HMDB" = stringr::str_which(metaspace_databases$db,
+                                                "HMDB"),
+                 "SwissLipids" = stringr::str_which(metaspace_databases$db,
+                                                    "swisslipids"),
+                 "CoreMetabolome" = stringr::str_which(metaspace_databases$db,
+                                                       "CoreMetabolome"))
+        }
+        metasp_r_idx = c(metasp_r_idx, indices)
+      }
+      metasp_r_idx = unique(metasp_r_idx)
+      iso_bg = metaspace_databases[metasp_r_idx,]
+      rownames(iso_bg) = NULL
 
+      if(endogenous_only){
+        iso_bg = iso_bg[iso_bg$Endogenous == "Yes",]
+      }
+      if (pathway_assoc_only){
+        iso_bg = iso_bg[iso_bg$Pathway_assoc == "Yes",]
+      }
+      if (remove_expected_predicted){
+        iso_bg = iso_bg[iso_bg$HMDB_status %nin% c("expected", "predicted"),]
+      }
+    }
+
+
+    #NOTE Adding Isomers for Metabo and Lipids
     if (consider_isomers){
-      if (molecule_type == "Metabo"){
-        annotation_list <-
-          lapply(annotation_formulas, function(annotation_formula_i){
-            metaspace_databases$name[which(metaspace_databases$formula == annotation_formula_i &
-                                             metaspace_databases$db == "HMDB")]
-          })
-      }
-      else{
-        annotation_list <-
-          lapply(annotation_formulas, function(annotation_formula_i){
-            metaspace_databases$name[which(metaspace_databases$formula == annotation_formula_i &
-                                             metaspace_databases$db != "HMDB")]
-          })
-      }
+      annotation_list <-
+        lapply(annotation_formulas, function(annotation_formula_i){
+          iso_bg$name[which(iso_bg$formula == annotation_formula_i)]
+        })
     }
     else{
       annotation_list = vector("list", length(annotation_formulas))
@@ -243,25 +301,11 @@ initEnrichment <- function(scmatrix,
       }, simplify = F)
 
 
-    #NOTE Added conditional to consider metabolites and lipids for annotations list as above
-    if (molecule_type == "Metabo"){
-      annotation_list <-
-        lapply(seq_along(annotation_formulas), function(i){
-          c(isomer = annotation_list[[i]],
-            isobar = metaspace_databases$name[which(metaspace_databases$formula %in% gsub("\\..+$","",isobars_list[[i]]) &
-                                                      metaspace_databases$db == "HMDB")])
-        })
-    }
-    else{
-      annotation_list <-
-        lapply(seq_along(annotation_formulas), function(i){
-          c(isomer = annotation_list[[i]],
-            isobar = metaspace_databases$name[which(metaspace_databases$formula %in% gsub("\\..+$","",isobars_list[[i]]) &
-                                                      metaspace_databases$db != "HMDB")])
-        })
-    }
-
-
+    annotation_list <-
+      lapply(seq_along(annotation_formulas), function(i){
+        c(isomer = annotation_list[[i]],
+          isobar = iso_bg$name[which(iso_bg$formula %in% gsub("\\..+$","",isobars_list[[i]]))])
+      })
   }
   else {   ## isobars == FALSE
     isobars_list <- NULL
@@ -292,6 +336,8 @@ initEnrichment <- function(scmatrix,
     structure(
       list(scmatrix = scmatrix,
            enrichment_type = match.arg(enrichment_type),
+           Annotation_database = annot_db,
+           Custom_database = annot_custom_db,
            annotations = annotation_list,
            annotation.weights = annotation.weights,
            isobars_list = isobars_list,
