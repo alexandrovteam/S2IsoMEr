@@ -353,8 +353,8 @@ initEnrichment <- function(scmatrix,
            termsSelection = termsSelection,
            condition.x = condition.x,
            condition.y = condition.y,
-           ranking.by = ifelse(enrichment_type == "MSEA", match.arg(ranking.by), NULL),
-           gsea.method = ifelse(enrichment_type == "MSEA", match.arg(gsea.method), NULL)),
+           ranking.by = ifelse(enrichment_type == "MSEA", match.arg(ranking.by), NA),
+           gsea.method = ifelse(enrichment_type == "MSEA", match.arg(gsea.method), NA)),
       class = "bmetenrich")
 
   print(object)
@@ -448,7 +448,7 @@ Run_enrichment <- function(object, Run_DE = FALSE,
       enrich_res = Run_bootstrap_MSEA(object = object, ...)
     }
     else{
-      enrich_res = Run_simple_MSEA(object = object, ranking_by = object$ranking.by,...)
+      enrich_res = Run_simple_MSEA(object = object,...)
     }
   }
   return(enrich_res)
