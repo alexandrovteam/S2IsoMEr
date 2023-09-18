@@ -1,6 +1,3 @@
-#TODO make sure all variable names are the same between simple and bootstraps
-
-
 .ora_analysis <- function(regulons, targets, universe, ...) {
 
   # NSE vs. R CMD check workaround
@@ -67,14 +64,7 @@ ora_conting_decoupleR = function(dat, as_matrix = T) {
   }
   return(conting)
 }
-decouple_ORA_wrapper = function(marker_list,term_list, universe,
-                                min_intersect = 3, seed = 42){
-  # n_up = nrow(input_mat)
-  # n_bottom = 0
-
-  # withr::with_seed(seed, {
-  #   targets <- decoupleR:::.ora_slice_targets(input_mat, n_up, n_bottom, with_ties)
-  # })
+decouple_ORA_wrapper = function(marker_list,term_list, universe, seed = 42){
 
   ORA_res = .ora_analysis(regulons = term_list, targets = marker_list,
                           universe = universe)
@@ -128,21 +118,60 @@ adjust_conting_iso = function(observed, expected,universe){
 
 get_metabo_iso = function(sf_vec, consider_isobars = T,
                           polarization_mode = NA, mass_range_ppm = 3,
-                          only_HMDB = F){
+                          annot_db = "HMDB", annot_custom_db = NULL,
+                          use_LION = F, endogenous_only = T,
+                          pathway_assoc_only = F,
+                          remove_expected_predicted = T){
 
   annotation_formulas_adduct <- gsub("\\+|\\-",".",sf_vec)
   annotation_formulas <- gsub("\\..+$","",annotation_formulas_adduct)
   annotation_adduct <- gsub("^.+\\.","",annotation_formulas_adduct)
-  annotation_list <-
-    lapply(annotation_formulas, function(annotation_formula_i){
-      if (only_HMDB){
-        res = metaspace_databases$name[which(metaspace_databases$formula == annotation_formula_i &
-                                               metaspace_databases$db == "HMDB")]
+
+  if (!is.null(annot_custom_db)){
+    iso_bg = annot_custom_db
+    iso_bg$db = "CustomDB"
+  }
+  else{
+    metasp_r_idx = c()
+    for (i in annot_db){
+      if (i == "LipidMaps"){
+        if (use_LION){
+          indices = stringr::str_which(metaspace_databases$db,
+                                       "LION_LipidMaps")
+        }
+        else{
+          indices = stringr::str_which(metaspace_databases$db,
+                                       "Ramp_LipidMaps")
+        }
       }
       else{
-        res = metaspace_databases$name[metaspace_databases$formula == annotation_formula_i]
+        indices = switch(i, "HMDB" = stringr::str_which(metaspace_databases$db,
+                                                        "HMDB"),
+                         "SwissLipids" = stringr::str_which(metaspace_databases$db,
+                                                            "swisslipids"),
+                         "CoreMetabolome" = stringr::str_which(metaspace_databases$db,
+                                                               "CoreMetabolome"))
       }
-      res
+      metasp_r_idx = c(metasp_r_idx, indices)
+    }
+    metasp_r_idx = unique(metasp_r_idx)
+    iso_bg = metaspace_databases[metasp_r_idx,]
+    rownames(iso_bg) = NULL
+
+    if(endogenous_only){
+      iso_bg = iso_bg[iso_bg$Endogenous == "Yes",]
+    }
+    if (pathway_assoc_only){
+      iso_bg = iso_bg[iso_bg$Pathway_assoc == "Yes",]
+    }
+    if (remove_expected_predicted){
+      iso_bg = iso_bg[iso_bg$HMDB_status %nin% c("expected", "predicted"),]
+    }
+  }
+
+  annotation_list <-
+    lapply(annotation_formulas, function(annotation_formula_i){
+      iso_bg$name[iso_bg$formula == annotation_formula_i]
     })
   is_adduct = any(c(paste0("pos", annotation_adduct),
                     paste0("neg", annotation_adduct)) %in% colnames(exact_masses))
@@ -209,7 +238,7 @@ get_metabo_iso = function(sf_vec, consider_isobars = T,
     annotation_list <-
       lapply(seq_along(annotation_formulas), function(i){
         c(isomer = annotation_list[[i]],
-          isobar = metaspace_databases$name[metaspace_databases$formula %in% gsub("\\..+$","",isobars_list[[i]])])
+          isobar = iso_bg$name[iso_bg$formula %in% gsub("\\..+$","",isobars_list[[i]])])
 
       })
   }
@@ -219,7 +248,7 @@ get_metabo_iso = function(sf_vec, consider_isobars = T,
 }
 
 metabo_bootstrap = function(annot_list, annot_weights = NULL,
-                            n_bootstraps = 50,sample_core_metab_only = T){
+                            n_bootstraps = 50){
   if (!is.null(annot_weights)) {
     if (length(annot_weights) != length(annot_list)) {
       stop("annotations and annotation.weights do not have the same length")
@@ -230,11 +259,11 @@ metabo_bootstrap = function(annot_list, annot_weights = NULL,
       }
     }
   }
-  if (sample_core_metab_only){
-    annot_list <- sapply(annot_list, function(i){
-      i[i %in% core_metab$name]
-    }, simplify = F)
-  }
+  # if (sample_core_metab_only){
+  #   annot_list <- sapply(annot_list, function(i){
+  #     i[i %in% core_metab$name]
+  #   }, simplify = F)
+  # }
 
   bootstrapped_sublist <- pbapply::pblapply(seq(n_bootstraps),function(n_i){
     sapply(seq(length(annot_list)),function(row_number_i){
@@ -262,9 +291,8 @@ metabo_bootstrap = function(annot_list, annot_weights = NULL,
 }
 
 simplify_hypergeom_bootstrap = function(bootstrap_list,term_list,universe = NULL,
-                                        core_metabo_only = F,
                                         boot_fract_cutoff = 0.5,
-                                        min_annot = 3, q.val_cutoff = 0.2,
+                                        min_intersection = 3, q.val_cutoff = 0.2,
                                         selected_terms = NULL,
                                         alpha_cutoff = 0.05){
 
@@ -285,16 +313,15 @@ simplify_hypergeom_bootstrap = function(bootstrap_list,term_list,universe = NULL
 
 
   enrich_res = decouple_ORA_wrapper(marker_list = bootstrap_list, term_list = term_list,
-                                    universe = univ,
-                                    min_intersect = min_annot)
+                                    universe = univ)
 
   boot_conting_res = enrich_res[[2]]
   enrich_res = enrich_res[[1]]
 
-  colnames(enrich_res)[which(colnames(enrich_res) == "source")] = "term"
+  colnames(enrich_res)[which(colnames(enrich_res) == "source")] = "Term"
   colnames(enrich_res)[which(colnames(enrich_res) == "condition")] = "bootstrap"
 
-  colnames(boot_conting_res)[which(colnames(boot_conting_res) == "source")] = "term"
+  colnames(boot_conting_res)[which(colnames(boot_conting_res) == "source")] = "Term"
   colnames(boot_conting_res)[which(colnames(boot_conting_res) == "condition")] = "bootstrap"
 
 
@@ -319,20 +346,20 @@ simplify_hypergeom_bootstrap = function(bootstrap_list,term_list,universe = NULL
 
 
   boot_enrich_res = boot_conting_res %>%
-    dplyr::left_join(enrich_res, by = c("term","bootstrap")) %>%
+    dplyr::left_join(enrich_res, by = c("Term","bootstrap")) %>%
     dplyr::mutate(padj = p.adjust(p_value, "BH")) %>%
-    dplyr::group_by(term) %>%
-    dplyr::mutate(fraction = length(term) / length(bootstrap_list)) %>%
+    dplyr::group_by(Term) %>%
+    dplyr::mutate(fraction = length(Term) / length(bootstrap_list)) %>%
     dplyr::ungroup()
 
   final_enrich_res = boot_enrich_res %>%
-    dplyr::filter(TP >= min_annot, p_value < alpha_cutoff,
+    dplyr::filter(TP >= min_intersection, p_value < alpha_cutoff,
                   fraction > boot_fract_cutoff)
 
   final_enrich_res <- final_enrich_res %>%
     group_by(bootstrap) %>%
     dplyr::mutate(q.value = p.adjust(p_value, method = "fdr"))  %>%
-    dplyr::group_by(term) %>%
+    dplyr::group_by(Term) %>%
     dplyr::summarise(n = median(TP, na.rm = T),
                      ES_median = median(OR, na.rm = T),
                      ES_sd = sd(OR, na.rm = T),
@@ -344,7 +371,7 @@ simplify_hypergeom_bootstrap = function(bootstrap_list,term_list,universe = NULL
     dplyr::arrange(q.value_median)
 
   final_enrich_res = final_enrich_res %>%
-    dplyr::filter(n > min_annot, q.value_median < q.val_cutoff, term != "") %>%
+    dplyr::filter(n > min_intersection, q.value_median < q.val_cutoff, Term != "") %>%
     ungroup() %>% as.data.frame()
 
   return(list("unfiltered_enrich_res" = boot_enrich_res,
@@ -360,6 +387,10 @@ Run_simple_ORA = function(marker_list, background, custom_universe = NULL,
       i[i %in% custom_universe]
     }, simplify = F)
     background <- pathway_list_slim[sapply(pathway_list_slim, length) > 0]
+    univ = custom_universe
+  }
+  else{
+    univ = unlist(background) %>% unique()
   }
 
   if (!is.list(marker_list)){
@@ -368,23 +399,21 @@ Run_simple_ORA = function(marker_list, background, custom_universe = NULL,
     #                            universe = custom_universe)
     ORA_res = decouple_ORA_wrapper(marker_list = list("Condition" = q),
                                    term_list = background,
-                                   n_background = length(unique(unlist(background))),
-                                   min_intersect = min_intersection)
+                                   universe = univ)
   }
   else{
     ORA_res = decouple_ORA_wrapper(marker_list = marker_list,
                                    term_list = background,
-                                   n_background = length(unique(unlist(background))),
-                                   min_intersect = min_intersection)
+                                   universe = univ)
   }
   ORA_conting = ORA_res[[2]]
   ORA_res = ORA_res[[1]]
   ORA_final = ORA_conting %>% dplyr::left_join(ORA_res)
   ORA_final = ORA_final %>%
-    mutate(padj = p.adjust(p_value, "BH")) %>%
+    mutate(q.value = p.adjust(p_value, "BH")) %>%
     dplyr::filter(TP >= min_intersection, p_value < alpha_cutoff)
 
-  colnames(ORA_final)[which(colnames(ORA_final) == "source")] = "term"
+  colnames(ORA_final)[which(colnames(ORA_final) == "source")] = "Term"
 
   return(ORA_final)
 }
@@ -393,8 +422,12 @@ Run_simple_ORA = function(marker_list, background, custom_universe = NULL,
 Run_bootstrap_ORA = function(marker_list, background, custom_universe = NULL,
                              alpha_cutoff = 0.05, min_intersection = 3,
                              consider_isobars = T,polarization_mode = NA, mass_range_ppm = 3,
-                             only_HMDB = F,annot_weights = NULL,
-                             n_bootstraps = 50,sample_core_metab_only = T,
+                             annot_db = "HMDB", annot_custom_db = NULL,
+                             use_LION = F, endogenous_only = T,
+                             pathway_assoc_only = F,
+                             remove_expected_predicted = T,
+                             annot_weights = NULL,
+                             n_bootstraps = 50,
                              boot_fract_cutoff = 0.5,q.val_cutoff = 0.2,
                              selected_terms = NULL){
 
@@ -410,21 +443,25 @@ Run_bootstrap_ORA = function(marker_list, background, custom_universe = NULL,
     message(paste0("\n", "Getting Isomers and Isobars", "\n"))
 
     iso_list = get_metabo_iso(sf_vec = q, consider_isobars = consider_isobars, polarization_mode = polarization_mode,
-                              mass_range_ppm = mass_range_ppm, only_HMDB = only_HMDB)
+                              mass_range_ppm = mass_range_ppm,annot_db = annot_db,
+                              annot_custom_db = annot_custom_db, use_LION = use_LION, endogenous_only = endogenous_only,
+                              pathway_assoc_only = pathway_assoc_only, remove_expected_predicted = remove_expected_predicted)
 
     if(!is.null(custom_universe)){
       univ_iso = get_metabo_iso(sf_vec = custom_universe, consider_isobars = consider_isobars, polarization_mode = polarization_mode,
-                                mass_range_ppm = mass_range_ppm, only_HMDB = only_HMDB)
+                                mass_range_ppm = mass_range_ppm,annot_db = annot_db,
+                                annot_custom_db = annot_custom_db, use_LION = use_LION, endogenous_only = endogenous_only,
+                                pathway_assoc_only = pathway_assoc_only, remove_expected_predicted = remove_expected_predicted)
       custom_universe = univ_iso %>% unlist() %>% unique()
     }
 
     boot_list = metabo_bootstrap(annot_list = iso_list, annot_weights = annot_weights,
-                                 n_bootstraps = n_bootstraps, sample_core_metab_only = sample_core_metab_only)
+                                 n_bootstraps = n_bootstraps)
 
     final_res = simplify_hypergeom_bootstrap(bootstrap_list = boot_list,
                                              term_list = background,
-                                             core_metabo_only = sample_core_metab_only,universe = custom_universe,
-                                             boot_fract_cutoff = boot_fract_cutoff, min_annot = min_intersection,
+                                             universe = custom_universe,
+                                             boot_fract_cutoff = boot_fract_cutoff, min_intersection = min_intersection,
                                              q.val_cutoff = q.val_cutoff,selected_terms = selected_terms,
                                              alpha_cutoff = alpha_cutoff)
     ORA_boot_all_grps[[grp]] = final_res

@@ -62,19 +62,19 @@ Run_simple_MSEA = function(object,min_pathway_size = 3){
         data.frame(Term = term,
                    n = 0,
                    ES = NA,
-                   p.value = NA)
+                   p_value = NA)
       } else if (all(members_logi)){
         data.frame(Term = term,
                    n = sum(members_logi),
                    ES = NA,
-                   p.value = NA)
+                   p_value = NA)
       } else {
         ks_results <- ks.test.signed(which(members_logi), which(!members_logi))
 
         data.frame(Term = term,
                    n = sum(members_logi),
                    ES = ks_results$ES,
-                   p.value = ks_results$p.value)
+                   p_value = ks_results$p.value)
       }
 
     }, simplify = F) %>% bind_rows()
@@ -96,18 +96,21 @@ Run_simple_MSEA = function(object,min_pathway_size = 3){
     fgsea_res = simple_fgsea(pathways = bg,
                                stats    = mols_ranks,
                                minSize  = min_pathway_size, scoreType = "std")
+    fgsea_res = fgsea_res %>% dplyr::select(pathway, size, ES, pval, padj, NES)
     enrichment_analysis = fgsea_res
   }
 
+  colnames(enrichment_analysis)[which(colnames(enrichment_analysis) == "pval")] = "p_value"
+  colnames(enrichment_analysis)[which(colnames(enrichment_analysis) == "size")] = "n"
+  colnames(enrichment_analysis)[which(colnames(enrichment_analysis) == "pathway")] = "Term"
+
   enrichment_analysis = enrichment_analysis %>%
-    dplyr::select(pathway, NES,pval,padj,size) %>%
-    dplyr::filter(pathway != "all")
-  colnames(enrichment_analysis)[1] = "Term"
+    dplyr::filter(Term != "all")
 
   enrichment_analysis$Term <-
     object$LUT$name[match(enrichment_analysis$Term, object$LUT$ID)]
 
-  object$enrichment_analysis <- list(table = enrichment_analysis,
+  object$enrichment_analysis <- list(enrichment_results = enrichment_analysis,
                                      comparison = object$rankings$comparison)
 
   return(object)
@@ -216,13 +219,13 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,min_pathway_size = 3){
                        bootstrap = bootstrap_i,
                        n = 0,
                        ES = NA,
-                       p.value = NA)
+                       p_value = NA)
           } else if (all(members_logi)){
             data.frame(Term = term,
                        bootstrap = bootstrap_i,
                        n = sum(members_logi),
                        ES = NA,
-                       p.value = NA)
+                       p_value = NA)
           } else {
             ks_results <- ks.test.signed( which(members_logi), which(!members_logi))
 
@@ -230,7 +233,7 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,min_pathway_size = 3){
                        bootstrap = bootstrap_i,
                        n = sum(members_logi),
                        ES = ks_results$ES,
-                       p.value = ks_results$p.value)
+                       p_value = ks_results$p.value)
           }
 
         }, simplify = F) %>% bind_rows()
@@ -260,6 +263,7 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,min_pathway_size = 3){
                                  minSize  = min_pathway_size,
                                  scoreType = ifelse(any(boot_ranks < 0), "std", "pos"))
         fgsea_res$bootstrap = bootstrap_i
+        fgsea_res = fgsea_res %>% dplyr::select(pathway, bootstrap, size, ES, pval, NES)
         fgsea_res
       }) %>% dplyr::bind_rows()
     colnames(enrichment_analysis)[which(colnames(enrichment_analysis) == "pval")] = "p_value"
@@ -275,7 +279,22 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,min_pathway_size = 3){
   enrichment_analysis$Term <-
     object$LUT$name[match(enrichment_analysis$Term, object$LUT$ID)]
 
-  object$enrichment_analysis <- list(table = enrichment_analysis,
+  summarized_enrichment_results <-
+    enrichment_analysis %>% dplyr::group_by(bootstrap) %>%
+    dplyr::mutate(q.value = p.adjust(p_value, method = "fdr"))  %>%
+    dplyr::group_by(Term) %>%
+    dplyr::summarise(n = median(n, na.rm = T),
+              ES_median = median(ES, na.rm = T),
+              ES_sd = sd(ES, na.rm = T),
+              p.value_median = median(p_value, na.rm = T),
+              p.value_sd = sd(p_value, na.rm = T),
+              q.value_median = median(q.value, na.rm = T),
+              q.value_sd = sd(q.value, na.rm = T),
+              fraction.bootstrap.presence = median(fraction, na.rm = T)) %>%
+    dplyr::arrange(q.value_median)
+
+  object$enrichment_analysis <- list(enrichment_results = summarized_enrichment_results,
+                                     per_bootstrap_enrich_results = enrichment_analysis,
                                      n_bootstraps = n_bootstraps,
                                      fraction_matched_to_pathway = fraction_matched_to_pathway,
                                      comparison = object$rankings$comparison)
