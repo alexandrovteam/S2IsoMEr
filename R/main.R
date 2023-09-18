@@ -436,7 +436,16 @@ Run_enrichment <- function(object, Run_DE = FALSE,
                          "downregulated" = rownames(sel_markers)[which(sel_markers$LFC < 0)])
     if (any(c(object$consider_isomers, object$consider_isobars))){
       enrich_res = Run_bootstrap_ORA(marker_list = final_markers,
-                                     background = object$pathway_list, ...)
+                                     background = object$pathway_list,
+                                     polarization_mode = object$polarization_mode,
+                                     mass_range_ppm = object$mass_range_ppm,
+                                     annot_db = object$annot_db,
+                                     annot_custom_db = object$annot_custom_db,
+                                     use_LION = ifelse("LION" %in% object$background_type, T, F),
+                                     endogenous_only = object$endogenous_only,
+                                     pathway_assoc_only = object$pathway_assoc_only,
+                                     remove_expected_predicted = object$remove_expected_predicted,
+                                     annot_weights = object$annotation.weights, ...)
     }
     else{
       enrich_res = Run_simple_ORA(marker_list = final_markers,
