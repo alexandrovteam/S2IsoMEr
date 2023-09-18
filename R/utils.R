@@ -82,6 +82,33 @@ check_feat_type = function(feats){
   return(feat_type)
 }
 
+#' Load enrichment background
+#'
+#' Load_background() retrieves a list of terms and associated metabolites for enrichment based on requested
+#' molecule type, background type and input feature type.
+#'
+#' @param mol_type Character indicating molecule type. Can be either `Lipid` for Lipids and `Metabo` for small molecules
+#' @param bg_type Character indicating background type :
+#' \itemize{
+#'  \item{`LION : `}{LION ontology for Lipids only}
+#'  \item{`main_class : `}{Level 1 classification - finer classification compared to super_class}
+#'  \item{`super_class : `}{Level 0 classification}
+#'  \item{`sub_class : `}{Level 2 classification - finer classification compared to main_class}
+#'  \item{`pathways : `}{Biological pathways based upon KEGG, Reactome, and SMPDB}
+#'  }
+#' @param feature_type Character indicating input feature type. Can be either `sf` for sum formula or ion
+#' and `name` for molecule name.
+#'
+#' @return List where each element name correspond to a given term and values are
+#' either metabolite names or sum formulas.
+#' @examples
+#' myTestRun <-
+#' Load_background(mol_type = "Metabo",
+#'                    bg_type = "main_class",
+#'                    feature_type = "name")
+#'
+#'
+#' @export
 Load_background = function(mol_type = c("Lipid", "Metabo"),
                            bg_type = c("LION","main_class","super_class", "sub_class",
                                        "pathways"),
@@ -165,9 +192,6 @@ setConditions.bmetenrich <- function(object, condition.x = NULL, condition.y = N
     }
 
   }
-
   return(object)
-
-
 }
 
