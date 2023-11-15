@@ -139,34 +139,6 @@ initEnrichment <- function(scmatrix,
     feat_type = "name"
   }
 
-  #NOTE pathway will be built based on molecule type (Lipids / Metabo) and background type, otherwise custom
-  if (is.null(custom_bg)) {
-    pathway_list = Load_background(mol_type = molecule_type,
-                                   bg_type = background_type,
-                                   feature_type = feat_type)
-    pathway_list$all <- unique(unlist(pathway_list))
-    if (background_type != "LION"){
-      LUT <- data.frame(ID = names(pathway_list),
-                        name = names(pathway_list))
-    }
-    else{
-      LUT <- LION_LUT
-      }
-    }
-  else {
-    if (is.list(custom_bg)) {
-      pathway_list <- custom_bg
-      pathway_list$all <- unique(unlist(pathway_list))
-
-      ## make an *ad-hoc* LUT
-      LUT <- data.frame(ID = names(pathway_list),
-                        name = names(pathway_list))
-    }
-    else {
-      stop("Custom background is not in the right format")
-    }
-  }
-
   #NOTE annotations can be constructed based on scmatrix, so the argument was changed to only accept optional custom list from user
   if (!is.null(annotations) & is.list(annotations)){
     ## use provided list when used as input
@@ -226,6 +198,60 @@ initEnrichment <- function(scmatrix,
       }
       if (remove_expected_predicted){
         iso_bg = iso_bg[iso_bg$HMDB_status %nin% c("expected", "predicted"),]
+      }
+    }
+
+    #NOTE pathway will be built based on molecule type (Lipids / Metabo) and background type, otherwise custom
+    if (is.null(custom_bg)) {
+      pathway_list = Load_background(mol_type = molecule_type,
+                                     bg_type = background_type,
+                                     feature_type = feat_type)
+      if (feat_type == "sf"){
+        pathway_list_slim <- sapply(pathway_list, function(i){
+          i[i %in% iso_bg$formula]
+        }, simplify = F)
+        pathway_list <- pathway_list_slim[sapply(pathway_list_slim, length) > 0]
+      }
+      else{
+        pathway_list_slim <- sapply(pathway_list, function(i){
+          i[i %in% iso_bg$name]
+        }, simplify = F)
+        pathway_list <- pathway_list_slim[sapply(pathway_list_slim, length) > 0]
+      }
+      pathway_list$all <- unique(unlist(pathway_list))
+      if (background_type != "LION"){
+        LUT <- data.frame(ID = names(pathway_list),
+                          name = names(pathway_list))
+      }
+      else{
+        LUT <- LION_LUT
+      }
+    }
+    else {
+      if (is.list(custom_bg)) {
+        pathway_list <- custom_bg
+
+        if (feat_type == "sf"){
+          pathway_list_slim <- sapply(pathway_list, function(i){
+            i[i %in% iso_bg$formula]
+          }, simplify = F)
+          pathway_list <- pathway_list_slim[sapply(pathway_list_slim, length) > 0]
+        }
+        else{
+          pathway_list_slim <- sapply(pathway_list, function(i){
+            i[i %in% iso_bg$name]
+          }, simplify = F)
+          pathway_list <- pathway_list_slim[sapply(pathway_list_slim, length) > 0]
+        }
+
+        pathway_list$all <- unique(unlist(pathway_list))
+
+        ## make an *ad-hoc* LUT
+        LUT <- data.frame(ID = names(pathway_list),
+                          name = names(pathway_list))
+      }
+      else {
+        stop("Custom background is not in the right format")
       }
     }
 
@@ -395,8 +421,8 @@ Run_enrichment <- function(object, Run_DE = FALSE,
                            DE_pval_cutoff = 0.05, DE_LFC_cutoff = 1,
                            min.pct.diff = 0.1,...){
   if(object$enrichment_type == "ORA"){
-    cond_x_cells = colnames(object$scmatrix)[which(object$conditions == condition.x)]
-    cond_y_cells = colnames(object$scmatrix)[which(object$conditions == condition.y)]
+    cond_x_cells = colnames(object$scmatrix)[which(object$conditions == object$condition.x)]
+    cond_y_cells = colnames(object$scmatrix)[which(object$conditions == object$condition.y)]
     LFC = apply(object$scmatrix, 1, function(x){
       log2(mean(x[cond_y_cells])) - log2(mean(x[cond_x_cells]))
     })
