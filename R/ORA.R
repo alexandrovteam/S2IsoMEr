@@ -76,11 +76,11 @@ decouple_ORA_wrapper = function(marker_list,term_list, universe, seed = 42){
 }
 
 adjust_conting_iso = function(observed, expected,universe){
-  # if (check_feat_type(observed) == "sf"){
-  #   return(list("obs" = observed,
-  #               "exp" = expected,
-  #               "n_bg" = unique(universe)))
-  # }
+  if (check_feat_type(observed) == "sf"){
+    return(list("obs" = observed,
+                "exp" = expected,
+                "n_bg" = length(unique(universe))))
+  }
   FN = setdiff(expected, observed)
   TP = intersect(expected, observed)
 
@@ -382,6 +382,18 @@ simplify_hypergeom_bootstrap = function(bootstrap_list,term_list,universe = NULL
 Run_simple_ORA = function(marker_list, background, custom_universe = NULL,
                           alpha_cutoff = 0.05, min_intersection = 3){
 
+  if (!is.list(marker_list)){
+    q = sub("[-+].*","", marker_list) %>% unique()
+    # ORA_conting = hyper_geom_enrich(query = q, term_list = background,
+    #                            universe = custom_universe)
+    marker_list  = list("Condition" = q)
+  }
+  else{
+    marker_list = lapply(marker_list, function(x){
+      sub("[-+].*","", x) %>% unique()
+    })
+  }
+
   if (!is.null(custom_universe)){
     pathway_list_slim <- sapply(background, function(i){
       i[i %in% custom_universe]
@@ -390,22 +402,19 @@ Run_simple_ORA = function(marker_list, background, custom_universe = NULL,
     univ = custom_universe
   }
   else{
+    pathway_list_slim <- sapply(background, function(i){
+      length(intersect(i, unlist(marker_list)))
+      }, simplify = T)
+    background <- background[which(pathway_list_slim != 0)]
     univ = unlist(background) %>% unique()
   }
 
-  if (!is.list(marker_list)){
-    q = sub("[-+].*","", marker_list) %>% unique()
-    # ORA_conting = hyper_geom_enrich(query = q, term_list = background,
-    #                            universe = custom_universe)
-    ORA_res = decouple_ORA_wrapper(marker_list = list("Condition" = q),
-                                   term_list = background,
-                                   universe = univ)
-  }
-  else{
-    ORA_res = decouple_ORA_wrapper(marker_list = marker_list,
-                                   term_list = background,
-                                   universe = univ)
-  }
+  background = background[-which(names(background) == "all")]
+
+  ORA_res = decouple_ORA_wrapper(marker_list = marker_list,
+                                 term_list = background,
+                                 universe = univ)
+
   ORA_conting = ORA_res[[2]]
   ORA_res = ORA_res[[1]]
   ORA_final = ORA_conting %>% dplyr::left_join(ORA_res)
