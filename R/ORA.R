@@ -435,10 +435,19 @@ Run_bootstrap_ORA = function(marker_list, background, custom_universe = NULL,
                              use_LION = F, endogenous_only = T,
                              pathway_assoc_only = F,
                              remove_expected_predicted = T,
+                             annot_list = NULL,
                              annot_weights = NULL,
                              n_bootstraps = 50,
                              boot_fract_cutoff = 0.5,q.val_cutoff = 0.2,
                              selected_terms = NULL){
+
+  if(!is.null(custom_universe)){
+    univ_iso = get_metabo_iso(sf_vec = custom_universe, consider_isobars = consider_isobars, polarization_mode = polarization_mode,
+                              mass_range_ppm = mass_range_ppm,annot_db = annot_db,
+                              annot_custom_db = annot_custom_db, use_LION = use_LION, endogenous_only = endogenous_only,
+                              pathway_assoc_only = pathway_assoc_only, remove_expected_predicted = remove_expected_predicted)
+    custom_universe = univ_iso %>% unlist() %>% unique()
+  }
 
   if (!is.list(marker_list)){
     q = sub("[-+].*","", marker_list) %>% unique()
@@ -451,17 +460,16 @@ Run_bootstrap_ORA = function(marker_list, background, custom_universe = NULL,
 
     message(paste0("\n", "Getting Isomers and Isobars", "\n"))
 
-    iso_list = get_metabo_iso(sf_vec = q, consider_isobars = consider_isobars, polarization_mode = polarization_mode,
-                              mass_range_ppm = mass_range_ppm,annot_db = annot_db,
-                              annot_custom_db = annot_custom_db, use_LION = use_LION, endogenous_only = endogenous_only,
-                              pathway_assoc_only = pathway_assoc_only, remove_expected_predicted = remove_expected_predicted)
-
-    if(!is.null(custom_universe)){
-      univ_iso = get_metabo_iso(sf_vec = custom_universe, consider_isobars = consider_isobars, polarization_mode = polarization_mode,
+    if(!is.null(annot_list)){
+      q = q[which(q %in% names(annot_list))]
+      iso_list = annot_list
+      iso_list = iso_list[q]
+    }
+    else{
+      iso_list = get_metabo_iso(sf_vec = q, consider_isobars = consider_isobars, polarization_mode = polarization_mode,
                                 mass_range_ppm = mass_range_ppm,annot_db = annot_db,
                                 annot_custom_db = annot_custom_db, use_LION = use_LION, endogenous_only = endogenous_only,
                                 pathway_assoc_only = pathway_assoc_only, remove_expected_predicted = remove_expected_predicted)
-      custom_universe = univ_iso %>% unlist() %>% unique()
     }
 
     boot_list = metabo_bootstrap(annot_list = iso_list, annot_weights = annot_weights,

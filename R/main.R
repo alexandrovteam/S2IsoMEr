@@ -458,7 +458,7 @@ Run_enrichment <- function(object, Run_DE = FALSE,
     }
     final_markers = list("upregulated" = rownames(sel_markers)[which(sel_markers$LFC > 0)],
                          "downregulated" = rownames(sel_markers)[which(sel_markers$LFC < 0)],
-                         "all" = unique(sel_markers))
+                         "all" = unique(rownames(sel_markers)))
     if (any(c(object$consider_isomers, object$consider_isobars))){
       enrich_res = Run_bootstrap_ORA(marker_list = final_markers,
                                      background = object$pathway_list,
@@ -470,7 +470,9 @@ Run_enrichment <- function(object, Run_DE = FALSE,
                                      endogenous_only = object$endogenous_only,
                                      pathway_assoc_only = object$pathway_assoc_only,
                                      remove_expected_predicted = object$remove_expected_predicted,
-                                     annot_weights = object$annotation.weights, ...)
+                                     annot_weights = object$annotation.weights,
+                                     consider_isobars = object$consider_isobars,
+                                     annot_list = object$annotations, ...)
     }
     else{
       enrich_res = Run_simple_ORA(marker_list = final_markers,
