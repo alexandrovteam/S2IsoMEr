@@ -139,6 +139,102 @@ initEnrichment <- function(scmatrix,
     feat_type = "name"
   }
 
+  if (!is.null(annot_custom_db)){
+    iso_bg = annot_custom_db
+    iso_bg$db = "CustomDB"
+  }
+  else{
+    metasp_r_idx = c()
+    for (i in annot_db){
+      if (i == "LipidMaps"){
+        if (background_type == "LION"){
+          indices = stringr::str_which(metaspace_databases$db,
+                                       "LION_LipidMaps")
+        }
+        else{
+          indices = stringr::str_which(metaspace_databases$db,
+                                       "Ramp_LipidMaps")
+        }
+      }
+      else{
+        indices = switch(i, "HMDB" = stringr::str_which(metaspace_databases$db,
+                                                        "HMDB"),
+                         "SwissLipids" = stringr::str_which(metaspace_databases$db,
+                                                            "swisslipids"),
+                         "CoreMetabolome" = stringr::str_which(metaspace_databases$db,
+                                                               "CoreMetabolome"))
+      }
+      metasp_r_idx = c(metasp_r_idx, indices)
+    }
+    metasp_r_idx = unique(metasp_r_idx)
+    iso_bg = metaspace_databases[metasp_r_idx,]
+    rownames(iso_bg) = NULL
+
+    if(endogenous_only){
+      iso_bg = iso_bg[iso_bg$Endogenous == "Yes",]
+    }
+    if (pathway_assoc_only){
+      iso_bg = iso_bg[iso_bg$Pathway_assoc == "Yes",]
+    }
+    if (remove_expected_predicted){
+      iso_bg = iso_bg[iso_bg$HMDB_status %nin% c("expected", "predicted"),]
+    }
+  }
+
+  #NOTE pathway will be built based on molecule type (Lipids / Metabo) and background type, otherwise custom
+  if (is.null(custom_bg)) {
+    pathway_list = Load_background(mol_type = molecule_type,
+                                   bg_type = background_type,
+                                   feature_type = feat_type)
+    if (feat_type == "sf"){
+      pathway_list_slim <- sapply(pathway_list, function(i){
+        i[i %in% iso_bg$formula]
+      }, simplify = F)
+      pathway_list <- pathway_list_slim[sapply(pathway_list_slim, length) > 0]
+    }
+    else{
+      pathway_list_slim <- sapply(pathway_list, function(i){
+        i[i %in% iso_bg$name]
+      }, simplify = F)
+      pathway_list <- pathway_list_slim[sapply(pathway_list_slim, length) > 0]
+    }
+    pathway_list$all <- unique(unlist(pathway_list))
+    if (background_type != "LION"){
+      LUT <- data.frame(ID = names(pathway_list),
+                        name = names(pathway_list))
+    }
+    else{
+      LUT <- LION_LUT
+    }
+  }
+  else {
+    if (is.list(custom_bg)) {
+      pathway_list <- custom_bg
+
+      if (feat_type == "sf"){
+        pathway_list_slim <- sapply(pathway_list, function(i){
+          i[i %in% iso_bg$formula]
+        }, simplify = F)
+        pathway_list <- pathway_list_slim[sapply(pathway_list_slim, length) > 0]
+      }
+      else{
+        pathway_list_slim <- sapply(pathway_list, function(i){
+          i[i %in% iso_bg$name]
+        }, simplify = F)
+        pathway_list <- pathway_list_slim[sapply(pathway_list_slim, length) > 0]
+      }
+
+      pathway_list$all <- unique(unlist(pathway_list))
+
+      ## make an *ad-hoc* LUT
+      LUT <- data.frame(ID = names(pathway_list),
+                        name = names(pathway_list))
+    }
+    else {
+      stop("Custom background is not in the right format")
+    }
+  }
+
   #NOTE annotations can be constructed based on scmatrix, so the argument was changed to only accept optional custom list from user
   if (!is.null(annotations) & is.list(annotations)){
     ## use provided list when used as input
@@ -157,104 +253,6 @@ initEnrichment <- function(scmatrix,
     annotation_adduct <- gsub("^.+\\.","",annotation_formulas_adduct)
 
     cat("\nParsing isomers...\n")
-
-
-    if (!is.null(annot_custom_db)){
-      iso_bg = annot_custom_db
-      iso_bg$db = "CustomDB"
-    }
-    else{
-      metasp_r_idx = c()
-      for (i in annot_db){
-        if (i == "LipidMaps"){
-          if (background_type == "LION"){
-            indices = stringr::str_which(metaspace_databases$db,
-                                        "LION_LipidMaps")
-          }
-          else{
-            indices = stringr::str_which(metaspace_databases$db,
-                                         "Ramp_LipidMaps")
-          }
-        }
-        else{
-          indices = switch(i, "HMDB" = stringr::str_which(metaspace_databases$db,
-                                                "HMDB"),
-                 "SwissLipids" = stringr::str_which(metaspace_databases$db,
-                                                    "swisslipids"),
-                 "CoreMetabolome" = stringr::str_which(metaspace_databases$db,
-                                                       "CoreMetabolome"))
-        }
-        metasp_r_idx = c(metasp_r_idx, indices)
-      }
-      metasp_r_idx = unique(metasp_r_idx)
-      iso_bg = metaspace_databases[metasp_r_idx,]
-      rownames(iso_bg) = NULL
-
-      if(endogenous_only){
-        iso_bg = iso_bg[iso_bg$Endogenous == "Yes",]
-      }
-      if (pathway_assoc_only){
-        iso_bg = iso_bg[iso_bg$Pathway_assoc == "Yes",]
-      }
-      if (remove_expected_predicted){
-        iso_bg = iso_bg[iso_bg$HMDB_status %nin% c("expected", "predicted"),]
-      }
-    }
-
-    #NOTE pathway will be built based on molecule type (Lipids / Metabo) and background type, otherwise custom
-    if (is.null(custom_bg)) {
-      pathway_list = Load_background(mol_type = molecule_type,
-                                     bg_type = background_type,
-                                     feature_type = feat_type)
-      if (feat_type == "sf"){
-        pathway_list_slim <- sapply(pathway_list, function(i){
-          i[i %in% iso_bg$formula]
-        }, simplify = F)
-        pathway_list <- pathway_list_slim[sapply(pathway_list_slim, length) > 0]
-      }
-      else{
-        pathway_list_slim <- sapply(pathway_list, function(i){
-          i[i %in% iso_bg$name]
-        }, simplify = F)
-        pathway_list <- pathway_list_slim[sapply(pathway_list_slim, length) > 0]
-      }
-      pathway_list$all <- unique(unlist(pathway_list))
-      if (background_type != "LION"){
-        LUT <- data.frame(ID = names(pathway_list),
-                          name = names(pathway_list))
-      }
-      else{
-        LUT <- LION_LUT
-      }
-    }
-    else {
-      if (is.list(custom_bg)) {
-        pathway_list <- custom_bg
-
-        if (feat_type == "sf"){
-          pathway_list_slim <- sapply(pathway_list, function(i){
-            i[i %in% iso_bg$formula]
-          }, simplify = F)
-          pathway_list <- pathway_list_slim[sapply(pathway_list_slim, length) > 0]
-        }
-        else{
-          pathway_list_slim <- sapply(pathway_list, function(i){
-            i[i %in% iso_bg$name]
-          }, simplify = F)
-          pathway_list <- pathway_list_slim[sapply(pathway_list_slim, length) > 0]
-        }
-
-        pathway_list$all <- unique(unlist(pathway_list))
-
-        ## make an *ad-hoc* LUT
-        LUT <- data.frame(ID = names(pathway_list),
-                          name = names(pathway_list))
-      }
-      else {
-        stop("Custom background is not in the right format")
-      }
-    }
-
 
     #NOTE Adding Isomers for Metabo and Lipids
     if (consider_isomers){
@@ -455,11 +453,12 @@ Run_enrichment <- function(object, Run_DE = FALSE,
                                              abs(pct.diff) >= min.pct.diff)
     }
     if (nrow(sel_markers) == 0){
-      message("No differentially markers are found, maybe consider less strict cutoffs")
+      message("No differential markers were found, maybe consider less strict cutoffs")
       return(NULL)
     }
     final_markers = list("upregulated" = rownames(sel_markers)[which(sel_markers$LFC > 0)],
-                         "downregulated" = rownames(sel_markers)[which(sel_markers$LFC < 0)])
+                         "downregulated" = rownames(sel_markers)[which(sel_markers$LFC < 0)],
+                         "all" = unique(sel_markers))
     if (any(c(object$consider_isomers, object$consider_isobars))){
       enrich_res = Run_bootstrap_ORA(marker_list = final_markers,
                                      background = object$pathway_list,
