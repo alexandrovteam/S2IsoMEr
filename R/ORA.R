@@ -409,7 +409,7 @@ Run_simple_ORA = function(marker_list, background, custom_universe = NULL,
     univ = unlist(background) %>% unique()
   }
 
-  background = background[-which(names(background) == "all")]
+  background = background[which(names(background) != "all")]
 
   ORA_res = decouple_ORA_wrapper(marker_list = marker_list,
                                  term_list = background,
