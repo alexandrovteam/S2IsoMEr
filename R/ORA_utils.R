@@ -4,33 +4,43 @@ adjust_conting_iso = function(observed, expected,universe){
                 "exp" = expected,
                 "n_bg" = length(unique(universe))))
   }
+
+  #https://www.pathwaycommons.org/guide/primers/statistics/fishers_exact_test/
+  #expected = m
+  #observed = k
+  #universe = m+n
+
+  #TP = x
+  #FP = k-x
+  #FN = m-x
+  #TN = n-(k-x)
+
+  #Sanity checks:
+  #TP + FP = Observed
+  #TP + FN = Expected
+  #FP + TN = Universe - expected
+  #FN + TN = Universe - observed
+
   FN = setdiff(expected, observed)
   TP = intersect(expected, observed)
 
-  # obs_iso = metaspace_databases[which(metaspace_databases$name %in% observed),]
   obs_iso = metaspace_databases[metaspace_databases$name %fin% observed,]
-
-
-  # TP_iso = obs_iso[which(obs_iso$name %in% TP),]
-  TP_iso = obs_iso[obs_iso$name %fin% TP,]
-
-  # univ_iso = metaspace_databases[which(metaspace_databases$name %in% universe),]
+  exp_iso = metaspace_databases[metaspace_databases$name %fin% expected,]
   univ_iso = metaspace_databases[metaspace_databases$name %fin% universe,]
 
+  TP_iso = obs_iso[obs_iso$name %fin% TP,]
+  FN_iso = exp_iso[exp_iso$name %fin% FN,]
 
-  # FN_iso = metaspace_databases[which(metaspace_databases$name %in% FN),]
-  # FN_iso = FN_iso[which(FN_iso$formula %nin% TP_iso$formula),]
+  #Since in bootstrapping only 1 isomer is selected for observed while in background,
+  #there are multiple isomers of the same formula for a given term, It's removed
+  #from false negatives if any of the isomers are observed as true positve.
 
-  FN_iso = metaspace_databases[metaspace_databases$name %fin% FN,]
   FN_iso = FN_iso[FN_iso$formula %nin% TP_iso$formula,]
-
-  # TN_iso = univ_iso[which(univ_iso$formula %nin% unique(c(FN_iso$formula,
-  #                                                     obs_iso$formula))),]
-
   FN_iso = FN_iso[!duplicated(FN_iso$formula),]
-  # TN_iso = TN_iso[!duplicated(TN_iso$formula),]
 
-  TN_n = length(unique(univ_iso$formula)) - length(observed) - nrow(FN_iso)
+  FP_iso = length(unique(obs_iso$formula)) - length(unique(TP_iso$formula))
+
+  TN_n = (length(unique(univ_iso$formula)) - length(unique(obs_iso$formula)) ) - FP_iso
 
   n_background = (length(observed) + nrow(FN_iso) + TN_n)
 
