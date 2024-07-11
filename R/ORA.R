@@ -4,7 +4,8 @@ simplify_hypergeom_bootstrap = function(bootstrap_list,term_list,universe = NULL
                                         boot_fract_cutoff = 0.5,
                                         min_intersection = 3, q.val_cutoff = 0.2,
                                         selected_terms = NULL,
-                                        alpha_cutoff = 0.05){
+                                        alpha_cutoff = 0.05,
+                                        pass_adjust = F){
 
   if (!is.null(universe)){
     pathway_list_slim <- sapply(term_list, function(i){
@@ -20,10 +21,8 @@ simplify_hypergeom_bootstrap = function(bootstrap_list,term_list,universe = NULL
     term_list = term_list[which(names(term_list) %in% selected_terms)]
   }
 
-
-
   enrich_res = decouple_ORA_wrapper(marker_list = bootstrap_list, term_list = term_list,
-                                    universe = univ)
+                                    universe = univ, pass_adjust = pass_adjust)
 
   boot_conting_res = enrich_res[[2]]
   enrich_res = enrich_res[[1]]
@@ -33,21 +32,6 @@ simplify_hypergeom_bootstrap = function(bootstrap_list,term_list,universe = NULL
 
   colnames(boot_conting_res)[which(colnames(boot_conting_res) == "source")] = "Term"
   colnames(boot_conting_res)[which(colnames(boot_conting_res) == "condition")] = "bootstrap"
-
-
-  # boot_conting_res = pbapply::pblapply(seq(length(bootstrap_list)),function(n_i){
-  #   enrich_res = hyper_geom_enrich(query = unique(bootstrap_list[[n_i]]),
-  #                                  term_list = term_list, universe = universe)
-  #   enrich_res$bootstrap = n_i
-  #   #enrich_res = enrich_res %>% dplyr::filter(!is.na(OR), !is.na(pval))
-  #   if(nrow(enrich_res) == 0){
-  #     return(NULL)
-  #   }
-  #   else{
-  #     return(enrich_res)
-  #   }
-  # })
-  # boot_conting_res = boot_conting_res %>% dplyr::bind_rows()
 
   observed = boot_conting_res$TP / (boot_conting_res$TP + boot_conting_res$FP)
   expected = (boot_conting_res$TP + boot_conting_res$FN) / (boot_conting_res$TP + boot_conting_res$FP +
@@ -62,27 +46,25 @@ simplify_hypergeom_bootstrap = function(bootstrap_list,term_list,universe = NULL
     dplyr::mutate(fraction = length(Term) / length(bootstrap_list)) %>%
     dplyr::ungroup()
 
-  final_enrich_res = boot_enrich_res %>%
-    dplyr::filter(TP >= min_intersection, p_value < alpha_cutoff,
-                  fraction > boot_fract_cutoff)
 
-  final_enrich_res <- final_enrich_res %>%
-    group_by(bootstrap) %>%
+  final_enrich_res = boot_enrich_res %>%
+    dplyr::filter(fraction > boot_fract_cutoff) %>%
+    dplyr::group_by(bootstrap) %>%
     dplyr::mutate(q.value = p.adjust(p_value, method = "fdr"))  %>%
     dplyr::group_by(Term) %>%
     dplyr::summarise(n = median(TP, na.rm = T),
                      ES_median = median(OR, na.rm = T),
                      ES_sd = sd(OR, na.rm = T),
-                     p.value_median = median(p_value, na.rm = T),
-                     p.value_sd = sd(p_value, na.rm = T),
-                     q.value_median = median(q.value, na.rm = T),
-                     q.value_sd = sd(q.value, na.rm = T),
+                     p.value_combined = metap::sumlog(p_value)[["p"]],
+                     q.value_combined = metap::sumlog(q.value)[["p"]],
                      fraction.bootstrap.presence = median(fraction, na.rm = T)) %>%
-    dplyr::arrange(q.value_median)
-
-  final_enrich_res = final_enrich_res %>%
-    dplyr::filter(n > min_intersection, q.value_median < q.val_cutoff, Term != "") %>%
-    ungroup() %>% as.data.frame()
+    dplyr::arrange(q.value_combined) %>%
+    dplyr::filter(n >= min_intersection,
+                  q.value_combined < q.val_cutoff,
+                  p.value_combined < alpha_cutoff,
+                  Term != "") %>%
+    dplyr::ungroup() %>%
+    as.data.frame()
 
   return(list("unfiltered_enrich_res" = boot_enrich_res,
               "clean_enrich_res" = final_enrich_res))
@@ -149,7 +131,9 @@ Run_bootstrap_ORA = function(marker_list, background, custom_universe = NULL,
                              annot_weights = NULL,
                              n_bootstraps = 50,
                              boot_fract_cutoff = 0.5,q.val_cutoff = 0.2,
-                             selected_terms = NULL){
+                             selected_terms = NULL,
+                             adjust_contingency = T,
+                             report_ambiguity_scores = F){
 
   if(!is.null(custom_universe)){
     univ_iso = get_metabo_iso(sf_vec = custom_universe, consider_isobars = consider_isobars, polarization_mode = polarization_mode,
@@ -182,6 +166,21 @@ Run_bootstrap_ORA = function(marker_list, background, custom_universe = NULL,
                                 pathway_assoc_only = pathway_assoc_only, remove_expected_predicted = remove_expected_predicted)
     }
 
+    if(report_ambiguity_scores){
+      if(!is.null(univ_iso)){
+        univ_ambig = calc_ambiguity(input_iso_list = univ_iso, weights = NULL)
+      }
+      else{
+        univ_ambig = NULL
+      }
+      iso_ambig = calc_ambiguity(input_iso_list = iso_list, weights = annot_weights)
+      ambig_scores = list("Query ambiguity" = iso_ambig,
+                          "Universe ambiguity" = univ_ambig)
+    }
+    else{
+      ambig_scores = NULL
+    }
+
     boot_list = metabo_bootstrap(annot_list = iso_list, annot_weights = annot_weights,
                                  n_bootstraps = n_bootstraps)
 
@@ -190,8 +189,9 @@ Run_bootstrap_ORA = function(marker_list, background, custom_universe = NULL,
                                              universe = custom_universe,
                                              boot_fract_cutoff = boot_fract_cutoff, min_intersection = min_intersection,
                                              q.val_cutoff = q.val_cutoff,selected_terms = selected_terms,
-                                             alpha_cutoff = alpha_cutoff)
-    ORA_boot_all_grps[[grp]] = final_res
+                                             alpha_cutoff = alpha_cutoff, pass_adjust = !adjust_contingency)
+
+    ORA_boot_all_grps[[grp]] = c(final_res, ambig_score)
   }
   return(ORA_boot_all_grps)
 }
