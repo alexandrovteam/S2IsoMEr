@@ -195,3 +195,84 @@ setConditions.bmetenrich <- function(object, condition.x = NULL, condition.y = N
   return(object)
 }
 
+calc_ambiguity = function(input_iso_list, weights = NULL){
+  if (!is.null(weights)) {
+    if (length(weights) != length(input_iso_list)) {
+      stop("Input isomer list and weights do not have the same length")
+    }
+    else {
+      ## extra check
+      if (!all(sapply(weights, length) == sapply(input_iso_list, length))) {
+        stop("Input isomer list and weights do not have the same length for each element")
+      }
+    }
+  }
+
+  n_sf = length(input_iso_list)
+
+  message("Calculating ambiguity ...")
+  ambig_score = pbapply::pblapply(seq(n_sf),function(n_i){
+    n_mol_names = length(input_iso_list[[n_i]])
+    if(n_mol_names < 2){
+      entropy = 0
+    }
+    else{
+      if(!is.null(weights)){
+        mol_weights = weights[[n_i]]
+      }
+      else {
+        mol_weights = rep(x = 1, times = n_mol_names)
+      }
+
+      probs = mol_weights / sum(mol_weights)
+      entropy = -sum(probs * log(probs, base = 2))
+    }
+
+    entropy
+  })
+  names(ambig_score) = names(input_iso_list)
+  return(ambig_score)
+}
+
+passed_filters_per_term = function(unfiltered_df,
+                                 enrich_type = c("ORA", "MSEA"),
+                                 min_intersection = 3,
+                                 alpha_cutoff = 0.05,
+                                 q.val_cutoff = 0.2,
+                                 boot_fract_cutoff = 0.5){
+  if(!enrich_type %in% c("ORA","MSEA")){
+    stop("Invalid enrichment type. Please use either ORA or MSEA")
+  }
+  else{
+    if (enrich_type == "MSEA"){
+      colnames(unfiltered_df)[which(colnames(unfiltered_df) == "n")] = "TP"
+    }
+  }
+
+
+  pass_filts = unfiltered_df %>%
+    dplyr::group_by(bootstrap) %>%
+    dplyr::mutate(q.value = p.adjust(p_value, method = "fdr"))  %>%
+    dplyr::ungroup() %>%
+    dplyr::group_by(Term) %>%
+    dplyr::mutate(n = median(TP, na.rm = T),
+                  p.value_combined = metap::sumlog(p_value, na.rm = T)[["p"]],
+                  q.value_combined = metap::sumlog(q.value, na.rm = T)[["p"]],
+                  min_TP = ifelse(n >= min_intersection, 1, 0),
+                  significant_adj_boot = ifelse(p.value_combined < alpha_cutoff, 1, 0),
+                  significant_adj_terms = ifelse(q.value_combined < alpha_cutoff, 1, 0),
+                  pass_boot_fraction = ifelse(fraction > boot_fract_cutoff,1,0)) %>%
+    dplyr::ungroup() %>%
+    dplyr::filter(Term != "") %>%
+    dplyr::select(Term, min_TP, significant_adj_boot,
+                  significant_adj_terms, pass_boot_fraction) %>%
+    dplyr::distinct()
+
+  pass_all = rowSums(pass_filts[,-1]) / (ncol(pass_filts) - 1)
+  pass_all[pass_all < 1] = 0
+  pass_filts$pass_all_filts = pass_all
+
+  return(pass_filts)
+}
+
+
