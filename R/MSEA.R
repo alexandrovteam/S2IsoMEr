@@ -67,7 +67,9 @@ Run_simple_MSEA = function(object,min_pathway_size = 3){
   return(object)
 }
 #' @export
-Run_bootstrap_MSEA = function(object,n_bootstraps = 50,min_pathway_size = 3){
+Run_bootstrap_MSEA = function(object,n_bootstraps = 50,
+                              min_pathway_size = 3,
+                              report_ambiguity_scores = F){
 
   if(!all(c(object$condition.x, object$condition.y) ==   object$rankings$comparison)){
     message("condition comparison of the ranking is not the same as set conditions")
@@ -82,6 +84,14 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,min_pathway_size = 3){
   cat("\n")
   cat("Bootstrapping...")
   cat("\n")
+
+  if(report_ambiguity_scores){
+    ambig_scores = calc_ambiguity(input_iso_list = object$annotations,
+                                  weights = object$annotation.weights)
+  }
+  else{
+    ambig_scores = NULL
+  }
 
   bootstrapped_sublist <- pbapply::pbsapply(seq(n_bootstraps),       ## bootstrapping
                                             function(n_i) {
@@ -247,6 +257,7 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,min_pathway_size = 3){
                                      per_bootstrap_enrich_results = enrichment_analysis,
                                      n_bootstraps = n_bootstraps,
                                      fraction_matched_to_pathway = fraction_matched_to_pathway,
-                                     comparison = object$rankings$comparison)
+                                     comparison = object$rankings$comparison,
+                                     annotation_ambiguity_scores = ambig_scores)
   return(object)
 }
