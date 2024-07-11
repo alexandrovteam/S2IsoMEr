@@ -22,7 +22,8 @@ Imports:
     fastmatch,
     pheatmap,
     RColorBrewer,
-    ggridges
+    ggridges,
+    metap
 Depends: 
     ggplot2,
     dplyr,
