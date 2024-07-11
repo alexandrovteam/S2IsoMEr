@@ -1,4 +1,4 @@
-.ora_analysis <- function(regulons, targets, universe, ...) {
+.ora_analysis <- function(regulons, targets, universe,pass_adjust = F, ...) {
 
   # NSE vs. R CMD check workaround
   p.value <- NULL
@@ -15,7 +15,8 @@
       dat = adjust_conting_iso(
         expected = regulons[[source]],
         observed = targets[[condition]],
-        universe = universe
+        universe = universe,
+        pass = pass_adjust
       ),
       pbar = pb,
       ...
@@ -64,10 +65,11 @@ ora_conting_decoupleR = function(dat, as_matrix = T) {
   }
   return(conting)
 }
-decouple_ORA_wrapper = function(marker_list,term_list, universe, seed = 42){
+decouple_ORA_wrapper = function(marker_list,term_list, universe,
+                                pass_adjust = F, seed = 42){
 
   ORA_res = .ora_analysis(regulons = term_list, targets = marker_list,
-                          universe = universe)
+                          universe = universe, pass_adjust = pass_adjust)
 
   ORA_conting = ORA_res %>% dplyr::select(source, condition, TP, FP, FN, TN)
   ORA_res = ORA_res %>% dplyr::select(statistic, source, condition, score, p_value)
