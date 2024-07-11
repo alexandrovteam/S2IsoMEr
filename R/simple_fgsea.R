@@ -40,6 +40,14 @@ simple_fgsea = function(pathways,
                         scoreType   = c("std", "pos", "neg"),
                         nPermSimple = 1000){
   scoreType <- match.arg(scoreType)
+
+  ties <- sum(duplicated(stats[stats != 0]))
+  if (ties != 0) {
+    warning("There are ties in the preranked stats (", paste(round(ties *
+                                                                     100/length(stats), digits = 2)), "% of the list).\n",
+            "The order of those tied genes will be arbitrary, which may produce unexpected results.")
+  }
+
   pp <- fgsea:::preparePathwaysAndStats(pathways, stats, minSize, maxSize, 1, scoreType)
   pathwaysFiltered <- pp$filtered
   pathwaysSizes <- pp$sizes
