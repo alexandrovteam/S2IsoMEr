@@ -45,3 +45,10 @@ The columns are the following:
 \description{
 simple_fgsea calls a simple fGSEA from the fgsea package
 }
+\examples{
+bg = list("Term_A" = paste0("mol_", sample(100,20)),"Term_B" = paste0("mol_", sample(100,20)))
+mol_ranks = runif(10, -3, 3)
+names(mol_ranks) = sample(unique(unlist(bg)), 10)
+mol_ranks = mol_ranks[order(mol_ranks)]
+simple_fgsea(pathways = bg, stats = mol_ranks, minSize = 3, scoreType = "std")
+}
