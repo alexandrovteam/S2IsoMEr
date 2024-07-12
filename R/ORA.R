@@ -190,8 +190,13 @@ Run_bootstrap_ORA = function(marker_list, background, custom_universe = NULL,
                                              boot_fract_cutoff = boot_fract_cutoff, min_intersection = min_intersection,
                                              q.val_cutoff = q.val_cutoff,selected_terms = selected_terms,
                                              alpha_cutoff = alpha_cutoff, pass_adjust = !adjust_contingency)
+    if (report_ambiguity_scores){
+      ORA_boot_all_grps[[grp]] = c(final_res, ambig_score)
+    }
+    else{
+      ORA_boot_all_grps[[grp]] = final_res
+    }
 
-    ORA_boot_all_grps[[grp]] = c(final_res, ambig_score)
   }
   return(ORA_boot_all_grps)
 }
