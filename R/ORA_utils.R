@@ -1,7 +1,7 @@
 adjust_conting_iso = function(observed, expected,universe, pass = F){
 
 
-  if (check_feat_type(observed) == "sf" || pass){
+  if (pass){
     return(list("obs" = observed,
                 "exp" = expected,
                 "n_bg" = length(unique(universe))))
