@@ -1,10 +1,10 @@
-adjust_conting_iso = function(observed, expected,universe, pass = F){
+adjust_conting_iso = function(observed, expected,universe_iso, pass = F){
 
 
   if (pass){
     return(list("obs" = observed,
                 "exp" = expected,
-                "n_bg" = length(unique(universe))))
+                "n_bg" = length(unique(universe_iso$name))))
   }
 
   #https://www.pathwaycommons.org/guide/primers/statistics/fishers_exact_test/
@@ -28,7 +28,7 @@ adjust_conting_iso = function(observed, expected,universe, pass = F){
 
   obs_iso = metaspace_databases[metaspace_databases$name %fin% observed,]
   exp_iso = metaspace_databases[metaspace_databases$name %fin% expected,]
-  univ_iso = metaspace_databases[metaspace_databases$name %fin% universe,]
+  # universe_iso = metaspace_databases[metaspace_databases$name %fin% universe,]
 
   TP_iso = obs_iso[obs_iso$name %fin% TP,]
   FN_iso = exp_iso[exp_iso$name %fin% FN,]
@@ -42,7 +42,7 @@ adjust_conting_iso = function(observed, expected,universe, pass = F){
 
   FP_iso = length(unique(obs_iso$formula)) - length(unique(TP_iso$formula))
 
-  TN_n = (length(unique(univ_iso$formula)) - length(unique(obs_iso$formula)) ) - FP_iso
+  TN_n = (length(unique(universe_iso$formula)) - length(unique(obs_iso$formula)) ) - FP_iso
 
   n_background = (length(observed) + nrow(FN_iso) + TN_n)
 

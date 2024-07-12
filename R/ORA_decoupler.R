@@ -7,6 +7,8 @@
 
   n = length(names(regulons)) * length(names(targets))
 
+  univ_iso = metaspace_databases[metaspace_databases$name %fin% universe,]
+
   pb = progress::progress_bar$new(total = n, incomplete = " ")
 
   tidyr::expand_grid(source = names(regulons), condition = names(targets)) %>%
@@ -15,7 +17,7 @@
       dat = adjust_conting_iso(
         expected = regulons[[source]],
         observed = targets[[condition]],
-        universe = universe,
+        universe_iso = univ_iso,
         pass = pass_adjust
       ),
       pbar = pb,
