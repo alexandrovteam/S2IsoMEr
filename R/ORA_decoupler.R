@@ -7,7 +7,15 @@
 
   n = length(names(regulons)) * length(names(targets))
 
+  all_obs = unique(unlist(targets))
+  all_exp = unique(unlist(regulons))
+
+  all_obs_iso = metaspace_databases[metaspace_databases$name %fin% all_obs,]
+  all_exp_iso = metaspace_databases[metaspace_databases$name %fin% all_exp,]
+
   univ_iso = metaspace_databases[metaspace_databases$name %fin% universe,]
+  obs_iso_list = lapply(targets, function(i){all_obs_iso[all_obs_iso$name %fin% i,]})
+  exp_iso_list = lapply(regulons, function(i){all_exp_iso[all_exp_iso$name %fin% i,]})
 
   pb = progress::progress_bar$new(total = n, incomplete = " ")
 
@@ -16,7 +24,9 @@
     dplyr::summarise(.ora_fisher_exact_test(
       dat = adjust_conting_iso(
         expected = regulons[[source]],
+        exp_iso = exp_iso_list[[source]],
         observed = targets[[condition]],
+        obs_iso = obs_iso_list[[condition]],
         universe_iso = univ_iso,
         pass = pass_adjust
       ),

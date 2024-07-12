@@ -1,4 +1,6 @@
-adjust_conting_iso = function(observed, expected,universe_iso, pass = F){
+adjust_conting_iso = function(observed, obs_iso,
+                              expected, exp_iso,
+                              universe_iso, pass = F){
 
 
   if (pass){
@@ -25,10 +27,6 @@ adjust_conting_iso = function(observed, expected,universe_iso, pass = F){
 
   FN = setdiff(expected, observed)
   TP = intersect(expected, observed)
-
-  obs_iso = metaspace_databases[metaspace_databases$name %fin% observed,]
-  exp_iso = metaspace_databases[metaspace_databases$name %fin% expected,]
-  # universe_iso = metaspace_databases[metaspace_databases$name %fin% universe,]
 
   TP_iso = obs_iso[obs_iso$name %fin% TP,]
   FN_iso = exp_iso[exp_iso$name %fin% FN,]
