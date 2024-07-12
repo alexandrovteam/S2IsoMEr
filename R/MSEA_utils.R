@@ -50,8 +50,11 @@ rankScore.bmetenrich <- function(object,
   } else if(object$ranking.by == "wilcox.test"){
     rank_score <-
       apply(object$scmatrix, 1, function(i){
-        wilcox.test(x = i[object$conditions == object$condition.x],
-                    y = i[object$conditions == object$condition.y], alternative = alternative)$statistic
+        #Conditions are switched so that ranking matches the interpretation of logFC and BWS
+        calculate_wilcox_statistic(x = i[object$conditions == object$condition.y],
+                    y = i[object$conditions == object$condition.x])
+        # wilcox.test(x = i[object$conditions == object$condition.y],
+        #             y = i[object$conditions == object$condition.x], alternative = alternative)$statistic
       })
   } else if (object$ranking.by == "BWS") {
     rank_score <-
@@ -92,4 +95,33 @@ rankScore.bmetenrich <- function(object,
 
 
   return(object)
+}
+
+
+calculate_wilcox_statistic <- function(x, y = NULL, paired = FALSE) {
+  if (!is.null(y)) {
+    if (paired) {
+      if (length(x) != length(y))
+        stop("'x' and 'y' must have the same length")
+      x <- x - y
+      y <- NULL
+    } else {
+      y <- y[!is.na(y)]
+    }
+  }
+
+  x <- x[!is.na(x)]
+
+  if (is.null(y)) {
+    # Wilcoxon signed rank test
+    r <- rank(abs(x))
+    STATISTIC <- sum(r[x > 0])
+  }
+  else {
+    # Wilcoxon rank sum test
+    r <- rank(c(x, y))
+    STATISTIC <- sum(r[seq_along(x)]) - length(x) * (length(x) + 1) / 2
+  }
+
+  return(STATISTIC)
 }
