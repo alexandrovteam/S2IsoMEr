@@ -69,7 +69,8 @@ Run_simple_MSEA = function(object,min_pathway_size = 3){
 #' @export
 Run_bootstrap_MSEA = function(object,n_bootstraps = 50,
                               min_pathway_size = 3,
-                              report_ambiguity_scores = F){
+                              report_ambiguity_scores = F,
+                              boot_fract_cutoff = 0.5){
 
   if(!all(c(object$condition.x, object$condition.y) ==   object$rankings$comparison)){
     message("condition comparison of the ranking is not the same as set conditions")
@@ -251,7 +252,7 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,
               p.value_combined = metap::sumlog(p_value)[["p"]],
               q.value_combined = metap::sumlog(q.value)[["p"]],
               fraction.bootstrap.presence = median(fraction, na.rm = T)) %>%
-    dplyr::arrange(q.value_median)
+    dplyr::arrange(q.value_combined)
 
   object$enrichment_analysis <- list(enrichment_results = summarized_enrichment_results,
                                      per_bootstrap_enrich_results = enrichment_analysis,
