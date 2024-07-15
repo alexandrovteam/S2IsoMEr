@@ -43,6 +43,39 @@
     dplyr::select(statistic, source, condition, score, p_value,
                   TP, FP, FN, TN)
 }
+.ora_analysis_simple <- function(regulons, targets, universe,pass_adjust = F, ...) {
+
+  # NSE vs. R CMD check workaround
+  p.value <- NULL
+
+  message("\nRunning ORA analysis ... \n")
+
+  n = length(names(regulons)) * length(names(targets))
+
+  pb = progress::progress_bar$new(total = n, incomplete = " ")
+
+  n_univ = length(unique(universe))
+
+  tidyr::expand_grid(source = names(regulons), condition = names(targets)) %>%
+    dplyr::rowwise(source, condition) %>%
+    dplyr::summarise(.ora_fisher_exact_test(
+      dat = list("obs" = targets[[condition]],
+                 "exp" = regulons[[source]],
+                 "n_bg" = n_univ),
+      pbar = pb,
+      ...
+      ),
+    .groups = "drop"
+    ) %>%
+    dplyr::select(source, condition,
+                  p_value = p.value, everything()
+    ) %>%
+    dplyr::mutate(score = -log10(p_value)) %>%
+    tibble::add_column(statistic = "ora", .before = 1) %>%
+    dplyr::select(statistic, source, condition, score, p_value,
+                  TP, FP, FN, TN)
+}
+
 .ora_fisher_exact_test <- function(dat,pbar, ...) {
   pbar$tick()
   conting = ora_conting_decoupleR(dat, as_matrix = F) %>% as_tibble()
@@ -78,10 +111,17 @@ ora_conting_decoupleR = function(dat, as_matrix = T) {
   return(conting)
 }
 decouple_ORA_wrapper = function(marker_list,term_list, universe,
-                                pass_adjust = F, seed = 42){
+                                pass_adjust = F, seed = 42, ORA_boot = T){
 
-  ORA_res = .ora_analysis(regulons = term_list, targets = marker_list,
-                          universe = universe, pass_adjust = pass_adjust)
+  if(ORA_boot){
+    ORA_res = .ora_analysis(regulons = term_list, targets = marker_list,
+                            universe = universe, pass_adjust = pass_adjust)
+  }
+  else{
+    ORA_res = .ora_analysis_simple(regulons = term_list, targets = marker_list,
+                            universe = universe)
+  }
+
 
   ORA_conting = ORA_res %>% dplyr::select(source, condition, TP, FP, FN, TN)
   ORA_res = ORA_res %>% dplyr::select(statistic, source, condition, score, p_value)

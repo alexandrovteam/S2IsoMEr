@@ -105,7 +105,7 @@ Run_simple_ORA = function(marker_list, background, custom_universe = NULL,
 
   ORA_res = decouple_ORA_wrapper(marker_list = marker_list,
                                  term_list = background,
-                                 universe = univ)
+                                 universe = univ,ORA_boot = F)
 
   ORA_conting = ORA_res[[2]]
   ORA_res = ORA_res[[1]]
