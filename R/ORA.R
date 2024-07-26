@@ -1,75 +1,22 @@
-
-
-simplify_hypergeom_bootstrap = function(bootstrap_list,term_list,universe = NULL,
-                                        boot_fract_cutoff = 0.5,
-                                        min_intersection = 3, q.val_cutoff = 0.2,
-                                        selected_terms = NULL,
-                                        alpha_cutoff = 0.05,
-                                        pass_adjust = F){
-
-  if (!is.null(universe)){
-    pathway_list_slim <- sapply(term_list, function(i){
-      i[i %in% universe]
-    }, simplify = F)
-    term_list <- pathway_list_slim[sapply(pathway_list_slim, length) > 0]
-    univ = universe
-  }
-  else{
-    univ = unlist(term_list) %>% unique()
-  }
-  if (!is.null(selected_terms)){
-    term_list = term_list[which(names(term_list) %in% selected_terms)]
-  }
-
-  enrich_res = decouple_ORA_wrapper(marker_list = bootstrap_list, term_list = term_list,
-                                    universe = univ, pass_adjust = pass_adjust)
-
-  boot_conting_res = enrich_res[[2]]
-  enrich_res = enrich_res[[1]]
-
-  colnames(enrich_res)[which(colnames(enrich_res) == "source")] = "Term"
-  colnames(enrich_res)[which(colnames(enrich_res) == "condition")] = "bootstrap"
-
-  colnames(boot_conting_res)[which(colnames(boot_conting_res) == "source")] = "Term"
-  colnames(boot_conting_res)[which(colnames(boot_conting_res) == "condition")] = "bootstrap"
-
-  observed = boot_conting_res$TP / (boot_conting_res$TP + boot_conting_res$FP)
-  expected = (boot_conting_res$TP + boot_conting_res$FN) / (boot_conting_res$TP + boot_conting_res$FP +
-                                                              boot_conting_res$FN + boot_conting_res$TN)
-  boot_conting_res$OR = observed / expected
-
-
-  boot_enrich_res = boot_conting_res %>%
-    dplyr::left_join(enrich_res, by = c("Term","bootstrap")) %>%
-    dplyr::mutate(padj = p.adjust(p_value, "BH")) %>%
-    dplyr::group_by(Term) %>%
-    dplyr::mutate(fraction = length(Term) / length(bootstrap_list)) %>%
-    dplyr::ungroup()
-
-
-  final_enrich_res = boot_enrich_res %>%
-    dplyr::filter(fraction > boot_fract_cutoff) %>%
-    dplyr::group_by(bootstrap) %>%
-    dplyr::mutate(q.value = p.adjust(p_value, method = "fdr"))  %>%
-    dplyr::group_by(Term) %>%
-    dplyr::summarise(n = median(TP, na.rm = T),
-                     ES_median = median(OR, na.rm = T),
-                     ES_sd = sd(OR, na.rm = T),
-                     p.value_combined = metap::sumlog(p_value)[["p"]],
-                     q.value_combined = metap::sumlog(q.value)[["p"]],
-                     fraction.bootstrap.presence = median(fraction, na.rm = T)) %>%
-    dplyr::arrange(q.value_combined) %>%
-    dplyr::filter(n >= min_intersection,
-                  q.value_combined < q.val_cutoff,
-                  p.value_combined < alpha_cutoff,
-                  Term != "") %>%
-    dplyr::ungroup() %>%
-    as.data.frame()
-
-  return(list("unfiltered_enrich_res" = boot_enrich_res,
-              "clean_enrich_res" = final_enrich_res))
-
-}
+#' Wrapper function for Simple Over-Representation Analysis (ORA)
+#'
+#' @description This function performs a simple over-representation analysis (ORA) on a given list of metabolites and background.
+#'
+#' @param marker_list A vector or list of marker sets to analyze.
+#' @param background A list of named terms where each term is a character vector of metabolites.
+#' @param custom_universe An optional vector specifying a custom universe of terms. If not provided all metabolites in background will be used as universe.
+#' @param alpha_cutoff A numeric value indicating the alpha cutoff for significance.
+#' @param min_intersection An integer specifying the minimum intersection required between input list and a given term in background.
+#' @return A dataframe containing the ORA results for each group of markers.
+#' @examples
+#' \dontrun{
+#' marker_list <- c("B1", "B3", "B5")
+#' background <- list(
+#'   "Term1" = c("B1", "B2", "B3"),
+#'   "Term2" = c("B4", "B5", "B6")
+#' )
+#' results <- Run_simple_ORA(marker_list, background)
+#' }
 #' @export
 Run_simple_ORA = function(marker_list, background, custom_universe = NULL,
                           alpha_cutoff = 0.05, min_intersection = 3){
@@ -119,6 +66,42 @@ Run_simple_ORA = function(marker_list, background, custom_universe = NULL,
   return(ORA_final)
 }
 
+#' Wrapper function for Bootstrap Over-Representation Analysis (ORA)
+#'
+#' @description This function performs a bootstrap-based over-representation analysis (ORA) on a given list of metabolites and background.
+#'
+#' @param marker_list A vector or list of marker sets to analyze.
+#' @param background A list of named terms where each term is a character vector of metabolites.
+#' @param custom_universe An optional vector specifying a custom universe of terms. If not provided all metabolites in background will be used as universe.
+#' @param alpha_cutoff A numeric value indicating the alpha cutoff for significance.
+#' @param min_intersection An integer specifying the minimum intersection required between input list and a given term in background.
+#' @param consider_isobars A logical indicating whether to consider isobars.
+#' @param polarization_mode A parameter for polarization mode. If provided, it will be used to consider isomers and isobars.
+#' @param mass_range_ppm A numeric value for mass range in parts per million (ppm).
+#' @param annot_db A character string specifying the annotation database(s) used for annotation. Check  \code{\link{build_iso_bg}} for more information.
+#' @param annot_custom_db An optional custom annotation database. If provided, it will be used alongside or instead of the specified annotation database.
+#' @param use_LION A logical indicating whether to use LION ontology for select isomers/isobars for background.
+#' @param endogenous_only A logical indicating whether to consider only endogenous compounds. Applies only for HMDB and CoreMetabolome annotation databases.
+#' @param pathway_assoc_only A logical indicating whether to consider only pathway-associated compounds. Applies only for HMDB and CoreMetabolome annotation databases.
+#' @param remove_expected_predicted A logical indicating whether to remove expected and predicted annotations. Applies only for HMDB and CoreMetabolome annotation databases.
+#' @param annot_list An optional list of annotations. If provided, it will be used instead of generating isomers from built-in formula to molecule mapping.
+#' @param annot_weights An optional list of annotation weights. If provided, it will be used in the ambiguity score calculation and bootstrap analysis.
+#' @param n_bootstraps An integer specifying the number of bootstrap iterations.
+#' @param boot_fract_cutoff A numeric value specifying the minimum bootstrap fraction cutoff required. Default to 0.5 .
+#' @param q.val_cutoff A numeric value specifying the q-value cutoff for significance.
+#' @param selected_terms An optional vector of selected terms to focus on. If provided, the analysis will be restricted to these terms.
+#' @param adjust_contingency A logical indicating whether to adjust the contingency table to account for isomeric ambiguity.
+#' @param report_ambiguity_scores A logical indicating whether to report ambiguity scores. If TRUE, ambiguity scores will be included in the results.
+#' @return A list containing the ORA results for each group of markers. Both filtered and per-bootstrap results are provided.
+#' @examples
+#' \dontrun{
+#' marker_list <- c("B1", "B3", "B5")
+#' background <- list(
+#'   "Term1" = c("B1", "B2", "B3"),
+#'   "Term2" = c("B4", "B5", "B6")
+#' )
+#' results <- Run_bootstrap_ORA(marker_list, background)
+#' }
 #' @export
 Run_bootstrap_ORA = function(marker_list, background, custom_universe = NULL,
                              alpha_cutoff = 0.05, min_intersection = 3,
@@ -199,4 +182,75 @@ Run_bootstrap_ORA = function(marker_list, background, custom_universe = NULL,
 
   }
   return(ORA_boot_all_grps)
+}
+
+simplify_hypergeom_bootstrap = function(bootstrap_list,term_list,universe = NULL,
+                                        boot_fract_cutoff = 0.5,
+                                        min_intersection = 3, q.val_cutoff = 0.2,
+                                        selected_terms = NULL,
+                                        alpha_cutoff = 0.05,
+                                        pass_adjust = F){
+
+  if (!is.null(universe)){
+    pathway_list_slim <- sapply(term_list, function(i){
+      i[i %in% universe]
+    }, simplify = F)
+    term_list <- pathway_list_slim[sapply(pathway_list_slim, length) > 0]
+    univ = universe
+  }
+  else{
+    univ = unlist(term_list) %>% unique()
+  }
+  if (!is.null(selected_terms)){
+    term_list = term_list[which(names(term_list) %in% selected_terms)]
+  }
+
+  enrich_res = decouple_ORA_wrapper(marker_list = bootstrap_list, term_list = term_list,
+                                    universe = univ, pass_adjust = pass_adjust,ORA_boot = T)
+
+  boot_conting_res = enrich_res[[2]]
+  enrich_res = enrich_res[[1]]
+
+  colnames(enrich_res)[which(colnames(enrich_res) == "source")] = "Term"
+  colnames(enrich_res)[which(colnames(enrich_res) == "condition")] = "bootstrap"
+
+  colnames(boot_conting_res)[which(colnames(boot_conting_res) == "source")] = "Term"
+  colnames(boot_conting_res)[which(colnames(boot_conting_res) == "condition")] = "bootstrap"
+
+  observed = boot_conting_res$TP / (boot_conting_res$TP + boot_conting_res$FP)
+  expected = (boot_conting_res$TP + boot_conting_res$FN) / (boot_conting_res$TP + boot_conting_res$FP +
+                                                              boot_conting_res$FN + boot_conting_res$TN)
+  boot_conting_res$OR = observed / expected
+
+
+  boot_enrich_res = boot_conting_res %>%
+    dplyr::left_join(enrich_res, by = c("Term","bootstrap")) %>%
+    dplyr::mutate(padj = p.adjust(p_value, "BH")) %>%
+    dplyr::group_by(Term) %>%
+    dplyr::mutate(fraction = length(Term) / length(bootstrap_list)) %>%
+    dplyr::ungroup()
+
+
+  final_enrich_res = boot_enrich_res %>%
+    dplyr::filter(fraction > boot_fract_cutoff) %>%
+    dplyr::group_by(bootstrap) %>%
+    dplyr::mutate(q.value = p.adjust(p_value, method = "fdr"))  %>%
+    dplyr::group_by(Term) %>%
+    dplyr::summarise(n = median(TP, na.rm = T),
+                     ES_median = median(OR, na.rm = T),
+                     ES_sd = sd(OR, na.rm = T),
+                     p.value_combined = metap::sumlog(p_value)[["p"]],
+                     q.value_combined = metap::sumlog(q.value)[["p"]],
+                     fraction.bootstrap.presence = median(fraction, na.rm = T)) %>%
+    dplyr::arrange(q.value_combined) %>%
+    dplyr::filter(n >= min_intersection,
+                  q.value_combined < q.val_cutoff,
+                  p.value_combined < alpha_cutoff,
+                  Term != "") %>%
+    dplyr::ungroup() %>%
+    as.data.frame()
+
+  return(list("unfiltered_enrich_res" = boot_enrich_res,
+              "clean_enrich_res" = final_enrich_res))
+
 }
