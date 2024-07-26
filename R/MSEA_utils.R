@@ -1,5 +1,3 @@
-
-
 #' Rank metabolites for bmetenrichr enrichment object
 #'
 #' rankScore() ranks metabolites of bmetenrichr object to perform bootstrapping metabolite set enrichment analysis

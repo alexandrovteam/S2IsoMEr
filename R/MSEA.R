@@ -1,3 +1,27 @@
+#' Run Simple Metabolite Set Enrichment Analysis (MSEA)
+#'
+#' @description This function performs simple metabolite set enrichment analysis on a given dataset.
+#' It ensures that the ranking conditions are set properly and conducts the enrichment analysis using either the [KS-signed method](https://github.com/franapoli/signed-ks-test/blob/master/signed-ks-test.R) or [fgsea](https://bioconductor.org/packages/release/bioc/html/fgsea.html).
+#'
+#' @param object A bmetenrich object initialized by \code{\link{initEnrichment}} containing the necessary data and parameters, including annotations, annotation weights, rankings, pathway list, and additional settings.
+#' @param min_pathway_size An integer specifying the minimum number of metabolites that must be present in a given term for it to be considered.
+#' @return A list containing the results of the enrichment analysis, including:
+#'   \itemize{
+#'     \item enrichment results
+#'     \item the comparison conditions
+#'   }
+#' @details This function performs a bootstrapped metabolite set enrichment analysis by resampling the annotations and calculating enrichment scores for each bootstrap sample.
+#' It handles both KS-signed method](https://github.com/franapoli/signed-ks-test/blob/master/signed-ks-test.R) or [fgsea](https://bioconductor.org/packages/release/bioc/html/fgsea.html) methods for enrichment analysis and returns a comprehensive summary of the results.
+#'
+#' @references
+#' Korotkevich G, Sukhov V, Sergushichev A (2019). “Fast gene set enrichment analysis.” bioRxiv. doi:10.1101/060012, \url{http://biorxiv.org/content/early/2016/06/20/060012}.
+#'
+#' Napoli F (2017). “signed-ks-test.” \url{https://github.com/franapoli/signed-ks-test/blob/master/signed-ks-test.R}.
+#' @examples
+#' \dontrun{
+#' # Assuming `my_data` is a properly formatted object of class `bmetenrich` initialized by \code{\link{initEnrichment}}
+#' result <- Run_bootstrap_MSEA(object = my_data, n_bootstraps = 100)
+#' }
 #' @export
 Run_simple_MSEA = function(object,min_pathway_size = 3){
   object = rankScore.bmetenrich(object = object, ranking.by = NULL,
@@ -66,6 +90,38 @@ Run_simple_MSEA = function(object,min_pathway_size = 3){
 
   return(object)
 }
+
+#' Run Bootstrapped Metabolite Set Enrichment Analysis (MSEA)
+#'
+#' @description This function performs bootstrapped metabolite set enrichment analysis on a given dataset. It ensures that the ranking conditions are set properly and conducts the enrichment analysis using either the [KS-signed method](https://github.com/franapoli/signed-ks-test/blob/master/signed-ks-test.R) or [fgsea](https://bioconductor.org/packages/release/bioc/html/fgsea.html).
+#'
+#' @param object A bmetenrich object initialized by \code{\link{initEnrichment}} containing the necessary data and parameters, including annotations, annotation weights, rankings, pathway list, and additional settings.
+#' @param n_bootstraps An integer specifying the number of bootstrap samples to generate.
+#' @param min_pathway_size An integer specifying the minimum number of metabolites that must be present in a given term for it to be considered.
+#' @param report_ambiguity_scores A logical value indicating whether to calculate and report ambiguity scores for the annotations.
+#' @param boot_fract_cutoff A numeric value specifying the minimum fraction of bootstraps in which a pathway must appear to be considered in the final results.
+#' @return A list containing the results of the enrichment analysis, including:
+#'   \itemize{
+#'     \item summarized enrichment results
+#'     \item per-bootstrap enrichment results
+#'     \item the number of bootstraps
+#'     \item the fraction matched to the pathway
+#'     \item the comparison conditions
+#'     \item annotation ambiguity scores if calculated
+#'   }
+#' @details This function performs a bootstrapped metabolite set enrichment analysis by resampling the annotations and calculating enrichment scores for each bootstrap sample.
+#' It handles both [KS-signed method](https://github.com/franapoli/signed-ks-test/blob/master/signed-ks-test.R) or [fgsea](https://bioconductor.org/packages/release/bioc/html/fgsea.html) methods for enrichment analysis and returns a comprehensive summary of the results.
+#'
+#' @references
+#' Korotkevich G, Sukhov V, Sergushichev A (2019). “Fast gene set enrichment analysis.” bioRxiv. doi:10.1101/060012, \url{http://biorxiv.org/content/early/2016/06/20/060012}.
+#'
+#' Napoli F (2017). “signed-ks-test.” \url{https://github.com/franapoli/signed-ks-test/blob/master/signed-ks-test.R}.
+#'
+#' @examples
+#' \dontrun{
+#' # Assuming `my_data` is a properly formatted object of class `bmetenrich` initialized by \code{\link{initEnrichment}}
+#' result <- Run_bootstrap_MSEA(object = my_data, n_bootstraps = 100)
+#' }
 #' @export
 Run_bootstrap_MSEA = function(object,n_bootstraps = 50,
                               min_pathway_size = 3,
