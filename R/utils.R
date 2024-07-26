@@ -157,9 +157,9 @@ Load_background = function(mol_type = c("Lipid", "Metabo"),
 #' @param condition.x A optional character describing the reference condition.
 #' @param condition.y A optional character describing condition to interest.
 #'
-#' @return An object of class bmetenrich.
+#' @return An object of class `bmetenrich`.
 #'
-#' @return An object of class bmetenrich.
+#' @return An object of class `bmetenrich`.
 #' @examples
 #'
 #' setConditions(myTestRun, condition.x = 'CON', condition.y = "TREATMENT")
@@ -234,6 +234,41 @@ calc_ambiguity = function(input_iso_list, weights = NULL){
   return(ambig_score)
 }
 
+#' Report filters applied to bootstrap-based enrichment results
+#'
+#' @description This function filters enrichment results based on various criteria, such as minimum intersection, significance thresholds, and bootstrapping fractions, reporting which terms passed / didn't pass which filter.
+#'
+#' @param unfiltered_df A data frame containing unfiltered enrichment results from \code{\link{Run_bootstrap_ORA}} or \code{\link{Run_bootstrap_MSEA}}.
+#' @param enrich_type A character string specifying the type of enrichment analysis. Must be either "ORA" (Over-Representation Analysis) or "MSEA" (Metabolite Set Enrichment Analysis).
+#' @param min_intersection An integer specifying the minimum number of true positives (TP) required for a term to pass the filter.
+#' @param alpha_cutoff A numeric value specifying the p-value cutoff for significance. Default is 0.05.
+#' @param q.val_cutoff A numeric value specifying the q-value cutoff for significance. Default is 0.2.
+#' @param boot_fract_cutoff A numeric value specifying the minimum fraction of bootstraps in which a term must be present to be considered.
+#'
+#' @return A data frame with binary columns indicating which terms pass the specified criteria. The data frame columns include:
+#'   \itemize{
+#'     \item Term
+#'     \item min_TP (minimum true positives)
+#'     \item significant_adj_boot (significant adjusted bootstrap p-value)
+#'     \item significant_adj_terms (significant adjusted term p-value)
+#'     \item pass_boot_fraction (pass bootstrapping fraction)
+#'     \item pass_all_filts (Whether term passes all filters)
+#'   }
+#'
+#' @details The function adjusts p-values using the False Discovery Rate (FDR) method and calculates combined p-values using the `metap::sumlog` function. It then applies several filters to determine which terms pass all criteria.
+#'
+#' @examples
+#' \dontrun{
+#'   enrichment_results = object$enrichment_results #object is of class `bmetenrich`
+#'   filtered_results <- passed_filters_per_term(unfiltered_df = enrichment_results,
+#'                                               enrich_type = "MSEA",
+#'                                               min_intersection = 5,
+#'                                               alpha_cutoff = 0.01,
+#'                                               q.val_cutoff = 0.1,
+#'                                               boot_fract_cutoff = 0.6)
+#' }
+#'
+#' @export
 passed_filters_per_term = function(unfiltered_df,
                                  enrich_type = c("ORA", "MSEA"),
                                  min_intersection = 3,

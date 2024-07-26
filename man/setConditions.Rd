@@ -14,9 +14,9 @@ setConditions(object, ...)
 \item{condition.y}{A optional character describing condition to interest.}
 }
 \value{
-An object of class bmetenrich.
+An object of class \code{bmetenrich}.
 
-An object of class bmetenrich.
+An object of class \code{bmetenrich}.
 }
 \description{
 Set conditions for enrichment analysis
