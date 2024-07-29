@@ -1,3 +1,5 @@
+
+# MSEA -----------------------------------------------------------
 #' Plot bootstrap enrichment analysis
 #'
 #' @param object A bmetenrichr object after enrichment analysis.
@@ -13,13 +15,13 @@
 #' barplot_bootstrap(myTestRun)
 #'
 #' @export
-barplot_bootstrap <- function (object, ...) {
+barplot_MSEA_boot <- function (object, ...) {
   UseMethod("barplot_bootstrap", object)
 }
 
 
 #' @export
-barplot_bootstrap.bmetenrich <- function(object, min.annotations = 2, q.value.cutoff = 0.1,
+barplot_MSEA_boot.bmetenrich <- function(object, min.annotations = 2, q.value.cutoff = 0.1,
                                          bootstrap.fraction.cutoff = .5, by.statistic = 'q.value'){
   options(dplyr.summarise.inform = FALSE)
 
@@ -172,6 +174,98 @@ barplot_bootstrap.bmetenrich <- function(object, min.annotations = 2, q.value.cu
 
 }
 
+#' Plot Heatmap of MSEA Results Across Multiple Conditions
+#'
+#' @description This function generates a heatmap of combined MSEA results. The heatmap displays normalized enrichment scores (NES) across multiple conditions and highlights significant results based on a specified alpha cutoff.
+#'
+#' @param combined_MSEA_res A data frame containing combined MSEA results for each pairwise comparison from either enrichment results in \code{\link{Run_bootstrap_MSEA}} or \code{\link{Run_simple_MSEA}}
+#' @param alpha_cutoff A numeric value specifying the cutoff for significance. Terms with p-values below this threshold will be marked as significant. Default is 0.05.
+#'
+#' @return A heatmap plot showing the NES values for each term across different condition pairs. Significant results are highlighted with an asterisk.
+#'
+#' @details The function checks for the presence of required columns and ensures there are enough conditions to generate a meaningful plot. The heatmap includes color coding for NES values, with significant results indicated by asterisks.
+#'
+#' @examples
+#' \dontrun{
+#'   plot_MSEA_Multi_cond(combined_MSEA_res = msea_results, alpha_cutoff = 0.05)
+#' }
+#'
+#' @import pheatmap
+#' @import RColorBrewer
+#' @import grDevices
+#' @export
+plot_MSEA_Multi_cond = function(combined_MSEA_res,
+                                alpha_cutoff = 0.05){
+
+  missing_conds <- setdiff(c("condition.x", "condition.y"),
+                           colnames(combined_MSEA_res))
+
+  if (length(missing_conds) > 0) {
+    stop(paste("The following columns are missing:", paste(missing_conds,
+                                                           collapse = ", ")))
+  }
+
+  if (nrow(unique(combined_MSEA_res[c("condition.x", "condition.y")])) < 2) {
+    stop("Not enough conditions to plot heatmap")
+  }
+
+  combined_MSEA_res <- combined_MSEA_res %>%
+    rename_if_exists("n", "size") %>%
+    rename_if_exists("pathway", "Term") %>%
+    rename_if_exists("ES_median", "NES") %>%
+    rename_if_exists("pval", "p_value") %>%
+    rename_if_exists("p.value_combined", "p_value")
+
+  combined_MSEA_res$signif = ifelse(combined_MSEA_res$p_value < alpha_cutoff,
+                                    "*", "")
+
+  heat_mat = combined_MSEA_res %>%
+    dplyr::mutate(cond_label = paste0(condition.y, "_",condition.x)) %>%
+    dplyr::select(cond_label, Term, NES) %>%
+    tidyr::pivot_wider(names_from = cond_label, values_from = NES) %>%
+    column_to_rownames("Term") %>%
+    as.matrix()
+
+  label_mat = combined_MSEA_res %>%
+    dplyr::mutate(cond_label = paste0(condition.y, "_",condition.x)) %>%
+    dplyr::select(cond_label, Term, signif) %>%
+    tidyr::pivot_wider(names_from = cond_label, values_from = signif) %>%
+    column_to_rownames("Term") %>%
+    as.matrix()
+
+  pheatmap::pheatmap(heat_mat,
+                     color = grDevices::colorRampPalette(rev(
+                       RColorBrewer::brewer.pal(n = 10, name ="RdBu")))(100),
+                     cluster_rows = T, cluster_cols = F, na_col = "white",
+                     treeheight_row = 5,
+                     show_colnames = T,
+                     display_numbers = label_mat,
+                     fontsize = 14, angle_col = 45,
+                     fontsize_number = 14, number_color = "lightblue",
+                     legend = T)
+}
+
+# ORA ------------------------------------------------------------
+#' Bar Plot for Simple ORA Results
+#'
+#' @description This function creates a bar plot for simple (no bootstraps) Over-Representation Analysis (ORA) results, indicating the significance of terms based on a q-value cutoff.
+#'
+#' @param ORA_simple_res A data frame containing the ORA results.
+#' @param q_val_cutoff A numeric value specifying the q-value cutoff for significance. Default is 0.05.
+#'
+#' @return A ggplot object displaying the bar plot of ORA results.
+#'
+#' @details The function creates a bar plot where the terms are reordered by their scores in descending order. Bars are colored based on whether the term's score is above or below the negative log10 of the q-value cutoff. A dashed line indicates the cutoff for significance.
+#'
+#' @examples
+#' \dontrun{
+#'   plot <- barplot_ORA_simple(ORA_simple_res = ora_results, q_val_cutoff = 0.05)
+#'   print(plot)
+#' }
+#'
+#' @import ggplot2
+#' @import ggpubr
+#' @export
 barplot_ORA_simple = function(ORA_simple_res, q_val_cutoff = 0.05){
   plot_data = ORA_simple_res
   plot_data$Significance = ifelse(plot_data$score < -log10(q_val_cutoff), "No", "Yes")
@@ -190,6 +284,26 @@ barplot_ORA_simple = function(ORA_simple_res, q_val_cutoff = 0.05){
           axis.text = element_text(size = 14))
 }
 
+#' Bar Plot for ORA Bootstrapped Results
+#'
+#' @description This function creates a bar plot for Over-Representation Analysis (ORA) bootstrapped results, including error bars to show the range of enrichment scores (OR) and indicating the significance based on q-values.
+#'
+#' @param ORA_boot_res A list containing the ORA bootstrapped results. The list should include `unfiltered_enrich_res` and `clean_enrich_res` data frames.
+#'
+#' @return A ggplot object displaying the bar plot of ORA bootstrapped results.
+#'
+#' @details The function creates a bar plot where the terms are reordered by their median enrichment scores. Bars are filled with colors representing the combined q-values, and error bars show the minimum and maximum enrichment scores (ES_min and ES_max) across bootstraps. The number of true positives (n) is included in the term labels.
+#'
+#' @examples
+#' \dontrun{
+#'   plot <- barplot_ORA_boot(ORA_boot_res = ora_boot_results)
+#'   print(plot)
+#' }
+#'
+#' @import ggplot2
+#' @import ggpubr
+#' @import dplyr
+#' @export
 barplot_ORA_boot = function(ORA_boot_res){
   boot_summary = ORA_boot_res[["unfiltered_enrich_res"]] %>%
     dplyr::filter(Term %fin% ORA_boot_res[["clean_enrich_res"]]$Term) %>%
@@ -223,96 +337,127 @@ barplot_ORA_boot = function(ORA_boot_res){
     return(plot)
 }
 
-dotplot_enrich = function(plot_data, alpha_cutoff = 0.05){
-  cols = c("blue", "red")
+#' Dot Plot for Over-Representation Analysis (ORA) Results
+#'
+#' @description This function creates a dot plot for ORA results, with options to color the dots by enrichment score or significance and to facet by a specified variable.
+#'
+#' @param ORA_res A data frame containing the ORA results from either filtered results in output of \code{\link{Run_bootstrap_ORA}} or direct output of \code{\link{Run_simple_ORA}}.
+#' @param alpha_cutoff A numeric value specifying the alpha cutoff for significance. Default is 0.05.
+#' @param color_by A character string indicating whether to color the dots by "Enrichment_score" or "Significance"
+#' @param facet_by An optional character string specifying a column name by which to facet the plot.
+#'
+#' @return A ggplot object displaying the dot plot of ORA results.
+#'
+#' @details The function creates a dot plot where the size of the dots represents the size of the term (e.g., number of true positives), and the color represents either the enrichment score or the significance (-log10 of the p-value). If multiple conditions are present, the plot is adjusted accordingly. The plot can also be faceted by a specified variable.
+#'
+#' @examples
+#' \dontrun{
+#'   plot <- dotplot_ORA(plot_data = ora_results, alpha_cutoff = 0.05, color_by = "Significance", facet_by = "condition")
+#'   print(plot)
+#' }
+#'
+#' @import ggplot2
+#' @import ggpubr
+#' @import dplyr
+#' @import DOSE
+#' @export
+dotplot_ORA = function(ORA_res, alpha_cutoff = 0.05,
+                       color_by = c("Enrichment_score", "Significance"),
+                       facet_by = NULL){
+  cols = c("#3B6FB6", "#D41645")
 
-  colnames(plot_data)[which(colnames(plot_data) == "TP")] = "size"
-  colnames(plot_data)[which(colnames(plot_data) == "n")] = "size"
-  colnames(plot_data)[which(colnames(plot_data) == "ES_median")] = "Enrichment_Score"
-  colnames(plot_data)[which(colnames(plot_data) == "score")] = "Enrichment_Score"
-  colnames(plot_data)[which(colnames(plot_data) == "p_value")] = "sig_score"
-  colnames(plot_data)[which(colnames(plot_data) == "p.value_combined")] = "sig_score"
+  plot_data <- ORA_res %>%
+    rename_if_exists("TP", "size") %>%
+    rename_if_exists("n", "size") %>%
+    rename_if_exists("ES_median", "Enrichment_Score") %>%
+    rename_if_exists("score", "Enrichment_Score") %>%
+    rename_if_exists("p_value", "sig_score") %>%
+    rename_if_exists("p.value_combined", "sig_score")
 
-  plot_data[["sig_score"]] = -log10(plot_data[["sig_score"]])
+  if (color_by == "Enrichment_score"){
+    plot_data[["Score"]] = plot_data[["Enrichment_score"]]
+  }
+  else if (color_by == "Significance"){
+    plot_data[["Score"]] = -log10(plot_data[["sig_score"]])
+  }
+  else{
+    stop("Invalid argument for color_by. Select either Enrichment_score or Significance")
+  }
 
-  p = ggplot(data = plot_data, aes(x = Enrichment_Score,
-                               y = reorder(Term, Enrichment_Score))) +
-    geom_point(aes(size = size,color = sig_score)) +
-    scale_size(range = c(3, 6)) +
-    scale_color_gradient(low = cols[1], high = cols[2]) +
-    theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
-    guides(size = guide_legend(title = 'Term/query overlap'),
-           color = guide_colorbar(title = '-Log10(pvalue)')) +
-    labs(
-      x = 'Enrichment Score',
-      y = ''
-    ) +
-    ggpubr::theme_pubr() +
-    theme(axis.text.x = element_text(angle = 0,hjust = 1))
-    # facet_grid(~section, scales = "free_x", space = "free_x", switch = "y") +
-    # theme(
-    #   panel.spacing = unit(x = 1, units = "lines"),
-    #   strip.background = element_blank()) +
+  if(length(unique(plot_data$condition)) > 1){
+    p = ggplot(plot_data, aes_string(x = "condition",
+                                     y = "Term", size = "size")) +
+      geom_point(aes_string(color = "Score")) +
+      scale_color_continuous(low = "#3B6FB6",
+                             high = "#D41645", guide = guide_colorbar(reverse = TRUE)) +
+      ylab(NULL) +
+      # ggtitle("Trial") +
+      DOSE::theme_dose(12) +
+      scale_size_continuous(range = c(4, 9)) +
+      scale_y_discrete(labels = label_func) +
+      ggpubr::rotate_x_text(angle = 45) +
+      guides(size = guide_legend(order = 1), color = guide_colorbar(order = 2)) +
+      theme(axis.text.x = element_text(size = 14),
+            axis.text.y = element_text(size = 14),
+            axis.title.x = element_blank(),
+            axis.title.y = element_text(size = 16),
+            strip.text = element_text(size = 14))
+  }
+  else{
+    color_legend_title = switch(color_by, "Significance" = '-Log10(pvalue)',
+                                "Enrichment_score" = 'Enrichment Score')
+    p = ggplot(data = plot_data, aes(x = Enrichment_Score,
+                                     y = reorder(Term, Enrichment_Score))) +
+      geom_point(aes(size = size,color = Score)) +
+      scale_size(range = c(3, 6)) +
+      scale_color_gradient(low = cols[1], high = cols[2]) +
+      theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
+      guides(size = guide_legend(title = 'Term/query overlap'),
+             color = guide_colorbar(title = '-Log10(pvalue)')) +
+      labs(
+        x = 'Enrichment Score',
+        y = ''
+      ) +
+      ggpubr::theme_pubr() +
+      theme(axis.text.x = element_text(angle = 0,hjust = 1))
+  }
+
+  if (!is.null(facet_by)){
+    facet_col_sym = sym(facet_by)
+    p = p +
+      facet_wrap(vars(!!enquo(facet_col_sym))) +
+      theme(
+        panel.spacing = unit(x = 1, units = "lines"),
+        strip.background = element_blank())
+  }
   return(p)
 }
 
-Multi_cond_heatmap = function(plot_data){
-  if ("condition" %in% colnames(plot_data)){
-    if (length(unique(plot_data$condition)) < 2){
-      stop("Not enough conditions to plot heatmap")
-    }
-  }
-  else{
-    stop("Data is missing condition info")
-  }
 
-  if ("TP" %in% colnames(plot_data)){
-    colnames(plot_data)[which(colnames(plot_data) == "TP")] = "size"
-  }
+# Generic/other --------------------------------------------------------
 
-  colnames(plot_data)[which(colnames(plot_data) == "p_value")] = "pval"
-
-  plot_data$sig = ifelse(plot_data$pval < alpha_cutoff, "*", "")
-
-  plot_data$hm_label = paste0(plot_data$size, "\n", plot_data$sig)
-
-  long_df = plot_data %>% dplyr::select(condition, term, score)
-  long_df = long_df[!duplicated(long_df),]
-
-  long_df_label = plot_data %>% dplyr::select(condition, term, hm_label)
-  long_df_label = long_df_label[!duplicated(long_df_label),]
-
-  wide_df = long_df %>% tidyr::pivot_wider(names_from = condition,
-                                    values_from = score)
-  rNames = wide_df$term
-  wide_df = wide_df[,-1] %>% as.matrix()
-  rownames(wide_df) = rNames
-  wide_df[is.na(wide_df)] = 0
-
-  wide_df_label = long_df_label %>% tidyr::pivot_wider(names_from = condition,
-                                                values_from = hm_label)
-  rNames = wide_df_label$term
-  wide_df_label = wide_df_label[,-1] %>% as.matrix()
-  rownames(wide_df_label) = rNames
-  wide_df_label[is.na(wide_df_label)] = ""
-
-
-  pheatmap::pheatmap(mat = wide_df, cluster_rows = T, cluster_cols = F,
-           color = grDevices::colorRampPalette(rev(
-             RColorBrewer::brewer.pal(n = 10, name ="RdBu"))
-             )(100),
-           treeheight_row = 5,show_colnames = T,
-           display_numbers = wide_df_label, fontsize = 14, angle_col = 45,
-           fontsize_number = 14, number_color = "lightblue",
-           legend = T)
-}
-
-#' @importFrom EnhancedVolcano EnhancedVolcano
-DE_volcano = function(plot_data){
-  #TODO prepare data for enhancedvolcano plot
-}
-
-
+#' Ridge Plot of Bootstrap Enrichment Results for Terms of Interest
+#'
+#' @description This function creates a ridge plot visualizing the distribution of intersection sizes (TP) for specified terms of interest from bootstrap enrichment results.
+#'
+#' @param enrich_res A data frame containing the enrichment results per bootstrap, including columns for Term, n (TP), and fraction.
+#' @param terms_of_interest A character vector specifying the terms of interest to be plotted.
+#'
+#' @return A ggplot object displaying the ridge plot of intersection sizes for the specified terms of interest.
+#'
+#' @details The function filters the enrichment results to include only the specified terms of interest and creates a ridge plot showing the distribution of intersection sizes (TP). The terms are labeled with their names and the fraction of bootstraps in which they appear, and the plot includes quantile lines to indicate distribution quartiles.
+#'
+#' @examples
+#' \dontrun{
+#'   plot <- ridge_bootstraps(enrich_res = enrichment_results,
+#'                            terms_of_interest = c("Term1", "Term2", "Term3"))
+#'   print(plot)
+#' }
+#'
+#' @import ggplot2
+#' @import ggridges
+#' @import ggpubr
+#' @export
 ridge_bootstraps = function(enrich_res, terms_of_interest){
 
   plot_data = enrich_res[enrich_res$Term %in% terms_of_interest,]

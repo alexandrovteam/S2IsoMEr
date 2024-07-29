@@ -13,6 +13,13 @@ mismatch_df = function (x, y, on = NULL){
   x[keys$x %nin% keys$y, , drop = FALSE]
 }
 
+rename_if_exists <- function(data, old_name, new_name) {
+  if (old_name %in% colnames(data)) {
+    data <- rename(data, !!new_name := !!old_name)
+  }
+  data
+}
+
 
 to_ORA_query = function(dat, metadata = NULL, DE_data = T,
                         min.pct.exp = 0.5){
