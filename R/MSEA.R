@@ -303,8 +303,8 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,
     dplyr::mutate(q.value = p.adjust(p_value, method = "fdr"))  %>%
     dplyr::group_by(Term) %>%
     dplyr::summarise(n = median(n, na.rm = T),
-              ES_median = median(ES, na.rm = T),
-              ES_sd = sd(ES, na.rm = T),
+              ES_median = median(NES, na.rm = T),
+              ES_sd = sd(NES, na.rm = T),
               p.value_combined = metap::sumlog(p_value)[["p"]],
               q.value_combined = metap::sumlog(q.value)[["p"]],
               fraction.bootstrap.presence = median(fraction, na.rm = T)) %>%
