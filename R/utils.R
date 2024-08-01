@@ -298,8 +298,8 @@ passed_filters_per_term = function(unfiltered_df,
     dplyr::ungroup() %>%
     dplyr::group_by(Term) %>%
     dplyr::mutate(n = median(TP, na.rm = T),
-                  p.value_combined = metap::sumlog(p_value, na.rm = T)[["p"]],
-                  q.value_combined = metap::sumlog(q.value, na.rm = T)[["p"]],
+                  p.value_combined = metap::sumlog(p_value)[["p"]],
+                  q.value_combined = metap::sumlog(q.value)[["p"]],
                   min_TP = ifelse(n >= min_intersection, 1, 0),
                   significant_adj_boot = ifelse(p.value_combined < alpha_cutoff, 1, 0),
                   significant_adj_terms = ifelse(q.value_combined < alpha_cutoff, 1, 0),
