@@ -263,7 +263,6 @@ initEnrichment <- function(scmatrix,
     }
     else{
       annotation_list = vector("list", length(annotation_formulas))
-      names(annotation_list) = annotation_formulas
       annotation_list = lapply(annotation_list, function(x){character(0)})
     }
   }
@@ -328,8 +327,9 @@ initEnrichment <- function(scmatrix,
     annotation_list <-
       lapply(seq_along(annotation_formulas), function(i){
         c(isomer = annotation_list[[i]],
-          isobar = iso_bg$name[which(iso_bg$formula %in% gsub("\\..+$","",isobars_list[[i]]))])
+          isobar = iso_bg$name[which(iso_bg$formula %in% sub("[.+-].*","",isobars_list[[i]]))])
       })
+    names(annotation_list) = annotation_formulas_adduct
   }
   else {   ## isobars == FALSE
     isobars_list <- NULL
@@ -421,17 +421,23 @@ Run_enrichment <- function(object, Run_DE = FALSE,
   if(object$enrichment_type == "ORA"){
     cond_x_cells = colnames(object$scmatrix)[which(object$conditions == object$condition.x)]
     cond_y_cells = colnames(object$scmatrix)[which(object$conditions == object$condition.y)]
-    LFC = apply(object$scmatrix, 1, function(x){
-      log2(mean(x[cond_y_cells])) - log2(mean(x[cond_x_cells]))
-    })
-    pct.exp_cond_x = apply(object$scmatrix, 1, function(x){
-      length(which(x[cond_x_cells] != 0)) / length(cond_x_cells)
-    })
-    pct.exp_cond_y = apply(object$scmatrix, 1, function(x){
-      length(which(x[cond_y_cells] != 0)) / length(cond_y_cells)
-    })
-    if (Run_DE){
 
+    message("Prepareing input for ORA")
+    # Calculate means for both conditions
+    mean_cond_y <- rowMeans(object$scmatrix[, cond_y_cells])
+    mean_cond_x <- rowMeans(object$scmatrix[, cond_x_cells])
+
+    # Calculate Log Fold Change (LFC)
+    LFC <- log2(mean_cond_y) - log2(mean_cond_x)
+
+    # Calculate percentage of expression for cond_x
+    pct.exp_cond_x <- rowSums(object$scmatrix[, cond_x_cells] != 0) / length(cond_x_cells)
+
+    # Calculate percentage of expression for cond_y
+    pct.exp_cond_y <- rowSums(object$scmatrix[, cond_y_cells] != 0) / length(cond_y_cells)
+
+    if (Run_DE){
+      message("Runnig Differential analysis")
       pvals = seurat_wilcoxDETest(data.use = object$scmatrix,
                                   cells.1 = cond_x_cells,
                                   cells.2 = cond_y_cells)
