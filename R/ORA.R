@@ -22,7 +22,7 @@ Run_simple_ORA = function(marker_list, background, custom_universe = NULL,
                           alpha_cutoff = 0.05, min_intersection = 3){
 
   if (!is.list(marker_list)){
-    q = sub("[-+].*","", marker_list) %>% unique()
+    q = sub("[.+-].*","", marker_list) %>% unique()
     # ORA_conting = hyper_geom_enrich(query = q, term_list = background,
     #                            universe = custom_universe)
     marker_list  = list("Condition" = q)
@@ -127,13 +127,15 @@ Run_bootstrap_ORA = function(marker_list, background, custom_universe = NULL,
   }
 
   if (!is.list(marker_list)){
-    q = sub("[-+].*","", marker_list) %>% unique()
+    # q = sub("[-+].*","", marker_list) %>% unique()
+    q = gsub("\\+|\\-",".",marker_list)
     marker_list = list("query" = q)
   }
   ORA_boot_all_grps = list()
   for (grp in 1:length(marker_list)){
     q = marker_list[[grp]]
-    q = sub("[-+].*","", q) %>% unique()
+    q = gsub("\\+|\\-",".",q)
+    # q = sub("[-+].*","", q) %>% unique()
 
     message(paste0("\n", "Getting Isomers and Isobars", "\n"))
 
@@ -174,10 +176,10 @@ Run_bootstrap_ORA = function(marker_list, background, custom_universe = NULL,
                                              q.val_cutoff = q.val_cutoff,selected_terms = selected_terms,
                                              alpha_cutoff = alpha_cutoff, pass_adjust = !adjust_contingency)
     if (report_ambiguity_scores){
-      ORA_boot_all_grps[[grp]] = c(final_res, ambig_score)
+      ORA_boot_all_grps[[names(marker_list)[grp]]] = c(final_res, ambig_score)
     }
     else{
-      ORA_boot_all_grps[[grp]] = final_res
+      ORA_boot_all_grps[[names(marker_list)[grp]]] = final_res
     }
 
   }
