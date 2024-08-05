@@ -198,7 +198,8 @@ initEnrichment <- function(scmatrix,
       }, simplify = F)
       pathway_list <- pathway_list_slim[sapply(pathway_list_slim, length) > 0]
     }
-    pathway_list$all <- unique(unlist(pathway_list))
+    # pathway_list$all <- unique(unlist(pathway_list))
+    pathway_list = pathway_list[names(pathway_list) != "all"]
     if (background_type != "LION"){
       LUT <- data.frame(ID = names(pathway_list),
                         name = names(pathway_list))
@@ -223,8 +224,9 @@ initEnrichment <- function(scmatrix,
         }, simplify = F)
         pathway_list <- pathway_list_slim[sapply(pathway_list_slim, length) > 0]
       }
+      pathway_list = pathway_list[names(pathway_list) != "all"]
 
-      pathway_list$all <- unique(unlist(pathway_list))
+      # pathway_list$all <- unique(unlist(pathway_list))
 
       ## make an *ad-hoc* LUT
       LUT <- data.frame(ID = names(pathway_list),
@@ -329,11 +331,11 @@ initEnrichment <- function(scmatrix,
         c(isomer = annotation_list[[i]],
           isobar = iso_bg$name[which(iso_bg$formula %in% sub("[.+-].*","",isobars_list[[i]]))])
       })
-    names(annotation_list) = annotation_formulas_adduct
   }
   else {   ## isobars == FALSE
     isobars_list <- NULL
   }
+  names(annotation_list) = annotation_formulas_adduct
 
 
   if(termsOfInterest == "selection" & background_type == "LION"){
@@ -355,10 +357,10 @@ initEnrichment <- function(scmatrix,
   }
 
 
-  #NOTE added enrichment_type, background_name and Nullified ranking and GSEA method if ORA enrichment is chosen
   object <-
     structure(
       list(scmatrix = scmatrix,
+           polarization_mode = polarization_mode,
            enrichment_type = match.arg(enrichment_type),
            Annotation_database = annot_db,
            Custom_database = annot_custom_db,
@@ -369,9 +371,13 @@ initEnrichment <- function(scmatrix,
            include = include,
            consider_isomers = consider_isomers,
            consider_isobars = consider_isobars,
+           mass_range_ppm = mass_range_ppm,
            background_name = ifelse(!is.null(custom_bg), "custom",
                                     paste0(molecule_type, "_", background_type, "_",
                                            feat_type)),
+           endogenous_only = endogenous_only,
+           pathway_assoc_only = pathway_assoc_only,
+           remove_expected_predicted = remove_expected_predicted,
            pathway_list = pathway_list,
            LUT = LUT,
            termsSelection = termsSelection,
@@ -470,19 +476,31 @@ Run_enrichment <- function(object, Run_DE = FALSE,
                                      background = object$pathway_list,
                                      polarization_mode = object$polarization_mode,
                                      mass_range_ppm = object$mass_range_ppm,
-                                     annot_db = object$annot_db,
-                                     annot_custom_db = object$annot_custom_db,
-                                     use_LION = ifelse("LION" %in% object$background_type, T, F),
+                                     annot_db = object$Annotation_database,
+                                     annot_custom_db = object$Custom_database,
+                                     use_LION = ifelse(stringr::str_detect(LION_ORA_obj$background_name, "LION"), T, F),
                                      endogenous_only = object$endogenous_only,
                                      pathway_assoc_only = object$pathway_assoc_only,
                                      remove_expected_predicted = object$remove_expected_predicted,
                                      annot_weights = object$annotation.weights,
                                      consider_isobars = object$consider_isobars,
                                      annot_list = object$annotations, ...)
+
+      enrich_res = lapply(enrich_res, function(grp){
+        grp[["unfiltered_enrich_res"]] = match_LUT_to_Term(df = grp[["unfiltered_enrich_res"]],
+                                                           LUT = object$LUT)
+        grp[["clean_enrich_res"]] = match_LUT_to_Term(df = grp[["clean_enrich_res"]],
+                                                      LUT = object$LUT)
+        grp
+      })
     }
     else{
       enrich_res = Run_simple_ORA(marker_list = final_markers,
                                      background = object$pathway_list, ...)
+
+      enrich_res = match_LUT_to_Term(df = enrich_res,
+                                     LUT = object$LUT)
+
     }
   }
   else{
