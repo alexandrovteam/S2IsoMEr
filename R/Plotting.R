@@ -522,6 +522,8 @@ compare_metabo_distr = function(obj, metabolite, conds_of_interest = NULL){
   colnames(data)[1] = "intens"
   data$condition = obj$conditions
 
+  data$intens = convert_to_log10(data$intens)
+
   data_viz = data
   # data_viz = data %>%
   #   tidyr::gather(key = "metabo", value = "intens",-condition)
@@ -553,7 +555,7 @@ compare_metabo_distr = function(obj, metabolite, conds_of_interest = NULL){
     ggpubr::theme_pubr() +
     theme(plot.title = element_text(hjust = 0.5)) +
     scale_x_continuous(n.breaks = 10) +
-    facet_wrap(~condition)
+    facet_wrap(~condition, scales = "free_y")
 
   return(plot)
 
