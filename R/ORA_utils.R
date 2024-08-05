@@ -222,26 +222,31 @@ metabo_bootstrap = function(annot_list, annot_weights = NULL,
   #   }, simplify = F)
   # }
 
-  bootstrapped_sublist <- pbapply::pblapply(seq(n_bootstraps),function(n_i){
-    sapply(seq(length(annot_list)),function(row_number_i){
+  bootstrapped_sublist <- pbapply::pblapply(seq(n_bootstraps), function(n_i) {
+    sapply(seq(length(annot_list)), function(row_number_i) {
       molecules_to_sample <- annot_list[[row_number_i]]
-      if(length(molecules_to_sample)==0){
-        molecules_to_sample <- names(annot_list)[[row_number_i]]
-      }
+      mols <- NULL
 
-      if(!is.null(annot_weights)){
-        weights_to_sample <- annot_weights[[row_number_i]]
+      if(length(molecules_to_sample) == 0) {
+        mols <- names(annot_list)[row_number_i]
       } else {
-        weights_to_sample <- rep(x = 1, times = length(molecules_to_sample))
-      }
-      if(length(molecules_to_sample)!=1){
-        sample(x = molecules_to_sample,size = 1,prob = weights_to_sample)
-      }
-      else {
-        molecules_to_sample
+        if(!is.null(annot_weights)) {
+          weights_to_sample <- annot_weights[[row_number_i]]
+        } else {
+          weights_to_sample <- rep(1, length(molecules_to_sample))
+        }
+
+        if(length(molecules_to_sample) != 1) {
+          mols <- sample(x = molecules_to_sample, size = 1, prob = weights_to_sample)
+        } else {
+          mols <- molecules_to_sample
+        }
       }
 
-    })
+      names(mols) <- names(annot_list)[row_number_i]
+      mols
+
+    }, simplify = TRUE)
   })
   names(bootstrapped_sublist) = c(1:length(bootstrapped_sublist))
   return(bootstrapped_sublist)
