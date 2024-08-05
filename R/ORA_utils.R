@@ -116,7 +116,7 @@ get_metabo_iso = function(sf_vec, consider_isobars = T,
            'positive' = {
              col_name <- paste0("pos",annotation_adduct)
 
-             exact_masses_slim <- metabo_exact_masses[,c(1,which(grepl("pos",colnames(metabo_exact_masses))))]
+             exact_masses_slim <- exact_masses[,c(1,which(grepl("pos",colnames(exact_masses))))]
              colnames(exact_masses_slim) <- gsub("^pos","",colnames(exact_masses_slim))
              exact_masses_slim <- exact_masses_slim %>% tidyr::pivot_longer(cols = -1, values_to = "mass", names_to = "adduct")
              exact_masses_slim$formula_adduct <- paste0(exact_masses_slim$formula,".",exact_masses_slim$adduct)
@@ -124,7 +124,7 @@ get_metabo_iso = function(sf_vec, consider_isobars = T,
            'negative' = {
              col_name <- paste0("neg",annotation_adduct)
 
-             exact_masses_slim <- metabo_exact_masses[,c(1,which(grepl("neg",colnames(metabo_exact_masses))))]
+             exact_masses_slim <- exact_masses[,c(1,which(grepl("neg",colnames(exact_masses))))]
              colnames(exact_masses_slim) <- gsub("^neg","",colnames(exact_masses_slim))
              exact_masses_slim <- exact_masses_slim %>% tidyr::pivot_longer(cols = -1, values_to = "mass", names_to = "adduct")
              exact_masses_slim$formula_adduct <- paste0(exact_masses_slim$formula,".",exact_masses_slim$adduct)
@@ -134,7 +134,7 @@ get_metabo_iso = function(sf_vec, consider_isobars = T,
              col_name_i = col_name,
              function(annotation_formulas_i, col_name_i) {
                mass <-
-                 metabo_exact_masses[metabo_exact_masses$formula == annotation_formulas_i, col_name_i]
+                 exact_masses[exact_masses$formula == annotation_formulas_i, col_name_i]
                if (length(mass) == 0) {
                  mass = NA
                }
