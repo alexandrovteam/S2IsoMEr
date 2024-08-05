@@ -4,7 +4,7 @@
 \alias{ridge_bootstraps}
 \title{Ridge Plot of Bootstrap Enrichment Results for Terms of Interest}
 \usage{
-ridge_bootstraps(enrich_res, terms_of_interest)
+ridge_bootstraps(enrich_res, terms_of_interest, condition = NULL)
 }
 \arguments{
 \item{enrich_res}{A data frame containing the enrichment results per bootstrap, including columns for Term, n (TP), and fraction.}

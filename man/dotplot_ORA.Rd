@@ -7,7 +7,7 @@
 dotplot_ORA(
   ORA_res,
   alpha_cutoff = 0.05,
-  color_by = c("Enrichment_score", "Significance"),
+  color_by = "Significance",
   facet_by = NULL
 )
 }

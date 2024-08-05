@@ -4,7 +4,7 @@
 \alias{compare_metabo_distr}
 \title{Plot intensity distribution of metabolite across conditions}
 \usage{
-compare_metabo_distr(obj, metabolite)
+compare_metabo_distr(obj, metabolite, conds_of_interest = NULL)
 }
 \arguments{
 \item{metabolite}{A character indicating metabolite name}

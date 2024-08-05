@@ -4,7 +4,7 @@
 \alias{barplot_ORA_boot}
 \title{Bar Plot for ORA Bootstrapped Results}
 \usage{
-barplot_ORA_boot(ORA_boot_res)
+barplot_ORA_boot(ORA_boot_res, collapse_multi_cond = F)
 }
 \arguments{
 \item{ORA_boot_res}{A list containing the ORA bootstrapped results. The list should include \code{unfiltered_enrich_res} and \code{clean_enrich_res} data frames.}
