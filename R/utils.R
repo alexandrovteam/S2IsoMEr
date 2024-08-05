@@ -338,3 +338,20 @@ match_LUT_to_Term = function(df, LUT){
 }
 
 
+collapse_ORA_boot_multi_cond = function(ORA_boot_res_list){
+  unfiltered_res = lapply(ORA_boot_res_list, function(x){x[["unfiltered_enrich_res"]]}) %>%
+    dplyr::bind_rows(.id = "Condition")
+  clean_res = lapply(ORA_boot_res_list, function(x){x[["clean_enrich_res"]]}) %>%
+    dplyr::bind_rows(.id = "Condition")
+
+  return(list("unfiltered_enrich_res" = unfiltered_res,
+              "clean_enrich_res" = clean_res))
+}
+
+dotplot_label_func = function(n){
+  function(str) {
+    str <- gsub("_", " ", str)
+    yulab.utils::str_wrap(str, n)
+  }
+}
+
