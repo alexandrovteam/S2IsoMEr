@@ -23,7 +23,8 @@ Imports:
     pheatmap,
     RColorBrewer,
     ggridges,
-    metap
+    metap,
+    yulab.utils
 Depends: 
     ggplot2,
     dplyr,
