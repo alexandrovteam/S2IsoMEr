@@ -132,6 +132,9 @@ Load_background = function(mol_type = c("Lipid", "Metabo"),
   if (bg_name %nin% list_backgrounds(feature_type)){
     stop("Background not found, please check list_backgrounds()")
   }
+  # if(bg_name == "Lipid_LION_name"){
+  #
+  # }
   if (feature_type == "sf"){
    bg = switch(bg_name,
                "Lipid_super_class_sf" = LipidMaps_category_sf,
@@ -149,6 +152,7 @@ Load_background = function(mol_type = c("Lipid", "Metabo"),
                 "Lipid_main_class_name" = LipidMaps_main_class_name,
                 "Lipid_sub_class_name" = LipidMaps_sub_class_name,
                 "Lipid_pathways_name" = LipidMaps_pathway_name,
+                "Lipid_LION_name" = pathway_list_LION,
                 "Metabo_super_class_name" = Metabo_super_class_name,
                 "Metabo_main_class_name" = Metabo_class_name,
                 "Metabo_sub_class_name" = Metabo_sub_class_name,
@@ -315,6 +319,22 @@ passed_filters_per_term = function(unfiltered_df,
   pass_filts$pass_all_filts = pass_all
 
   return(pass_filts)
+}
+
+
+match_LUT_to_Term = function(df, LUT){
+  if (all(df$Term %in% LUT$name)){
+    return(df)
+  }
+  else{
+    updated_df = df %>%
+      dplyr::left_join(LUT, by = c("Term" = "ID")) %>%
+      dplyr::select(-Term) %>%
+      dplyr::rename("Term" = "name") %>%
+      dplyr::relocate(Term)
+
+    return(updated_df)
+  }
 }
 
 
