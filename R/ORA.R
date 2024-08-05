@@ -125,6 +125,9 @@ Run_bootstrap_ORA = function(marker_list, background, custom_universe = NULL,
                               pathway_assoc_only = pathway_assoc_only, remove_expected_predicted = remove_expected_predicted)
     custom_universe = univ_iso %>% unlist() %>% unique()
   }
+  else{
+    univ_iso = NULL
+  }
 
   if (!is.list(marker_list)){
     # q = sub("[-+].*","", marker_list) %>% unique()
@@ -176,7 +179,7 @@ Run_bootstrap_ORA = function(marker_list, background, custom_universe = NULL,
                                              q.val_cutoff = q.val_cutoff,selected_terms = selected_terms,
                                              alpha_cutoff = alpha_cutoff, pass_adjust = !adjust_contingency)
     if (report_ambiguity_scores){
-      ORA_boot_all_grps[[names(marker_list)[grp]]] = c(final_res, ambig_score)
+      ORA_boot_all_grps[[names(marker_list)[grp]]] = c(final_res, ambig_scores)
     }
     else{
       ORA_boot_all_grps[[names(marker_list)[grp]]] = final_res
