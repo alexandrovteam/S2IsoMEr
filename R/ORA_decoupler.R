@@ -41,7 +41,7 @@
     dplyr::mutate(score = -log10(p_value)) %>%
     tibble::add_column(statistic = "ora", .before = 1) %>%
     dplyr::select(statistic, source, condition, score, p_value,
-                  TP, FP, FN, TN)
+                  TP, FP, FN, TN, TP_markers)
 }
 .ora_analysis_simple <- function(regulons, targets, universe,pass_adjust = F, ...) {
 
@@ -81,7 +81,7 @@
   conting = ora_conting_decoupleR(dat, as_matrix = F) %>% as_tibble()
   rlang::exec(
     .fn = stats::fisher.test,
-    x = matrix(as.integer(conting), nrow = 2, ncol = 2),
+    x = matrix(as.integer(conting[,1:4]), nrow = 2, ncol = 2),
     y = NULL,
     alternative='greater',
     !!!list(...)
@@ -95,7 +95,9 @@ ora_conting_decoupleR = function(dat, as_matrix = T) {
   expected = dat[["exp"]]
   n_background = dat[["n_bg"]]
 
-  true_positive <- intersect(observed, expected) %>% length()
+  TP_mols = observed[observed %fin% expected]
+
+  true_positive <- length(TP_mols)
   false_negative <- setdiff(expected, observed) %>% length()
   false_positive <- setdiff(observed, expected) %>% length()
   true_negative <- (n_background -
@@ -106,7 +108,10 @@ ora_conting_decoupleR = function(dat, as_matrix = T) {
   }
   else{
     conting = data.frame(TP = true_positive, FP = false_positive,
-                         FN = false_negative , TN = true_negative)
+                         FN = false_negative , TN = true_negative,
+                         TP_markers = ifelse(true_positive != 0,
+                                             paste(names(TP_mols), collapse = ";"),
+                                             NA))
   }
   return(conting)
 }
@@ -152,7 +157,7 @@ decouple_ORA_wrapper = function(marker_list,term_list, universe,
   }
 
 
-  ORA_conting = ORA_res %>% dplyr::select(source, condition, TP, FP, FN, TN)
+  ORA_conting = ORA_res %>% dplyr::select(source, condition, TP, FP, FN, TN, TP_markers)
   ORA_res = ORA_res %>% dplyr::select(statistic, source, condition, score, p_value)
 
   return(list(ORA_res, ORA_conting))
