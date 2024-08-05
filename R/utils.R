@@ -355,3 +355,19 @@ dotplot_label_func = function(n){
   }
 }
 
+convert_to_log10 <- function(vec) {
+  # Check if the values are in log10 scale
+  is_log10 <- function(x) all(log10(10^x) == x)
+
+  # Apply the check and convert if necessary
+  if (!is_log10(vec)) {
+    vec <- log10(vec)
+  }
+
+  # Replace -Inf values with 0
+  vec[is.infinite(vec) & vec < 0] <- 0
+
+  return(vec)
+}
+
+
