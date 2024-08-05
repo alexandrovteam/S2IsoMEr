@@ -304,10 +304,27 @@ barplot_ORA_simple = function(ORA_simple_res, q_val_cutoff = 0.05){
 #' @import ggpubr
 #' @import dplyr
 #' @export
-barplot_ORA_boot = function(ORA_boot_res){
+barplot_ORA_boot = function(ORA_boot_res, collapse_multi_cond = F){
+  if (collapse_multi_cond){
+    ORA_boot_res = collapse_ORA_boot_multi_cond(ORA_boot_res_list = ORA_boot_res)
+  }
+
+  ORA_boot_res = ORA_boot_res[c("unfiltered_enrich_res",
+                                "clean_enrich_res")]
+
+  ORA_boot_res = lapply(ORA_boot_res, function(x){
+    if ("Condition" %in% colnames(x)){
+      x
+    }
+    else{
+      x = x %>% dplyr::mutate(Condition = "Query")
+      x
+    }
+  })
+
   boot_summary = ORA_boot_res[["unfiltered_enrich_res"]] %>%
     dplyr::filter(Term %fin% ORA_boot_res[["clean_enrich_res"]]$Term) %>%
-    dplyr::group_by(Term) %>%
+    dplyr::group_by(Term,Condition) %>%
     dplyr::summarise(ES_max = max(OR),
                      ES_min = min(OR))
 
@@ -317,21 +334,22 @@ barplot_ORA_boot = function(ORA_boot_res){
     dplyr::mutate(n = ceiling(n),
                   Term_label = paste0(Term, " (", n, ")")) %>%
     dplyr::select(Term_label, ES_median, ES_max, ES_min,
-                  p.value_combined, q.value_combined)
+                  p.value_combined, q.value_combined,Condition)
 
   min_qval = min(data_viz$q.value_combine)
 
   plot <- ggplot(data_viz, aes(x = reorder(Term_label, ES_median,),
-                               y = ES_median, fill = q.value_combined)) +
+                               y = ES_median, fill = -log10(q.value_combined))) +
     geom_bar(stat = "identity", position = position_dodge(), width = 0.7) +
     scale_y_continuous(n.breaks = 10) +
     geom_errorbar(aes_string(ymin = "ES_min", ymax = "ES_max"),
                   width = 0.2, position = position_dodge(0.7)) +
-    scale_fill_gradient(low = "#B3CDE3", high = "#FBB4AE", name = "q.value_combined") +
+    scale_fill_gradient(low = "#B3CDE3", high = "#FBB4AE", name = "-Log10(q.value)") +
     ggpubr::theme_pubr() +
     coord_flip() +
     xlab("") +
-    ylab("Fold Enrichment Score")
+    ylab("Fold Enrichment Score") +
+    facet_wrap(~Condition)
     # theme(plot.title = element_text(hjust = 0.5))
 
     return(plot)
@@ -362,7 +380,7 @@ barplot_ORA_boot = function(ORA_boot_res){
 #' @import DOSE
 #' @export
 dotplot_ORA = function(ORA_res, alpha_cutoff = 0.05,
-                       color_by = c("Enrichment_score", "Significance"),
+                       color_by = "Significance",
                        facet_by = NULL){
   cols = c("#3B6FB6", "#D41645")
 
@@ -372,7 +390,8 @@ dotplot_ORA = function(ORA_res, alpha_cutoff = 0.05,
     rename_if_exists("ES_median", "Enrichment_Score") %>%
     rename_if_exists("score", "Enrichment_Score") %>%
     rename_if_exists("p_value", "sig_score") %>%
-    rename_if_exists("p.value_combined", "sig_score")
+    rename_if_exists("p.value_combined", "sig_score") %>%
+    rename_if_exists("condition", "Condition")
 
   if (color_by == "Enrichment_score"){
     plot_data[["Score"]] = plot_data[["Enrichment_score"]]
@@ -384,8 +403,13 @@ dotplot_ORA = function(ORA_res, alpha_cutoff = 0.05,
     stop("Invalid argument for color_by. Select either Enrichment_score or Significance")
   }
 
-  if(length(unique(plot_data$condition)) > 1){
-    p = ggplot(plot_data, aes_string(x = "condition",
+  label_func = dotplot_label_func(n = 30)
+
+  color_legend_title = switch(color_by, "Significance" = '-Log10(pvalue)',
+                              "Enrichment_score" = 'Enrichment Score')
+
+  if(length(unique(plot_data$Condition)) > 1){
+    p = ggplot(plot_data, aes_string(x = "Condition",
                                      y = "Term", size = "size")) +
       geom_point(aes_string(color = "Score")) +
       scale_color_continuous(low = "#3B6FB6",
@@ -396,7 +420,8 @@ dotplot_ORA = function(ORA_res, alpha_cutoff = 0.05,
       scale_size_continuous(range = c(4, 9)) +
       scale_y_discrete(labels = label_func) +
       ggpubr::rotate_x_text(angle = 45) +
-      guides(size = guide_legend(order = 1), color = guide_colorbar(order = 2)) +
+      guides(size = guide_legend(order = 1, title = 'Term/query overlap'),
+             color = guide_colorbar(order = 2, title = color_legend_title)) +
       theme(axis.text.x = element_text(size = 14),
             axis.text.y = element_text(size = 14),
             axis.title.x = element_blank(),
@@ -404,8 +429,6 @@ dotplot_ORA = function(ORA_res, alpha_cutoff = 0.05,
             strip.text = element_text(size = 14))
   }
   else{
-    color_legend_title = switch(color_by, "Significance" = '-Log10(pvalue)',
-                                "Enrichment_score" = 'Enrichment Score')
     p = ggplot(data = plot_data, aes(x = Enrichment_Score,
                                      y = reorder(Term, Enrichment_Score))) +
       geom_point(aes(size = size,color = Score)) +
@@ -413,7 +436,7 @@ dotplot_ORA = function(ORA_res, alpha_cutoff = 0.05,
       scale_color_gradient(low = cols[1], high = cols[2]) +
       theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
       guides(size = guide_legend(title = 'Term/query overlap'),
-             color = guide_colorbar(title = '-Log10(pvalue)')) +
+             color = guide_colorbar(title = color_legend_title)) +
       labs(
         x = 'Enrichment Score',
         y = ''
@@ -458,7 +481,8 @@ dotplot_ORA = function(ORA_res, alpha_cutoff = 0.05,
 #' @import ggridges
 #' @import ggpubr
 #' @export
-ridge_bootstraps = function(enrich_res, terms_of_interest){
+ridge_bootstraps = function(enrich_res, terms_of_interest, condition = NULL){
+
 
   plot_data = enrich_res[enrich_res$Term %in% terms_of_interest,]
   colnames(plot_data)[which(colnames(plot_data) == "n")] = "TP"
@@ -466,11 +490,15 @@ ridge_bootstraps = function(enrich_res, terms_of_interest){
   plot_data$Term = paste0(plot_data$Term, " (", plot_data$fraction * 100,
                           ")")
 
+  if (!is.null(condition)){
+    plot_data = plot_data[plot_data$Condition == condition,]
+  }
+
   ggplot2::ggplot(plot_data, aes(x = TP, y = Term,
-                        fill = factor(stat(quantile)))) +
+                                 fill = stat(density))) +
     ggridges::stat_density_ridges(geom = "density_ridges_gradient",calc_ecdf = T,
-                                  quantiles = 4, quantile_lines = T) +
-    ggplot2::scale_fill_viridis_d(name = "Quartiles") +
+                                  scale = 0.95) +
+    ggplot2::scale_fill_viridis_c(name = "Density", direction = 1) +
     ggplot2::scale_x_continuous(n.breaks = 15, limits = c(0,max(plot_data$TP) +2)) +
     ylab("") +
     xlab("Intersection size") +
@@ -488,7 +516,7 @@ ridge_bootstraps = function(enrich_res, terms_of_interest){
 #' compare_metabo_distr(obj, metabolite="C6H8N2O3-H")
 #'
 #' @export
-compare_metabo_distr = function(obj, metabolite){
+compare_metabo_distr = function(obj, metabolite, conds_of_interest = NULL){
   data = obj$scmatrix[metabolite,] %>%
     as.data.frame()
   colnames(data)[1] = "intens"
@@ -497,6 +525,11 @@ compare_metabo_distr = function(obj, metabolite){
   data_viz = data
   # data_viz = data %>%
   #   tidyr::gather(key = "metabo", value = "intens",-condition)
+
+  if(!is.null(conds_of_interest)){
+    data_viz = data_viz %>%
+      dplyr::filter(condition %in% conds_of_interest)
+  }
 
   desc_stats <- data_viz %>%
     dplyr::group_by(condition) %>%
