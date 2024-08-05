@@ -310,3 +310,59 @@ adjust_conting_iso = function(observed, obs_iso,
   }
   return(df)
 }
+
+#' Get intersection between term and query for a Specific Term
+#'
+#' @description This function extracts unique true positive markers for a specified term from the ORA bootstrap result.
+#'
+#' @param ORA_boot_df A data frame containing the ORA bootstrap results.
+#' @param term_of_interest A string specifying the term for which true positive markers should be extracted.
+#'
+#' @return A character vector containing the unique true positive markers associated with the specified term.
+#'
+#'
+#' @examples
+#' \dontrun{
+#'   # Example usage with hypothetical data
+#'   ORA_boot_df <- data.frame(
+#'     Term = c("Term1", "Term2", "Term1"),
+#'     TP_markers = c("Marker1;Marker2", "Marker3;Marker4", "Marker2;Marker5")
+#'   )
+#'   markers <- get_TP_markers_per_Term(ORA_boot_df, "Term1")
+#'   print(markers)
+#' }
+#'
+#' @export
+get_TP_markers_per_Term = function(ORA_boot_df, term_of_interest){
+  markers = ORA_boot_df %>%
+    dplyr::filter(Term == term_of_interest) %>%
+    dplyr::pull(TP_markers) %>%
+    strsplit(split = ";") %>%
+    unlist() %>%
+    unique()
+  return(markers)
+}
+
+#' Map True Positive Markers to Input Ions from single cell matrix.
+#'
+#' @description This function maps true positive markers to their corresponding ions by modifying and matching the marker and ion names.
+#'
+#' @param markers A character vector containing true positive markers obtained from \code{\link{get_TP_markers_per_Term}}
+#' @param scm_ions A character vector containing input ion names.
+#'
+#' @return A character vector containing the ions that match the given true positive markers.
+#'
+#'
+#' @examples
+#' markers <- c("sf.Na", "sf.H")
+#' scm_ions <- c("sf+Na", "sf+H")
+#' map_TP_markers_to_ions(markers, scm_ions)
+#'
+#' @export
+map_TP_markers_to_ions = function(markers, scm_ions){
+  modified_scm_ion = gsub("\\+|\\-",".",scm_ions)
+  match_markers = modified_scm_ion %in% markers
+
+  marker_ions = scm_ions[match_markers]
+  return(marker_ions)
+}
