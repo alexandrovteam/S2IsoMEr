@@ -135,12 +135,10 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,
                 "run rankScore before enrichment analysis"))
   }
 
+  message("Calculating ranks ... ")
+
   object = rankScore.bmetenrich(object = object, ranking.by = NULL,
                                 alternative = "greater")
-
-  cat("\n")
-  cat("Bootstrapping...")
-  cat("\n")
 
   if(report_ambiguity_scores){
     ambig_scores = calc_ambiguity(input_iso_list = object$annotations,
@@ -150,6 +148,8 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,
     ambig_scores = NULL
   }
 
+  message("\nBootstrapping ... \n")
+
   bootstrapped_sublist <- pbapply::pbsapply(seq(n_bootstraps),       ## bootstrapping
                                             function(n_i) {
                                               sapply(seq(dim(object$scmatrix)[1]), function(row_number_i) {
@@ -157,27 +157,26 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,
                                                 molecules_to_sample <- object$annotations[[row_number_i]]
 
                                                 if(length(molecules_to_sample)==0){
-                                                  molecules_to_sample <- NA
+                                                  mols <- names(object$annotations)[row_number_i]
                                                 }
 
-                                                if(!is.null(object$annotation.weights)){
-                                                  weights_to_sample <- object$annotation.weights[[row_number_i]]
-                                                } else {
-                                                  weights_to_sample <- rep(x = 1, times = length(molecules_to_sample))
+                                                else{
+                                                  if(!is.null(object$annotation.weights)){
+                                                    weights_to_sample <- object$annotation.weights[[row_number_i]]
+                                                  } else {
+                                                    weights_to_sample <- rep(x = 1, times = length(molecules_to_sample))
+                                                  }
+
+
+                                                  if(length(molecules_to_sample)!=1){
+                                                    mols <- sample(x = molecules_to_sample, size = 1, prob = weights_to_sample)
+                                                  } else {          ## length to_sample == 1, R sample() fails with n=1
+                                                    mols <- molecules_to_sample
+                                                  }
                                                 }
 
-
-                                                if(length(molecules_to_sample)!=1){
-                                                  sample(
-                                                    x = molecules_to_sample,
-                                                    size = 1,    ## take one
-                                                    prob = weights_to_sample)
-
-
-                                                } else {          ## length to_sample == 1, R sample() fails with n=1
-                                                  molecules_to_sample
-                                                }
-
+                                                names(mols) <- names(object$annotations)[row_number_i]
+                                                mols
                                               })
                                             }) %>% data.frame
 
@@ -195,10 +194,12 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,
   cat("Match to pathway...")
   cat("\n")
 
+  all_path_metabo = unique(unlist(object$pathway_list))
+
   fraction_matched_to_pathway <-
     rowMeans(
       pbapply::pbsapply(bootstrapped_sublist, function(i) {
-        i %in% object$pathway_list$all
+        i %in% all_path_metabo
       })
     )
 
@@ -236,13 +237,13 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,
             data.frame(Term = term,
                        bootstrap = bootstrap_i,
                        n = 0,
-                       ES = NA,
+                       NES = NA,
                        p_value = NA)
           } else if (all(members_logi)){
             data.frame(Term = term,
                        bootstrap = bootstrap_i,
                        n = sum(members_logi),
-                       ES = NA,
+                       NES = NA,
                        p_value = NA)
           } else {
             ks_results <- ks.test.signed( which(members_logi), which(!members_logi))
@@ -250,7 +251,7 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,
             data.frame(Term = term,
                        bootstrap = bootstrap_i,
                        n = sum(members_logi),
-                       ES = ks_results$ES,
+                       NES = ks_results$ES,
                        p_value = ks_results$p.value)
           }
 
@@ -261,10 +262,14 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,
     enrichment_analysis <-
       pbapply::pblapply(seq(n_bootstraps), function(bootstrap_i){
 
-        boot_mols = bootstrapped_sublist[,bootstrap_i]
-        boot_mols[is.na(boot_mols)] = names(object$rankings$statistic)[sapply(object$annotations,
-                                                                              length) == 0]
         boot_ranks = object$rankings$statistic
+        names(boot_ranks) = gsub("\\+|\\-",".",names(boot_ranks))
+        boot_ranks = boot_ranks[rownames(bootstrapped_sublist)]
+
+        boot_mols = bootstrapped_sublist[,bootstrap_i]
+        # boot_mols[is.na(boot_mols)] = names(object$rankings$statistic)[sapply(object$annotations,
+        #                                                                       length) == 0]
+
         if (any(is.infinite(boot_ranks))){
           min_rank = min(boot_ranks[!is.infinite(boot_ranks)])
           max_rank = max(boot_ranks[!is.infinite(boot_ranks)])
@@ -272,7 +277,7 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,
           boot_ranks[is.infinite(boot_ranks) & boot_ranks > 0] = max_rank + 1
         }
         names(boot_ranks) = boot_mols
-        boot_ranks = boot_ranks[order(abs(boot_ranks), decreasing = T)]
+        boot_ranks = boot_ranks[order(abs(boot_ranks), decreasing = F)]
         boot_ranks = boot_ranks[!duplicated(names(boot_ranks))]
         boot_ranks = boot_ranks[order(boot_ranks)]
 
@@ -298,7 +303,7 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,
     object$LUT$name[match(enrichment_analysis$Term, object$LUT$ID)]
 
   summarized_enrichment_results <- enrichment_analysis %>%
-    dplyr::filter(fraction > boot_fract_cutoff) %>%
+    dplyr::filter(fraction > boot_fract_cutoff, !is.na(NES)) %>%
     dplyr::group_by(bootstrap) %>%
     dplyr::mutate(q.value = p.adjust(p_value, method = "fdr"))  %>%
     dplyr::group_by(Term) %>%
