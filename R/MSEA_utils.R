@@ -62,13 +62,21 @@ rankScore.bmetenrich <- function(object,
       })
   }
   else if (object$ranking.by == "logFC"){
-    rank_score <-
-      apply(object$scmatrix, 1, function(i){
-        x = log2(mean(i[object$conditions == object$condition.x], na.rm = T))
-        y = log2(mean(i[object$conditions == object$condition.y], na.rm = T))
+    cond_x_cells = colnames(object$scmatrix)[which(object$conditions == object$condition.x)]
+    cond_y_cells = colnames(object$scmatrix)[which(object$conditions == object$condition.y)]
+    # Calculate means for both conditions
+    mean_cond_y <- rowMeans(object$scmatrix[, cond_y_cells])
+    mean_cond_x <- rowMeans(object$scmatrix[, cond_x_cells])
 
-        y - x
-      })
+    # Calculate Log Fold Change (LFC)
+    rank_score <- log2(mean_cond_y) - log2(mean_cond_x)
+    # rank_score <-
+    #
+    #   apply(object$scmatrix, 1, function(i){
+    #     x = log2(mean(i[object$conditions == object$condition.x], na.rm = T))
+    #     y = log2(mean(i[object$conditions == object$condition.y], na.rm = T))
+    #
+    #     y - x})
   }
   else{
     stop("no valid ranking algorithm selected")
