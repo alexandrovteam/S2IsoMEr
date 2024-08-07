@@ -16,13 +16,13 @@
 #'
 #' @export
 barplot_MSEA_boot <- function (object, ...) {
-  UseMethod("barplot_bootstrap", object)
+  UseMethod("barplot_MSEA_boot", object)
 }
 
 
 #' @export
 barplot_MSEA_boot.bmetenrich <- function(object, min.annotations = 2, q.value.cutoff = 0.1,
-                                         bootstrap.fraction.cutoff = .5, by.statistic = 'q.value'){
+                                         bootstrap.fraction.cutoff = .5, by.statistic = 'ES'){
   options(dplyr.summarise.inform = FALSE)
 
   enrichment_analysis <- object$enrichment_analysis$per_bootstrap_enrich_results
@@ -84,50 +84,25 @@ barplot_MSEA_boot.bmetenrich <- function(object, min.annotations = 2, q.value.cu
       enrichment_analysis %>%
       {
         ggplot(data = .,
-               aes(
-                 x = reorder(Term, NES),
-                 y = NES,
-                 fill = sapply(q.value_combined, function(i) {
-                   min(10, -log(i, base = 10))
-                 })
-               )) +
-
+               aes(x = reorder(Term, NES), y = NES)) +
           coord_flip() +
-          geom_bar(
-            data = .  %>%
-              dplyr::group_by(Term) %>%
-              dplyr::summarise(NES = median(NES, na.rm = T), q.value_combined = q.value_combined[1]),
-            color = NA,
-            stat = "identity"
-          ) +
-          geom_jitter(size = 1,
-                      width = .1,
-                      color = "gray30") +
-
-          scale_fill_gradient2(
-            low = "gray",
-            mid = "gray",
-            high = "red",
-            ## scale from gray to red, with 10 as max
-            midpoint = -log(0.05, base = 10),
-            limits = c(0, 10)
-          ) +
-          geom_hline(yintercept = 0, linetype = 3) +
-
-          labs(
-            x = "",
-            y = "Enrichment Score",
-            fill = expression(-LOG[10] ~ italic(q) ~ value),
-            subtitle =  bquote(
-              .(object$enrichment_analysis$comparison[2]) ~ italic(vs.) ~ .(object$enrichment_analysis$comparison[1])
-            )
-
-          ) +
+          geom_bar(data = . %>% group_by(Term) %>%
+                     summarise(NES = median(NES, na.rm = TRUE),
+                               q.value_combined = first(q.value_combined)),
+                   aes(fill = -log10(q.value_combined)),
+                   color = NA, stat = "identity", alpha = 0.5) +
+          geom_jitter(size = 1, width = 0.1, color = "gray30") +
+          scale_fill_viridis_c(option = "viridis",
+                               limits = c(0, max(-log10(.$q.value_combined), na.rm = TRUE)),
+                               direction = 1) +
+          geom_hline(yintercept = 0, linetype = "dotted") +
+          labs(x = "", y = "Enrichment Score",
+               fill = expression(-log[10]~italic(q)~value),
+               subtitle = bquote(.(object$enrichment_analysis$comparison[2]) ~
+                                   italic(vs.) ~ .(object$enrichment_analysis$comparison[1]))) +
           ggpubr::theme_pubr() +
-          theme(
-            plot.title = element_text(face = "bold", hjust = 1),
-            axis.title.x = element_text(face = "bold")
-          )
+          theme(plot.title = element_text(face = "bold", hjust = 0.5),
+                axis.title.x = element_text(face = "bold"))
       }
   },
   'q.value' = {
@@ -242,7 +217,8 @@ plot_MSEA_Multi_cond = function(combined_MSEA_res,
                      display_numbers = label_mat,
                      fontsize = 14, angle_col = 45,
                      fontsize_number = 14, number_color = "lightblue",
-                     legend = T)
+                     legend = T,legend_breaks = c(-2,-1,0, 1, 2),
+                     legend_labels = c("-2", "-1", "0", "1", "NES"))
 }
 
 # ORA ------------------------------------------------------------
