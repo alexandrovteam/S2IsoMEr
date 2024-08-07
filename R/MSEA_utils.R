@@ -38,45 +38,42 @@ rankScore.bmetenrich <- function(object,
   }
 
   if(object$ranking.by == "t.test"){
+    #Conditions are switched so that ranking matches the interpretation of logFC
     rank_score <-
       apply(object$scmatrix, 1, function(i){
-        t.test(x = i[object$conditions == object$condition.x],
-               y = i[object$conditions == object$condition.y], alternative = alternative)$statistic
+        t.test(x = i[object$conditions == object$condition.y],
+               y = i[object$conditions == object$condition.x], alternative = alternative)$statistic
       })
 
 
   } else if(object$ranking.by == "wilcox.test"){
+
+    LFC = calc_LFC_scmat(object)
+
     rank_score <-
       apply(object$scmatrix, 1, function(i){
-        #Conditions are switched so that ranking matches the interpretation of logFC and BWS
+        #Conditions are switched so that ranking matches the interpretation of logFC
         calculate_wilcox_statistic(x = i[object$conditions == object$condition.y],
                     y = i[object$conditions == object$condition.x])
         # wilcox.test(x = i[object$conditions == object$condition.y],
         #             y = i[object$conditions == object$condition.x], alternative = alternative)$statistic
       })
+
+    rank_score = rank_score * sign(LFC)
+
   } else if (object$ranking.by == "BWS") {
+    LFC = calc_LFC_scmat(object)
+    #Conditions are switched so that ranking matches the interpretation of logFC and BWS
     rank_score <-
       apply(object$scmatrix, 1, function(i){
-        BWStest::bws_test(x = i[object$conditions == object$condition.x],
-                          y = i[object$conditions == object$condition.y], alternative = alternative)$statistic
+        BWStest::bws_stat(x = i[object$conditions == object$condition.y],
+                          y = i[object$conditions == object$condition.x])
       })
+    rank_score = rank_score * sign(LFC)
   }
   else if (object$ranking.by == "logFC"){
-    cond_x_cells = colnames(object$scmatrix)[which(object$conditions == object$condition.x)]
-    cond_y_cells = colnames(object$scmatrix)[which(object$conditions == object$condition.y)]
-    # Calculate means for both conditions
-    mean_cond_y <- rowMeans(object$scmatrix[, cond_y_cells])
-    mean_cond_x <- rowMeans(object$scmatrix[, cond_x_cells])
+    rank_score <- calc_LFC_scmat(object)
 
-    # Calculate Log Fold Change (LFC)
-    rank_score <- log2(mean_cond_y) - log2(mean_cond_x)
-    # rank_score <-
-    #
-    #   apply(object$scmatrix, 1, function(i){
-    #     x = log2(mean(i[object$conditions == object$condition.x], na.rm = T))
-    #     y = log2(mean(i[object$conditions == object$condition.y], na.rm = T))
-    #
-    #     y - x})
   }
   else{
     stop("no valid ranking algorithm selected")
@@ -131,3 +128,21 @@ calculate_wilcox_statistic <- function(x, y = NULL, paired = FALSE) {
 
   return(STATISTIC)
 }
+
+#' @export
+calc_LFC_scmat <- function (object, ...) {
+  UseMethod("calc_LFC_scmat", object)
+}
+#' @export
+calc_LFC_scmat.bmetenrich = function(object){
+  cond_x_cells = colnames(object$scmatrix)[which(object$conditions == object$condition.x)]
+  cond_y_cells = colnames(object$scmatrix)[which(object$conditions == object$condition.y)]
+  # Calculate means for both conditions
+  mean_cond_y <- rowMeans(object$scmatrix[, cond_y_cells])
+  mean_cond_x <- rowMeans(object$scmatrix[, cond_x_cells])
+
+  # Calculate Log Fold Change (LFC)
+  LFC <- log2(mean_cond_y) - log2(mean_cond_x)
+  return(LFC)
+}
+
