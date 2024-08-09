@@ -1,10 +1,13 @@
 Package: bmetenrichr
-Title: metabolite set enrichment analysis with bootstrapping
+Title: Spatial and single-cell Isomeric metabolite enrichment in R
 Version: 0.3.0
 Authors@R: 
-    person("Martijn", "Molenaar", role = "cre", email = "m.r.molenaar@protonmail.com",
-           comment = c(ORCID = "0000-0001-5221-608X"))
-Description: metabolite set enrichment analysis using bootstrapping of molecule isomers.
+    person("Bishoy", "Wadie", role = c("aut", "cre"), email = "bishoy.wadie@embl.de",
+           comment = c(ORCID = "0000-0001-8692-1107")),
+    person("Martijn", "Molenaar", role = "aut", email = "m.r.molenaar@protonmail.com",
+           comment = c(ORCID = "0000-0001-5221-608X"))       
+Description: R package performing Overrepresentation analysis (ORA) and Metabolite Set Enrichment Analysis (MSEA) on  
+Spatial  and single-cell metabolomics datasets using bootstrapping of isomeric/isobaric molecules.
 Imports: 
     pbapply,
     tidyr,
@@ -24,7 +27,8 @@ Imports:
     RColorBrewer,
     ggridges,
     metap,
-    yulab.utils
+    yulab.utils,
+    DOSE
 Depends: 
     ggplot2,
     dplyr,
@@ -37,8 +41,7 @@ LazyData: true
 Suggests: 
     testthat (>= 3.0.0),
     knitr,
-    rmarkdown,
-    spelling
+    rmarkdown
 VignetteBuilder: knitr
 Language: en-US
 Config/testthat/edition: 3
