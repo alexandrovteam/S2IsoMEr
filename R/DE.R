@@ -17,18 +17,15 @@ PackageCheck <- function(..., error = TRUE) {
 }
 
 
-#' @importFrom pbapply pbsapply
-#' @importFrom future.apply future_sapply
-#' @importFrom future nbrOfWorkers
-#' @importFrom limma rankSumTestWithCorrelation
+
 seurat_wilcoxDETest <- function(data.use,cells.1,cells.2,verbose = TRUE,...){
   data.use <- data.use[, c(cells.1, cells.2), drop = FALSE]
   j <- seq_len(length.out = length(x = cells.1))
 
   my.sapply <- ifelse(
-    test = verbose && nbrOfWorkers() == 1,
-    yes = pbsapply,
-    no = future_sapply
+    test = verbose && future::nbrOfWorkers() == 1,
+    yes = pbapply::pbsapply,
+    no = future.apply::future_sapply
   )
   overflow.check <- ifelse(
     test = is.na(x = suppressWarnings(length(x = data.use[1, ]) * length(x = data.use[1, ]))),

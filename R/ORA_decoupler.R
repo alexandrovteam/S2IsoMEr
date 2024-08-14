@@ -76,7 +76,6 @@
                   TP, FP, FN, TN)
 }
 
-#' @importFrom broom glance
 .ora_fisher_exact_test <- function(dat,pbar, ...) {
   pbar$tick()
   conting = ora_conting_decoupleR(dat, as_matrix = F) %>% tibble::as_tibble()

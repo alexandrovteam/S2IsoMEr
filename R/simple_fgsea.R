@@ -32,7 +32,6 @@
 #' names(mol_ranks) = sample(unique(unlist(bg)), 10)
 #' mol_ranks = mol_ranks[order(mol_ranks)]
 #' simple_fgsea(pathways = bg, stats = mol_ranks, minSize = 3, scoreType = "std")
-#' @importFrom BiocParallel SerialParam
 simple_fgsea = function(pathways,
                         stats,
                         minSize = 1,

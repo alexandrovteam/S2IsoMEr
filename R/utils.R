@@ -4,7 +4,6 @@
 
 "%nin%" = Negate("%fin%")
 
-#' @importFrom plyr join.keys
 mismatch_df = function (x, y, on = NULL){
   if (is.null(on)) {
     on <- dplyr::intersect(names(x), names(y))
