@@ -14,7 +14,6 @@ Imports:
     tidyr,
     fgsea,
     BWStest,
-    decoupleR,
     withr,
     future.apply,
     future,
