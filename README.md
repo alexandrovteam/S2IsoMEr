@@ -20,7 +20,7 @@ devtools::install_github("Bisho2122/S2IsoMEr")
 
 ## Licence
 
-`S2IsoMEr` is licensed under the MIT License. See the [LICENSE](https://github.com/bisho2122/S2IsoMEr?tab=MIT-2-ov-file) file for more details.
+`S2IsoMEr` is licensed under the MIT License. See the [LICENSE](https://github.com/bisho2122/S2IsoMEr?tab=MIT-1-ov-file) file for more details.
 
 ## Citation
 
