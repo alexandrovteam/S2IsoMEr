@@ -28,6 +28,11 @@ jobs:
           extra-packages: pkgdown
           needs: website
 
+      - name: Install S2IsoMEr
+        run: |
+          Rscript -e 'install.packages(c('devtools', 'pkgdown'))'
+          Rscript -e 'devtools::install_github("Bisho2122/S2IsoMEr")'
+
       - name: Deploy package
         run: |
           git config --local user.name "$GITHUB_ACTOR"
