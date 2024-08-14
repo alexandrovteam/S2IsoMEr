@@ -84,25 +84,26 @@ barplot_MSEA_boot.S2IsoMEr <- function(object, min.annotations = 2, q.value.cuto
     enrichment_plot <-
       enrichment_analysis %>%
       {
-        ggplot(data = .,
-               aes(x = reorder(Term, NES), y = NES)) +
-          coord_flip() +
-          geom_bar(data = . %>% group_by(Term) %>%
-                     summarise(NES = median(NES, na.rm = TRUE),
-                               q.value_combined = first(q.value_combined)),
-                   aes(fill = -log10(q.value_combined)),
+        ggplot2::ggplot(data = .,
+                        ggplot2::aes(x = reorder(Term, NES), y = NES)) +
+          ggplot2::coord_flip() +
+          ggplot2::geom_bar(data = . %>% dplyr::group_by(Term) %>%
+                     dplyr::summarise(NES = median(NES, na.rm = TRUE),
+                               q.value_combined = dplyr::first(q.value_combined)),
+                     ggplot2::aes(fill = -log10(q.value_combined)),
                    color = NA, stat = "identity", alpha = 0.5) +
-          geom_jitter(size = 1, width = 0.1, color = "gray30") +
-          scale_fill_viridis_c(option = "viridis",
+          ggplot2::geom_jitter(size = 1, width = 0.1, color = "gray30") +
+          ggplot2::scale_fill_viridis_c(option = "viridis",
                                limits = c(0, max(-log10(.$q.value_combined), na.rm = TRUE)),
                                direction = 1) +
-          geom_hline(yintercept = 0, linetype = "dotted") +
-          labs(x = "", y = "Enrichment Score",
-               fill = expression(-log[10]~italic(q)~value),
-               subtitle = bquote(.(object$enrichment_analysis$comparison[2]) ~
-                                   italic(vs.) ~ .(object$enrichment_analysis$comparison[1]))) +
+          ggplot2::geom_hline(yintercept = 0, linetype = "dotted") +
+          ggplot2::labs(x = "", y = "Enrichment Score",
+               fill = "-log10 q value",
+               subtitle = paste(object$enrichment_analysis$comparison[2],
+                                "vs.",
+                                object$enrichment_analysis$comparison[1])) +
           ggpubr::theme_pubr() +
-          theme(plot.title = element_text(face = "bold", hjust = 0.5),
+          ggplot2::theme(plot.title = element_text(face = "bold", hjust = 0.5),
                 axis.title.x = element_text(face = "bold"))
       }
   },
@@ -111,7 +112,7 @@ barplot_MSEA_boot.S2IsoMEr <- function(object, min.annotations = 2, q.value.cuto
     enrichment_analysis <-
       enrichment_analysis %>%
       dplyr::group_by(Term) %>%
-      mutate(NES = median(NES, na.rm = T),
+      dplyr::mutate(NES = median(NES, na.rm = T),
              up_down = factor(ifelse(sign(NES)>0, "UP","DOWN"),
                               levels = c("UP","DOWN")))
 
@@ -121,26 +122,26 @@ barplot_MSEA_boot.S2IsoMEr <- function(object, min.annotations = 2, q.value.cuto
 
     enrichment_plot <-
       enrichment_analysis  %>%
-      ggplot(data = .,aes(x = reorder(Term, desc(-log(`q.value`, base = 10))),
+      ggplot2::ggplot(data = .,ggplot2::aes(x = stats::reorder(Term, desc(-log(`q.value`, base = 10))),
                           y = -log(`q.value`, base = 10))) +
-      coord_flip() +
-      geom_bar(data = . %>%
-                 group_by(Term) %>%
-                 summarise(up_down = up_down[1],
+      ggplot2::coord_flip() +
+      ggplot2::geom_bar(data = . %>%
+                 dplyr::group_by(Term) %>%
+                 dplyr::summarise(up_down = up_down[1],
                            q.value = median(-log(`q.value`, base = 10)),
                            q.value_clipped = ifelse(q.value > 10, 10, q.value)),
-               aes(y = q.value, fill = q.value_clipped), stat = "identity") +
-      geom_jitter(size = 1, width = .1, color = "gray30") +
-      facet_grid(up_down~.,  space = "free", scales = "free") +
-      scale_fill_gradient2(low = "gray", mid = "gray",
+                 ggplot2::aes(y = q.value, fill = q.value_clipped), stat = "identity") +
+      ggplot2::geom_jitter(size = 1, width = .1, color = "gray30") +
+      ggplot2::facet_grid(up_down~.,  space = "free", scales = "free") +
+      ggplot2::scale_fill_gradient2(low = "gray", mid = "gray",
                            high = "red",midpoint = -log(0.05, base = 10),
                            limits = c(0,10)) +
-      geom_hline(yintercept = c(0,-log(0.05,base = 10)), linetype = 3) +
-      labs(x = "", y = expression(-LOG[10]~italic(q)~value),
-           fill = expression(-LOG[10]~italic(q)~value),
-           subtitle =  bquote(.(object$condition.y)~italic(vs.)~.(object$condition.x))) +
+      ggplot2::geom_hline(yintercept = c(0,-log(0.05,base = 10)), linetype = 3) +
+      ggplot2::labs(x = "", y = "-Log10 (q-value)",
+           fill = "-Log10 (q-value)",
+           subtitle = paste(object$condition.y, "vs.", object$condition.x)) +
       ggpubr::theme_pubr(legend = "right") +
-      theme(plot.title = element_text(face = "bold", hjust = 0.5), axis.title.x = element_text(face = "bold"))
+      ggplot2::theme(plot.title = element_text(face = "bold", hjust = 0.5), axis.title.x = ggplot2::element_text(face = "bold"))
   },
   {     ## else
     stop("No valid plot-mode selected. Use  either `ES` or `q.value`")
@@ -166,14 +167,11 @@ barplot_MSEA_boot.S2IsoMEr <- function(object, min.annotations = 2, q.value.cuto
 #'   plot_MSEA_Multi_cond(combined_MSEA_res = msea_results, alpha_cutoff = 0.05)
 #' }
 #'
-#' @import pheatmap
-#' @import RColorBrewer
-#' @import grDevices
 #' @export
 plot_MSEA_Multi_cond = function(combined_MSEA_res,
                                 alpha_cutoff = 0.05){
 
-  missing_conds <- setdiff(c("condition.x", "condition.y"),
+  missing_conds <- base::setdiff(c("condition.x", "condition.y"),
                            colnames(combined_MSEA_res))
 
   if (length(missing_conds) > 0) {
@@ -199,14 +197,14 @@ plot_MSEA_Multi_cond = function(combined_MSEA_res,
     dplyr::mutate(cond_label = paste0(condition.y, "_",condition.x)) %>%
     dplyr::select(cond_label, Term, NES) %>%
     tidyr::pivot_wider(names_from = cond_label, values_from = NES) %>%
-    column_to_rownames("Term") %>%
+    tibble::column_to_rownames("Term") %>%
     as.matrix()
 
   label_mat = combined_MSEA_res %>%
     dplyr::mutate(cond_label = paste0(condition.y, "_",condition.x)) %>%
     dplyr::select(cond_label, Term, signif) %>%
     tidyr::pivot_wider(names_from = cond_label, values_from = signif) %>%
-    column_to_rownames("Term") %>%
+    tibble::column_to_rownames("Term") %>%
     as.matrix()
 
   pheatmap::pheatmap(heat_mat,
@@ -240,24 +238,22 @@ plot_MSEA_Multi_cond = function(combined_MSEA_res,
 #'   print(plot)
 #' }
 #'
-#' @import ggplot2
-#' @import ggpubr
 #' @export
 barplot_ORA_simple = function(ORA_simple_res, q_val_cutoff = 0.05){
   plot_data = ORA_simple_res
   plot_data$Significance = ifelse(plot_data$score < -log10(q_val_cutoff), "No", "Yes")
 
   plot_data %>%
-    ggplot(aes(x = reorder(Term, score, max), y = score, fill = Significance)) +
-    geom_bar(stat = "identity") +
-    geom_text(aes(label = as.character(TP),hjust = 1), position = position_dodge(width = 0.5),
+    ggplot2::ggplot(ggplot2::aes(x = reorder(Term, score, max), y = score, fill = Significance)) +
+    ggplot2::geom_bar(stat = "identity") +
+    ggplot2::geom_text(aes(label = as.character(TP),hjust = 1), position = position_dodge(width = 0.5),
               color = "black", size = 6) +
-    coord_flip() +
+    ggplot2::coord_flip() +
     ggpubr::theme_pubr() +
-    ylab("-Log10 (q-value)") +
-    xlab("") +
-    geom_hline(yintercept = -log10(q_val_cutoff), linetype = "dashed", lwd = 1) +
-    theme(axis.title = element_text(size = 16),
+    ggplot2::ylab("-Log10 (q-value)") +
+    ggplot2::xlab("") +
+    ggplot2::geom_hline(yintercept = -log10(q_val_cutoff), linetype = "dashed", lwd = 1) +
+    ggplot2::theme(axis.title = element_text(size = 16),
           axis.text = element_text(size = 14))
 }
 
@@ -278,9 +274,6 @@ barplot_ORA_simple = function(ORA_simple_res, q_val_cutoff = 0.05){
 #'   print(plot)
 #' }
 #'
-#' @import ggplot2
-#' @import ggpubr
-#' @import dplyr
 #' @export
 barplot_ORA_boot = function(ORA_boot_res, collapse_multi_cond = F){
   if (collapse_multi_cond){
@@ -316,18 +309,18 @@ barplot_ORA_boot = function(ORA_boot_res, collapse_multi_cond = F){
 
   min_qval = min(data_viz$q.value_combine)
 
-  plot <- ggplot(data_viz, aes(x = reorder(Term_label, ES_median,),
+  plot <- ggplot2::ggplot(data_viz, ggplot2::aes(x = stats::reorder(Term_label, ES_median,),
                                y = ES_median, fill = -log10(q.value_combined))) +
-    geom_bar(stat = "identity", position = position_dodge(), width = 0.7) +
-    scale_y_continuous(n.breaks = 10) +
-    geom_errorbar(aes_string(ymin = "ES_min", ymax = "ES_max"),
+    ggplot2::geom_bar(stat = "identity", position = ggplot2::position_dodge(), width = 0.7) +
+    ggplot2::scale_y_continuous(n.breaks = 10) +
+    ggplot2::geom_errorbar(ggplot2::aes_string(ymin = "ES_min", ymax = "ES_max"),
                   width = 0.2, position = position_dodge(0.7)) +
     scale_fill_gradient(low = "#B3CDE3", high = "#FBB4AE", name = "-Log10(q.value)") +
     ggpubr::theme_pubr() +
-    coord_flip() +
-    xlab("") +
-    ylab("Fold Enrichment Score") +
-    facet_wrap(~Condition)
+    ggplot2::coord_flip() +
+    ggplot2::xlab("") +
+    ggplot2::ylab("Fold Enrichment Score") +
+    ggplot2::facet_wrap(~Condition)
     # theme(plot.title = element_text(hjust = 0.5))
 
     return(plot)
@@ -352,10 +345,6 @@ barplot_ORA_boot = function(ORA_boot_res, collapse_multi_cond = F){
 #'   print(plot)
 #' }
 #'
-#' @import ggplot2
-#' @import ggpubr
-#' @import dplyr
-#' @import DOSE
 #' @export
 dotplot_ORA = function(ORA_res, alpha_cutoff = 0.05,
                        color_by = "Significance",
@@ -387,49 +376,50 @@ dotplot_ORA = function(ORA_res, alpha_cutoff = 0.05,
                               "Enrichment_score" = 'Enrichment Score')
 
   if(length(unique(plot_data$Condition)) > 1){
-    p = ggplot(plot_data, aes_string(x = "Condition",
+    p = ggplot2::ggplot(plot_data, ggplot2::aes_string(x = "Condition",
                                      y = "Term", size = "size")) +
-      geom_point(aes_string(color = "Score")) +
-      scale_color_continuous(low = "#3B6FB6",
-                             high = "#D41645", guide = guide_colorbar(reverse = TRUE)) +
-      ylab(NULL) +
+      ggplot2::geom_point(aes_string(color = "Score")) +
+      ggplot2::scale_color_continuous(low = "#3B6FB6",
+                             high = "#D41645", guide = ggplot2::guide_colorbar(reverse = TRUE)) +
+      ggplot2::ylab(NULL) +
       # ggtitle("Trial") +
-      DOSE::theme_dose(12) +
-      scale_size_continuous(range = c(4, 9)) +
-      scale_y_discrete(labels = label_func) +
+      ggpubr::theme_pubr() +
+      ggplot2::scale_size_continuous(range = c(4, 9)) +
+      ggplot2::scale_y_discrete(labels = label_func) +
       ggpubr::rotate_x_text(angle = 45) +
-      guides(size = guide_legend(order = 1, title = 'Term/query overlap'),
-             color = guide_colorbar(order = 2, title = color_legend_title)) +
-      theme(axis.text.x = element_text(size = 14),
-            axis.text.y = element_text(size = 14),
-            axis.title.x = element_blank(),
-            axis.title.y = element_text(size = 16),
-            strip.text = element_text(size = 14))
+      ggplot2::guides(size = guide_legend(order = 1, title = 'Term/query overlap'),
+             color = ggplot2::guide_colorbar(order = 2, title = color_legend_title)) +
+      theme(axis.text.x = ggplot2::element_text(size = 14),
+            axis.text.y = ggplot2::element_text(size = 14),
+            axis.title.x = ggplot2::element_blank(),
+            axis.title.y = ggplot2::element_text(size = 16),
+            strip.text = ggplot2::element_text(size = 14))
   }
   else{
-    p = ggplot(data = plot_data, aes(x = Enrichment_Score,
-                                     y = reorder(Term, Enrichment_Score))) +
-      geom_point(aes(size = size,color = Score)) +
-      scale_size(range = c(3, 6)) +
-      scale_color_gradient(low = cols[1], high = cols[2]) +
-      theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
+    p = ggplot2::ggplot(data = plot_data, ggplot2::aes(x = Enrichment_Score,
+                                     y = stats::reorder(Term, Enrichment_Score))) +
+      ggplot2::geom_point(ggplot2::aes(size = size,color = Score)) +
+      ggplot2::scale_size(range = c(3, 6)) +
+      ggplot2::scale_color_gradient(low = cols[1], high = cols[2]) +
+      ggplot2::theme(axis.title.x = ggplot2::element_blank(),
+                     axis.title.y = ggplot2::element_blank()) +
       guides(size = guide_legend(title = 'Term/query overlap'),
              color = guide_colorbar(title = color_legend_title)) +
-      labs(
+      ggplot2::labs(
         x = 'Enrichment Score',
         y = ''
       ) +
       ggpubr::theme_pubr() +
-      theme(axis.text.x = element_text(angle = 0,hjust = 1))
+      ggplot2::theme(axis.text.x = element_text(angle = 0,hjust = 1))
   }
 
   if (!is.null(facet_by)){
-    facet_col_sym = sym(facet_by)
+    facet_col_sym = ggplot2::sym(facet_by)
     p = p +
-      facet_wrap(vars(!!enquo(facet_col_sym))) +
-      theme(
+      facet_wrap(ggplot2::vars(!!ggplot2::enquo(facet_col_sym))) +
+      ggplot2::theme(
         panel.spacing = unit(x = 1, units = "lines"),
-        strip.background = element_blank())
+        strip.background = ggplot2::element_blank())
   }
   return(p)
 }
@@ -455,9 +445,6 @@ dotplot_ORA = function(ORA_res, alpha_cutoff = 0.05,
 #'   print(plot)
 #' }
 #'
-#' @import ggplot2
-#' @import ggridges
-#' @import ggpubr
 #' @export
 ridge_bootstraps = function(enrich_res, terms_of_interest, condition = NULL){
 
@@ -472,14 +459,14 @@ ridge_bootstraps = function(enrich_res, terms_of_interest, condition = NULL){
     plot_data = plot_data[plot_data$Condition == condition,]
   }
 
-  ggplot2::ggplot(plot_data, aes(x = TP, y = Term,
+  ggplot2::ggplot(plot_data, ggplot2::aes(x = TP, y = Term,
                                  fill = stat(density))) +
     ggridges::stat_density_ridges(geom = "density_ridges_gradient",calc_ecdf = T,
                                   scale = 0.95) +
     ggplot2::scale_fill_viridis_c(name = "Density", direction = 1) +
     ggplot2::scale_x_continuous(n.breaks = 15, limits = c(0,max(plot_data$TP) +2)) +
-    ylab("") +
-    xlab("Intersection size") +
+    ggplot2::ylab("") +
+    ggplot2::xlab("Intersection size") +
     ggpubr::theme_pubr()
 }
 
@@ -519,22 +506,22 @@ compare_metabo_distr = function(obj, metabolite, conds_of_interest = NULL){
       median = median(intens)
     )
 
-  plot <- ggplot(data_viz, aes(x = intens, fill = condition)) +
-    geom_density(alpha = 0.5) +
-    geom_density(alpha = 0.4) +
-    geom_vline(data = desc_stats, aes(xintercept = mean, color = condition, linetype = "Mean"), size = 1) +
-    geom_vline(data = desc_stats, aes(xintercept = median, color = condition, linetype = "Median"), size = 1) +
-    scale_linetype_manual(name = "Statistic", values = c("Mean" = "dashed", "Median" = "solid")) +
-    labs(title = metabolite,
+  plot <- ggplot2::ggplot(data_viz, ggplot2::aes(x = intens, fill = condition)) +
+    ggplot2::geom_density(alpha = 0.5) +
+    ggplot2::geom_density(alpha = 0.4) +
+    ggplot2::geom_vline(data = desc_stats, ggplot2::aes(xintercept = mean, color = condition, linetype = "Mean"), size = 1) +
+    ggplot2::geom_vline(data = desc_stats, ggplot2::aes(xintercept = median, color = condition, linetype = "Median"), size = 1) +
+    ggplot2::scale_linetype_manual(name = "Statistic", values = c("Mean" = "dashed", "Median" = "solid")) +
+    ggplot2::labs(title = metabolite,
          x = "Intensity(Log10)",
          y = "Density",
          fill = "Condition",
          color = "Condition",
          linetype = "Statistic") +
     ggpubr::theme_pubr() +
-    theme(plot.title = element_text(hjust = 0.5)) +
-    scale_x_continuous(n.breaks = 10) +
-    facet_wrap(~condition, scales = "free_y")
+    ggplot2::theme(plot.title = element_text(hjust = 0.5)) +
+    ggplot2::scale_x_continuous(n.breaks = 10) +
+    ggplot2::facet_wrap(~condition, scales = "free_y")
 
   return(plot)
 
