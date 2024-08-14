@@ -142,9 +142,27 @@ calculate_wilcox_statistic <- function(x, y = NULL, paired = FALSE) {
   return(STATISTIC)
 }
 
+#' Calculate Log Fold Change (LFC) from Single-Cell Metabolomics Matrix
+#'
+#' @description This method calculates the Log Fold Change (LFC) between two conditions in a single-cell metabolomics matrix. It compares the mean metabolite expression levels between the specified conditions and returns the LFC values for each metabolite.
+#'
+#' @param object A \code{S2IsoMEr} object that contains the single-cell metabolomics matrix (\code{scmatrix}) and metadata about conditions (\code{conditions}, \code{condition.x}, and \code{condition.y}).
+#'
+#' @return A numeric vector of Log Fold Change (LFC) values for each metabolite. The length of the vector matches the number of metabolites in the matrix.
+#'
+#' @details This method computes the mean expression levels of metabolites for two conditions specified in the \code{S2IsoMEr} object. The LFC is calculated as the difference in log2-transformed mean expression levels between the two conditions.
+#'
+#' @examples
+#' # Assuming `myS2IsoMEr` is a valid S2IsoMEr object
+#' lfc_values <- calc_LFC_scmat(myS2IsoMEr)
+#' print(lfc_values)
+#'
+#' @export
 calc_LFC_scmat <- function (object) {
   UseMethod("calc_LFC_scmat")
 }
+
+#' @export
 calc_LFC_scmat.S2IsoMEr = function(object){
   cond_x_cells = colnames(object$scmatrix)[which(object$conditions == object$condition.x)]
   cond_y_cells = colnames(object$scmatrix)[which(object$conditions == object$condition.y)]
