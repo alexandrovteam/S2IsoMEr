@@ -75,9 +75,10 @@ When set to 'negative', included adducts are '-H', '+Cl'.}
 
 \item{condition.y}{second condition identifier for pairwise comparison.}
 
-\item{ranking.by}{A character of either 't.test' or 'wilcox.test', to rank metabolites for the respective statistic.Ignored if \link{enrichment_type} is 'ORA'.}
+\item{ranking.by}{A character of either 'wilcox.test' (default), 't.test', 'logFC' or 'BWS', to rank metabolites using the respective statistic. Check \code{\link{rankScore}} for more details.
+Ignored if \code{enrichment_type} is 'ORA'.}
 
-\item{gsea.method}{A character of either 'ks_signed' or 'fgsea'. Ignored if \link{enrichment_type} is 'ORA'.}
+\item{gsea.method}{A character of either 'ks_signed' or 'fgsea'. Ignored if \code{enrichment_type} is 'ORA'.}
 }
 \value{
 An object of class S2IsoMEr.

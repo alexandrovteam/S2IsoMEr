@@ -15,8 +15,9 @@
 #' barplot_bootstrap(myTestRun)
 #'
 #' @export
-barplot_MSEA_boot <- function (object, ...) {
-  UseMethod("barplot_MSEA_boot", object)
+barplot_MSEA_boot <- function (object, min.annotations = 2, q.value.cutoff = 0.1,
+                               bootstrap.fraction.cutoff = .5, by.statistic = 'ES') {
+  UseMethod("barplot_MSEA_boot")
 }
 
 
@@ -265,7 +266,8 @@ barplot_ORA_simple = function(ORA_simple_res, q_val_cutoff = 0.05){
 #' @description This function creates a bar plot for Over-Representation Analysis (ORA) bootstrapped results, including error bars to show the range of enrichment scores (OR) and indicating the significance based on q-values.
 #'
 #' @param ORA_boot_res A list containing the ORA bootstrapped results. The list should include `unfiltered_enrich_res` and `clean_enrich_res` data frames.
-#'
+#' @param collapse_multi_cond A logical value indicating whether to collapse results across multiple conditions.
+#'   Default is \code{FALSE}.
 #' @return A ggplot object displaying the bar plot of ORA bootstrapped results.
 #'
 #' @details The function creates a bar plot where the terms are reordered by their median enrichment scores. Bars are filled with colors representing the combined q-values, and error bars show the minimum and maximum enrichment scores (ES_min and ES_max) across bootstraps. The number of true positives (n) is included in the term labels.
@@ -441,7 +443,7 @@ dotplot_ORA = function(ORA_res, alpha_cutoff = 0.05,
 #'
 #' @param enrich_res A data frame containing the enrichment results per bootstrap, including columns for Term, n (TP), and fraction.
 #' @param terms_of_interest A character vector specifying the terms of interest to be plotted.
-#'
+#' @param condition Optional. A character string specifying a particular condition to filter the enrichment results. If \code{NULL} (the default), results from all conditions will be included.
 #' @return A ggplot object displaying the ridge plot of intersection sizes for the specified terms of interest.
 #'
 #' @details The function filters the enrichment results to include only the specified terms of interest and creates a ridge plot showing the distribution of intersection sizes (TP). The terms are labeled with their names and the fraction of bootstraps in which they appear, and the plot includes quantile lines to indicate distribution quartiles.
@@ -483,10 +485,11 @@ ridge_bootstraps = function(enrich_res, terms_of_interest, condition = NULL){
 
 #' Plot intensity distribution of metabolite across conditions
 #'
-#' @param object A S2IsoMEr object after enrichment analysis.
+#' @param obj A S2IsoMEr object after enrichment analysis.
 #' @param metabolite A character indicating metabolite name
+#' @param conds_of_interest Optional. A character vector specifying which conditions to include in the plot. If `NULL` (the default), all conditions are included.
 #'
-#' @return A ggplot2 object.
+#' @return  A `ggplot2` object displaying the density plot of metabolite intensities across conditions.
 #' @examples
 #'
 #' compare_metabo_distr(obj, metabolite="C6H8N2O3-H")

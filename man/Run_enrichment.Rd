@@ -18,9 +18,15 @@ Run_enrichment(
 
 \item{Run_DE}{A logical indicating whether to run differential analysis using limma's rank Sum Test With Correlation. Ignored if enrichment type is 'MSEA'.}
 
+\item{DE_pval_cutoff}{A numeric indicating p-value cutoff. Default is 0.05.}
+
 \item{DE_LFC_cutoff}{A numeric indicating the minimum log2 fold change for differential analysis}
 
 \item{min.pct.diff}{A numeric indicating the minimum percentage difference between samples/cells in both conditions for a marker to be considered differentially abundant.}
+
+\item{...}{Additional arguments passed to functions used internally, such as \code{\link{Run_bootstrap_ORA}},
+\code{\link{Run_simple_ORA}}, \code{\link{Run_bootstrap_MSEA}}, and \code{\link{Run_simple_MSEA}}.
+Consult the specific function documentation for details on these arguments.}
 }
 \value{
 Data.frame with enrichment results

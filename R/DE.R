@@ -20,6 +20,7 @@ PackageCheck <- function(..., error = TRUE) {
 #' @importFrom pbapply pbsapply
 #' @importFrom future.apply future_sapply
 #' @importFrom future nbrOfWorkers
+#' @importFrom limma rankSumTestWithCorrelation
 seurat_wilcoxDETest <- function(data.use,cells.1,cells.2,verbose = TRUE,...){
   data.use <- data.use[, c(cells.1, cells.2), drop = FALSE]
   j <- seq_len(length.out = length(x = cells.1))

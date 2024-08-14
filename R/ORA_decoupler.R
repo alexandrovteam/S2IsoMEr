@@ -76,9 +76,10 @@
                   TP, FP, FN, TN)
 }
 
+#' @importFrom broom glance
 .ora_fisher_exact_test <- function(dat,pbar, ...) {
   pbar$tick()
-  conting = ora_conting_decoupleR(dat, as_matrix = F) %>% as_tibble()
+  conting = ora_conting_decoupleR(dat, as_matrix = F) %>% tibble::as_tibble()
   rlang::exec(
     .fn = stats::fisher.test,
     x = matrix(as.integer(conting[,1:4]), nrow = 2, ncol = 2),

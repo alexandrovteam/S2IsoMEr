@@ -8,6 +8,9 @@ barplot_ORA_boot(ORA_boot_res, collapse_multi_cond = F)
 }
 \arguments{
 \item{ORA_boot_res}{A list containing the ORA bootstrapped results. The list should include \code{unfiltered_enrich_res} and \code{clean_enrich_res} data frames.}
+
+\item{collapse_multi_cond}{A logical value indicating whether to collapse results across multiple conditions.
+Default is \code{FALSE}.}
 }
 \value{
 A ggplot object displaying the bar plot of ORA bootstrapped results.

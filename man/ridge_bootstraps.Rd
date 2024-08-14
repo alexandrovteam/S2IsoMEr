@@ -10,6 +10,8 @@ ridge_bootstraps(enrich_res, terms_of_interest, condition = NULL)
 \item{enrich_res}{A data frame containing the enrichment results per bootstrap, including columns for Term, n (TP), and fraction.}
 
 \item{terms_of_interest}{A character vector specifying the terms of interest to be plotted.}
+
+\item{condition}{Optional. A character string specifying a particular condition to filter the enrichment results. If \code{NULL} (the default), results from all conditions will be included.}
 }
 \value{
 A ggplot object displaying the ridge plot of intersection sizes for the specified terms of interest.

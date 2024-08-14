@@ -4,6 +4,7 @@
 
 "%nin%" = Negate("%fin%")
 
+#' @importFrom plyr join.keys
 mismatch_df = function (x, y, on = NULL){
   if (is.null(on)) {
     on <- dplyr::intersect(names(x), names(y))
@@ -174,7 +175,7 @@ Load_background = function(mol_type = c("Lipid", "Metabo"),
 #' setConditions(myTestRun, condition.x = 'CON', condition.y = "TREATMENT")
 #'
 #' @export
-setConditions <- function (object, ...) {
+setConditions <- function (object, condition.x = NULL, condition.y = NULL) {
   UseMethod("setConditions", object)
 }
 

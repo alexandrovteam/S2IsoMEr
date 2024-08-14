@@ -4,12 +4,26 @@
 \alias{rankScore}
 \title{Rank metabolites for S2IsoMEr enrichment object}
 \usage{
-rankScore(object, ...)
+rankScore(object, ranking.by = "wilcox.test", alternative = "greater")
 }
 \arguments{
 \item{object}{A S2IsoMEr object.}
 
-\item{ranking.by}{A character of either 't.test' (default) or 'wilcox.test', to rank metabolites using the respective statistic.}
+\item{ranking.by}{A character string specifying the ranking method. Options include:
+\itemize{
+\item \code{"wilcox.test"} (default) - Ranks metabolites based on the results of a Wilcoxon test.
+\item \code{"t.test"} - Ranks metabolites based on the results of a t-test.
+\item \code{"logFC"} - Ranks metabolites based on log fold change.
+\item \code{"BWS"} - Ranks metabolites based on BWS (Baumgartner-Weiss-Schindler ).
+}}
+
+\item{alternative}{A character string specifying the alternative hypothesis for statistical tests. Options are:
+\itemize{
+\item \code{"two.sided"} - Test for differences in both directions.
+\item \code{"less"} - Test if the second condition is less than the first
+\item \code{"greater"} - Test if the second condition is greater than the first
+}
+Default is \code{"greater"}.}
 }
 \value{
 An object of class S2IsoMEr.

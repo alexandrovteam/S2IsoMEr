@@ -7,12 +7,14 @@
 compare_metabo_distr(obj, metabolite, conds_of_interest = NULL)
 }
 \arguments{
+\item{obj}{A S2IsoMEr object after enrichment analysis.}
+
 \item{metabolite}{A character indicating metabolite name}
 
-\item{object}{A S2IsoMEr object after enrichment analysis.}
+\item{conds_of_interest}{Optional. A character vector specifying which conditions to include in the plot. If \code{NULL} (the default), all conditions are included.}
 }
 \value{
-A ggplot2 object.
+A \code{ggplot2} object displaying the density plot of metabolite intensities across conditions.
 }
 \description{
 Plot intensity distribution of metabolite across conditions

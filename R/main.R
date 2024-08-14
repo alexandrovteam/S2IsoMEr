@@ -28,8 +28,9 @@
 #' @param condition.x first condition identifier for pairwise comparison.
 #' @param condition.y second condition identifier for pairwise comparison.
 #' @param termsOfInterest A character containing 'selection' (for default LION-term selection), 'all', or a vector of term names (see 'pathway').
-#' @param ranking.by A character of either 't.test' or 'wilcox.test', to rank metabolites for the respective statistic.Ignored if [enrichment_type] is 'ORA'.
-#' @param gsea.method A character of either 'ks_signed' or 'fgsea'. Ignored if [enrichment_type] is 'ORA'.
+#' @param ranking.by A character of either 'wilcox.test' (default), 't.test', 'logFC' or 'BWS', to rank metabolites using the respective statistic. Check \code{\link{rankScore}} for more details.
+#' Ignored if \code{enrichment_type} is 'ORA'.
+#' @param gsea.method A character of either 'ks_signed' or 'fgsea'. Ignored if \code{enrichment_type} is 'ORA'.
 #'
 #' @return An object of class S2IsoMEr.
 #' @examples
@@ -393,15 +394,15 @@ initEnrichment <- function(scmatrix,
 
 
 #' @export
-print.S2IsoMEr <- function(object){
-  cat("single-cell metabolomics matrix of", dim(object$scmatrix)[1], "metabolites and",
-      dim(object$scmatrix)[2], "cells\n")
-  cat("active pathway:", object$background_type ,"\n\n")
+print.S2IsoMEr <- function(x, ...){
+  cat("single-cell metabolomics matrix of", dim(x$scmatrix)[1], "metabolites and",
+      dim(x$scmatrix)[2], "cells\n")
+  cat("active pathway:", x$background_type ,"\n\n")
 
-  cat("conditions:", paste(unique(object$conditions), collapse = ", "),"\n\n")
+  cat("conditions:", paste(unique(x$conditions), collapse = ", "),"\n\n")
 
-  cat("condition.x:", object$condition.x,"\n")
-  cat("condition.y:", object$condition.y,"\n")
+  cat("condition.x:", x$condition.x,"\n")
+  cat("condition.y:", x$condition.y,"\n")
 }
 
 
@@ -411,8 +412,12 @@ print.S2IsoMEr <- function(object){
 #'
 #' @param object A numeric matrix of n metabolites (rows) and m cells or measurments (columns).
 #' @param Run_DE A logical indicating whether to run differential analysis using limma's rank Sum Test With Correlation. Ignored if enrichment type is 'MSEA'.
+#' @param DE_pval_cutoff A numeric indicating p-value cutoff. Default is 0.05.
 #' @param DE_LFC_cutoff A numeric indicating the minimum log2 fold change for differential analysis
 #' @param min.pct.diff A numeric indicating the minimum percentage difference between samples/cells in both conditions for a marker to be considered differentially abundant.
+#' @param ... Additional arguments passed to functions used internally, such as \code{\link{Run_bootstrap_ORA}},
+#' \code{\link{Run_simple_ORA}}, \code{\link{Run_bootstrap_MSEA}}, and \code{\link{Run_simple_MSEA}}.
+#' Consult the specific function documentation for details on these arguments.
 #' @return Data.frame with enrichment results
 #' @examples
 #' myTestRun <-

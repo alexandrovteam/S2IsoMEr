@@ -4,7 +4,7 @@
 \alias{setConditions}
 \title{Set conditions for enrichment analysis}
 \usage{
-setConditions(object, ...)
+setConditions(object, condition.x = NULL, condition.y = NULL)
 }
 \arguments{
 \item{object}{A S2IsoMEr object.}

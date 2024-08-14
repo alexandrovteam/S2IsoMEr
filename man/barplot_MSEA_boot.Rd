@@ -4,7 +4,13 @@
 \alias{barplot_MSEA_boot}
 \title{Plot bootstrap enrichment analysis}
 \usage{
-barplot_MSEA_boot(object, ...)
+barplot_MSEA_boot(
+  object,
+  min.annotations = 2,
+  q.value.cutoff = 0.1,
+  bootstrap.fraction.cutoff = 0.5,
+  by.statistic = "ES"
+)
 }
 \arguments{
 \item{object}{A S2IsoMEr object after enrichment analysis.}

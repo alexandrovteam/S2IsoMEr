@@ -105,7 +105,7 @@ ks.test.signed <- function (x, y, ..., alternative = c("two.sided", "less", "gre
       IND <- which(!is.na(x) & (x > 0))
       if (length(IND))
         p[IND] <- tryCatch({
-          tryRes <- .C(stats:::C_pkstwo, length(x[IND]), p = x[IND],
+          tryRes <- .C(stats:::C_pKS2, length(x[IND]), p = x[IND],
                        as.double(tol), PACKAGE = "stats")$p
         }, warning = function(w) {
           warning(w)
