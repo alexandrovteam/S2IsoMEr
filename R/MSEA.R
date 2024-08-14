@@ -30,6 +30,12 @@ Run_simple_MSEA = function(object,min_pathway_size = 3){
   bg = object$pathway_list
 
   if (object$gsea.method == "ks.signed"){
+
+    tmp = tempfile()
+    url <- "https://raw.githubusercontent.com/franapoli/signed-ks-test/master/signed-ks-test.R"
+    utils::download.file(url, destfile = tmp)
+    source(tmp)
+
     enrichment_analysis = sapply(names(bg), function(term){
 
       members_logi <- rownames(scmat_data) %in% bg[[term]]
@@ -44,7 +50,7 @@ Run_simple_MSEA = function(object,min_pathway_size = 3){
                    ES = NA,
                    p_value = NA)
       } else {
-        ks_results <- ks.test.signed(which(members_logi), which(!members_logi))
+        ks_results <- ks.test.2(which(members_logi), which(!members_logi))
 
         data.frame(Term = term,
                    n = sum(members_logi),
@@ -246,7 +252,7 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,
                        NES = NA,
                        p_value = NA)
           } else {
-            ks_results <- ks.test.signed( which(members_logi), which(!members_logi))
+            ks_results <- ks.test.2( which(members_logi), which(!members_logi))
 
             data.frame(Term = term,
                        bootstrap = bootstrap_i,
