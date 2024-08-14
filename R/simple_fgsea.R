@@ -32,6 +32,7 @@
 #' names(mol_ranks) = sample(unique(unlist(bg)), 10)
 #' mol_ranks = mol_ranks[order(mol_ranks)]
 #' simple_fgsea(pathways = bg, stats = mol_ranks, minSize = 3, scoreType = "std")
+#' @importFrom BiocParallel SerialParam
 simple_fgsea = function(pathways,
                         stats,
                         minSize = 1,
@@ -39,7 +40,6 @@ simple_fgsea = function(pathways,
                         eps = 1e-50,
                         scoreType   = c("std", "pos", "neg"),
                         nPermSimple = 1000){
-  scoreType <- match.arg(scoreType)
 
   ties <- sum(duplicated(stats[stats != 0]))
   if (ties != 0) {
@@ -48,26 +48,9 @@ simple_fgsea = function(pathways,
             "The order of those tied genes will be arbitrary, which may produce unexpected results.")
   }
 
-  pp <- fgsea:::preparePathwaysAndStats(pathways, stats, minSize, maxSize, 1, scoreType)
-  pathwaysFiltered <- pp$filtered
-  pathwaysSizes <- pp$sizes
-  stats <- pp$stats
-  m <- length(pathwaysFiltered)
-  minSize <- max(minSize, 1)
-  eps <- max(0, min(1, eps))
-  gseaStatRes <- do.call(rbind,
-                         lapply(pathwaysFiltered,
-                                fgsea:::calcGseaStat,
-                                stats             = stats,
-                                returnLeadingEdge = TRUE,
-                                scoreType         = scoreType))
-  leadingEdges <- mapply("[", list(names(stats)), gseaStatRes[, "leadingEdge"], SIMPLIFY = FALSE)
-  pathwayScores <- unlist(gseaStatRes[, "res"])
-  seeds <- sample.int(10^9, 1)
-  simpleFgseaRes <- fgsea:::fgseaSimpleImpl(pathwayScores=pathwayScores, pathwaysSizes=pathwaysSizes,
-                                            pathwaysFiltered=pathwaysFiltered, leadingEdges=leadingEdges,
-                                            permPerProc=nPermSimple, seeds=seeds, toKeepLength=m,
-                                            stats=stats, BPPARAM= BiocParallel::SerialParam(), scoreType=scoreType)
+  simpleFgseaRes = fgsea::fgseaSimple(pathways = pathways, stats = stats,nperm = nPermSimple,
+                     minSize = minSize,maxSize = maxSize,scoreType = scoreType,
+                     nproc = 0, gseaParam = 1, BPPARAM = BiocParallel::SerialParam())
 
   return(simpleFgseaRes)
 }
