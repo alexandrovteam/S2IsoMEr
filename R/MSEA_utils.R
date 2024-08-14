@@ -1,11 +1,11 @@
-#' Rank metabolites for bmetenrichr enrichment object
+#' Rank metabolites for S2IsoMEr enrichment object
 #'
-#' rankScore() ranks metabolites of bmetenrichr object to perform bootstrapping metabolite set enrichment analysis
+#' rankScore() ranks metabolites of S2IsoMEr object to perform bootstrapping metabolite set enrichment analysis
 #'
-#' @param object A bmetenrichr object.
+#' @param object A S2IsoMEr object.
 #' @param ranking.by A character of either 't.test' (default) or 'wilcox.test', to rank metabolites using the respective statistic.
 #'
-#' @return An object of class bmetenrich.
+#' @return An object of class S2IsoMEr.
 #'
 #' @examples
 #' myTestRun <-
@@ -18,7 +18,7 @@ rankScore <- function (object, ...) {
 }
 
 #' @export
-rankScore.bmetenrich <- function(object,
+rankScore.S2IsoMEr <- function(object,
                                  ranking.by = NULL,
                                  alternative = c("two.sided", "less", "greater")){
 
@@ -134,7 +134,7 @@ calc_LFC_scmat <- function (object, ...) {
   UseMethod("calc_LFC_scmat", object)
 }
 #' @export
-calc_LFC_scmat.bmetenrich = function(object){
+calc_LFC_scmat.S2IsoMEr = function(object){
   cond_x_cells = colnames(object$scmatrix)[which(object$conditions == object$condition.x)]
   cond_y_cells = colnames(object$scmatrix)[which(object$conditions == object$condition.y)]
   # Calculate means for both conditions

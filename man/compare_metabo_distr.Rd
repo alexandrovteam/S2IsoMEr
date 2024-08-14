@@ -9,7 +9,7 @@ compare_metabo_distr(obj, metabolite, conds_of_interest = NULL)
 \arguments{
 \item{metabolite}{A character indicating metabolite name}
 
-\item{object}{A bmetenrichr object after enrichment analysis.}
+\item{object}{A S2IsoMEr object after enrichment analysis.}
 }
 \value{
 A ggplot2 object.

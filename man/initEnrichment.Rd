@@ -2,7 +2,7 @@
 % Please edit documentation in R/main.R
 \name{initEnrichment}
 \alias{initEnrichment}
-\title{Generate bmetenrichr enrichment object}
+\title{Generate S2IsoMEr enrichment object}
 \usage{
 initEnrichment(
   scmatrix,
@@ -48,7 +48,7 @@ initEnrichment(
 \item{remove_expected_predicted}{A logical indicating whether to remove expected and predicted isomers based on HMDB status (default = TRUE)}
 
 \item{annotations}{An optional custom list of length n, with each element contains a vector of isomer names. If not specified,
-bmetenrichr uses the CoreMetabolome, LIPIDMAPS, SwissLipids, and HMDB databases from METASPACE (https://metaspace2020.eu/) to generate an annotation list automatically.}
+S2IsoMEr uses the CoreMetabolome, LIPIDMAPS, SwissLipids, and HMDB databases from METASPACE (https://metaspace2020.eu/) to generate an annotation list automatically.}
 
 \item{annotation.weights}{An optional list of length n, each element contains a vector of isomer weights. Only when annotations is provided as list.}
 
@@ -80,7 +80,7 @@ When set to 'negative', included adducts are '-H', '+Cl'.}
 \item{gsea.method}{A character of either 'ks_signed' or 'fgsea'. Ignored if \link{enrichment_type} is 'ORA'.}
 }
 \value{
-An object of class bmetenrich.
+An object of class S2IsoMEr.
 }
 \description{
 initEnrichment() creates object to perform bootstrapping metabolite set enrichment analysis

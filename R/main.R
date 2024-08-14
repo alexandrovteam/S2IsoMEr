@@ -1,7 +1,7 @@
 ###
 
 
-#' Generate bmetenrichr enrichment object
+#' Generate S2IsoMEr enrichment object
 #'
 #' initEnrichment() creates object to perform bootstrapping metabolite set enrichment analysis
 #'
@@ -14,7 +14,7 @@
 #' @param pathway_assoc_only A logical indicating whether to only consider metabolites associated with a biological pathway (default = FALSE)
 #' @param remove_expected_predicted A logical indicating whether to remove expected and predicted isomers based on HMDB status (default = TRUE)
 #' @param annotations An optional custom list of length n, with each element contains a vector of isomer names. If not specified,
-#' bmetenrichr uses the CoreMetabolome, LIPIDMAPS, SwissLipids, and HMDB databases from METASPACE (https://metaspace2020.eu/) to generate an annotation list automatically.
+#' S2IsoMEr uses the CoreMetabolome, LIPIDMAPS, SwissLipids, and HMDB databases from METASPACE (https://metaspace2020.eu/) to generate an annotation list automatically.
 #' @param annotation.weights An optional list of length n, each element contains a vector of isomer weights. Only when annotations is provided as list.
 #' @param consider_isobars A logical indicating whether to include isobars (default = FALSE)
 #' @param consider_isomers A logical indicating whether to include isomers (default = TRUE)
@@ -31,7 +31,7 @@
 #' @param ranking.by A character of either 't.test' or 'wilcox.test', to rank metabolites for the respective statistic.Ignored if [enrichment_type] is 'ORA'.
 #' @param gsea.method A character of either 'ks_signed' or 'fgsea'. Ignored if [enrichment_type] is 'ORA'.
 #'
-#' @return An object of class bmetenrich.
+#' @return An object of class S2IsoMEr.
 #' @examples
 #' myTestRun <-
 #' initEnrichment(scmatrix = scMatrix,
@@ -385,7 +385,7 @@ initEnrichment <- function(scmatrix,
            condition.y = condition.y,
            ranking.by = ifelse(enrichment_type == "MSEA", match.arg(ranking.by), NA),
            gsea.method = ifelse(enrichment_type == "MSEA", match.arg(gsea.method), NA)),
-      class = "bmetenrich")
+      class = "S2IsoMEr")
 
   print(object)
   return(object)
@@ -393,7 +393,7 @@ initEnrichment <- function(scmatrix,
 
 
 #' @export
-print.bmetenrich <- function(object){
+print.S2IsoMEr <- function(object){
   cat("single-cell metabolomics matrix of", dim(object$scmatrix)[1], "metabolites and",
       dim(object$scmatrix)[2], "cells\n")
   cat("active pathway:", object$background_type ,"\n\n")

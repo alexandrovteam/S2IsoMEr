@@ -164,13 +164,11 @@ Load_background = function(mol_type = c("Lipid", "Metabo"),
 
 #' Set conditions for enrichment analysis
 #'
-#' @param object A bmetenrichr object.
+#' @param object A S2IsoMEr object.
 #' @param condition.x A optional character describing the reference condition.
 #' @param condition.y A optional character describing condition to interest.
 #'
-#' @return An object of class `bmetenrich`.
-#'
-#' @return An object of class `bmetenrich`.
+#' @return An object of class `S2IsoMEr`.
 #' @examples
 #'
 #' setConditions(myTestRun, condition.x = 'CON', condition.y = "TREATMENT")
@@ -181,7 +179,7 @@ setConditions <- function (object, ...) {
 }
 
 #' @export
-setConditions.bmetenrich <- function(object, condition.x = NULL, condition.y = NULL){
+setConditions.S2IsoMEr <- function(object, condition.x = NULL, condition.y = NULL){
   if (is.null(condition.x) & is.null(condition.y)){
     stop("no condition identifiers submitted, with no defaults")
   }
@@ -270,7 +268,7 @@ calc_ambiguity = function(input_iso_list, weights = NULL){
 #'
 #' @examples
 #' \dontrun{
-#'   enrichment_results = object$enrichment_results #object is of class `bmetenrich`
+#'   enrichment_results = object$enrichment_results #object is of class `S2IsoMEr`
 #'   filtered_results <- passed_filters_per_term(unfiltered_df = enrichment_results,
 #'                                               enrich_type = "MSEA",
 #'                                               min_intersection = 5,

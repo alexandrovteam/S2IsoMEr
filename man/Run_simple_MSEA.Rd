@@ -7,7 +7,7 @@
 Run_simple_MSEA(object, min_pathway_size = 3)
 }
 \arguments{
-\item{object}{A bmetenrich object initialized by \code{\link{initEnrichment}} containing the necessary data and parameters, including annotations, annotation weights, rankings, pathway list, and additional settings.}
+\item{object}{A S2IsoMEr object initialized by \code{\link{initEnrichment}} containing the necessary data and parameters, including annotations, annotation weights, rankings, pathway list, and additional settings.}
 
 \item{min_pathway_size}{An integer specifying the minimum number of metabolites that must be present in a given term for it to be considered.}
 }
@@ -28,7 +28,7 @@ It handles both KS-signed method](https://github.com/franapoli/signed-ks-test/bl
 }
 \examples{
 \dontrun{
-# Assuming `my_data` is a properly formatted object of class `bmetenrich` initialized by \code{\link{initEnrichment}}
+# Assuming `my_data` is a properly formatted object of class `S2IsoMEr` initialized by \code{\link{initEnrichment}}
 result <- Run_bootstrap_MSEA(object = my_data, n_bootstraps = 100)
 }
 }

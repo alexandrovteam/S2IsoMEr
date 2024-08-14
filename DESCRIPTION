@@ -1,10 +1,10 @@
-Package: bmetenrichr
+Package: S2IsoMEr
 Title: Spatial and single-cell Isomeric metabolite enrichment in R
 Version: 0.3.0
 Authors@R: 
     person("Bishoy", "Wadie", role = c("aut", "cre"), email = "bishoy.wadie@embl.de",
            comment = c(ORCID = "0000-0001-8692-1107")),
-    person("Martijn", "Molenaar", role = "aut", email = "m.r.molenaar@protonmail.com",
+    person("Martijn", "Molenaar", role = c("aut", "cre"), email = "m.r.molenaar@protonmail.com",
            comment = c(ORCID = "0000-0001-5221-608X"))       
 Description: R package performing Overrepresentation analysis (ORA) and Metabolite Set Enrichment Analysis (MSEA) on Spatial and single-cell metabolomics datasets using bootstrapping of isomeric/isobaric molecules.
 Imports: 

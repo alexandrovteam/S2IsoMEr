@@ -7,16 +7,14 @@
 setConditions(object, ...)
 }
 \arguments{
-\item{object}{A bmetenrichr object.}
+\item{object}{A S2IsoMEr object.}
 
 \item{condition.x}{A optional character describing the reference condition.}
 
 \item{condition.y}{A optional character describing condition to interest.}
 }
 \value{
-An object of class \code{bmetenrich}.
-
-An object of class \code{bmetenrich}.
+An object of class \code{S2IsoMEr}.
 }
 \description{
 Set conditions for enrichment analysis

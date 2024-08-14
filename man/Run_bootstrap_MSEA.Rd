@@ -13,7 +13,7 @@ Run_bootstrap_MSEA(
 )
 }
 \arguments{
-\item{object}{A bmetenrich object initialized by \code{\link{initEnrichment}} containing the necessary data and parameters, including annotations, annotation weights, rankings, pathway list, and additional settings.}
+\item{object}{A S2IsoMEr object initialized by \code{\link{initEnrichment}} containing the necessary data and parameters, including annotations, annotation weights, rankings, pathway list, and additional settings.}
 
 \item{n_bootstraps}{An integer specifying the number of bootstrap samples to generate.}
 
@@ -43,7 +43,7 @@ It handles both \href{https://github.com/franapoli/signed-ks-test/blob/master/si
 }
 \examples{
 \dontrun{
-# Assuming `my_data` is a properly formatted object of class `bmetenrich` initialized by \code{\link{initEnrichment}}
+# Assuming `my_data` is a properly formatted object of class `S2IsoMEr` initialized by \code{\link{initEnrichment}}
 result <- Run_bootstrap_MSEA(object = my_data, n_bootstraps = 100)
 }
 }

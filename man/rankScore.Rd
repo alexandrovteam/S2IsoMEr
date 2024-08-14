@@ -2,20 +2,20 @@
 % Please edit documentation in R/MSEA_utils.R
 \name{rankScore}
 \alias{rankScore}
-\title{Rank metabolites for bmetenrichr enrichment object}
+\title{Rank metabolites for S2IsoMEr enrichment object}
 \usage{
 rankScore(object, ...)
 }
 \arguments{
-\item{object}{A bmetenrichr object.}
+\item{object}{A S2IsoMEr object.}
 
 \item{ranking.by}{A character of either 't.test' (default) or 'wilcox.test', to rank metabolites using the respective statistic.}
 }
 \value{
-An object of class bmetenrich.
+An object of class S2IsoMEr.
 }
 \description{
-rankScore() ranks metabolites of bmetenrichr object to perform bootstrapping metabolite set enrichment analysis
+rankScore() ranks metabolites of S2IsoMEr object to perform bootstrapping metabolite set enrichment analysis
 }
 \examples{
 myTestRun <-

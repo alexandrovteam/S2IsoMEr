@@ -2,7 +2,7 @@
 # MSEA -----------------------------------------------------------
 #' Plot bootstrap enrichment analysis
 #'
-#' @param object A bmetenrichr object after enrichment analysis.
+#' @param object A S2IsoMEr object after enrichment analysis.
 #' @param min.annotations An integer describing the minimal number of annotations each term should include
 #' @param q.value.cutoff A numeric between 0 and 1. Only terms with q-values lower than this value will be displayed.
 #' @param bootstrap.fraction.cutoff A numeric between 0 and 1 (default = 0.5), indicating the minimal fraction that the metabolite set is present in all bootstrap iterations.
@@ -21,7 +21,7 @@ barplot_MSEA_boot <- function (object, ...) {
 
 
 #' @export
-barplot_MSEA_boot.bmetenrich <- function(object, min.annotations = 2, q.value.cutoff = 0.1,
+barplot_MSEA_boot.S2IsoMEr <- function(object, min.annotations = 2, q.value.cutoff = 0.1,
                                          bootstrap.fraction.cutoff = .5, by.statistic = 'ES'){
   options(dplyr.summarise.inform = FALSE)
 
@@ -483,7 +483,7 @@ ridge_bootstraps = function(enrich_res, terms_of_interest, condition = NULL){
 
 #' Plot intensity distribution of metabolite across conditions
 #'
-#' @param object A bmetenrichr object after enrichment analysis.
+#' @param object A S2IsoMEr object after enrichment analysis.
 #' @param metabolite A character indicating metabolite name
 #'
 #' @return A ggplot2 object.

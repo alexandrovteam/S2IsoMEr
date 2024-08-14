@@ -7,7 +7,7 @@
 barplot_MSEA_boot(object, ...)
 }
 \arguments{
-\item{object}{A bmetenrichr object after enrichment analysis.}
+\item{object}{A S2IsoMEr object after enrichment analysis.}
 
 \item{min.annotations}{An integer describing the minimal number of annotations each term should include}
 

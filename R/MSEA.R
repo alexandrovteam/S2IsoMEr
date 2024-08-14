@@ -3,7 +3,7 @@
 #' @description This function performs simple metabolite set enrichment analysis on a given dataset.
 #' It ensures that the ranking conditions are set properly and conducts the enrichment analysis using either the [KS-signed method](https://github.com/franapoli/signed-ks-test/blob/master/signed-ks-test.R) or [fgsea](https://bioconductor.org/packages/release/bioc/html/fgsea.html).
 #'
-#' @param object A bmetenrich object initialized by \code{\link{initEnrichment}} containing the necessary data and parameters, including annotations, annotation weights, rankings, pathway list, and additional settings.
+#' @param object A S2IsoMEr object initialized by \code{\link{initEnrichment}} containing the necessary data and parameters, including annotations, annotation weights, rankings, pathway list, and additional settings.
 #' @param min_pathway_size An integer specifying the minimum number of metabolites that must be present in a given term for it to be considered.
 #' @return A list containing the results of the enrichment analysis, including:
 #'   \itemize{
@@ -19,12 +19,12 @@
 #' Napoli F (2017). “signed-ks-test.” \url{https://github.com/franapoli/signed-ks-test/blob/master/signed-ks-test.R}.
 #' @examples
 #' \dontrun{
-#' # Assuming `my_data` is a properly formatted object of class `bmetenrich` initialized by \code{\link{initEnrichment}}
+#' # Assuming `my_data` is a properly formatted object of class `S2IsoMEr` initialized by \code{\link{initEnrichment}}
 #' result <- Run_bootstrap_MSEA(object = my_data, n_bootstraps = 100)
 #' }
 #' @export
 Run_simple_MSEA = function(object,min_pathway_size = 3){
-  object = rankScore.bmetenrich(object = object, ranking.by = NULL,
+  object = rankScore.S2IsoMEr(object = object, ranking.by = NULL,
                                 alternative = "greater")
   scmat_data = object$scmatrix[object$rankings$rank,]
   bg = object$pathway_list
@@ -95,7 +95,7 @@ Run_simple_MSEA = function(object,min_pathway_size = 3){
 #'
 #' @description This function performs bootstrapped metabolite set enrichment analysis on a given dataset. It ensures that the ranking conditions are set properly and conducts the enrichment analysis using either the [KS-signed method](https://github.com/franapoli/signed-ks-test/blob/master/signed-ks-test.R) or [fgsea](https://bioconductor.org/packages/release/bioc/html/fgsea.html).
 #'
-#' @param object A bmetenrich object initialized by \code{\link{initEnrichment}} containing the necessary data and parameters, including annotations, annotation weights, rankings, pathway list, and additional settings.
+#' @param object A S2IsoMEr object initialized by \code{\link{initEnrichment}} containing the necessary data and parameters, including annotations, annotation weights, rankings, pathway list, and additional settings.
 #' @param n_bootstraps An integer specifying the number of bootstrap samples to generate.
 #' @param min_pathway_size An integer specifying the minimum number of metabolites that must be present in a given term for it to be considered.
 #' @param report_ambiguity_scores A logical value indicating whether to calculate and report ambiguity scores for the annotations.
@@ -119,7 +119,7 @@ Run_simple_MSEA = function(object,min_pathway_size = 3){
 #'
 #' @examples
 #' \dontrun{
-#' # Assuming `my_data` is a properly formatted object of class `bmetenrich` initialized by \code{\link{initEnrichment}}
+#' # Assuming `my_data` is a properly formatted object of class `S2IsoMEr` initialized by \code{\link{initEnrichment}}
 #' result <- Run_bootstrap_MSEA(object = my_data, n_bootstraps = 100)
 #' }
 #' @export
@@ -137,7 +137,7 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,
 
   message("Calculating ranks ... ")
 
-  object = rankScore.bmetenrich(object = object, ranking.by = NULL,
+  object = rankScore.S2IsoMEr(object = object, ranking.by = NULL,
                                 alternative = "greater")
 
   if(report_ambiguity_scores){

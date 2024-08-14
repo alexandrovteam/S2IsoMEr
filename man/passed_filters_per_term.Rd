@@ -45,7 +45,7 @@ The function adjusts p-values using the False Discovery Rate (FDR) method and ca
 }
 \examples{
 \dontrun{
-  enrichment_results = object$enrichment_results #object is of class `bmetenrich`
+  enrichment_results = object$enrichment_results #object is of class `S2IsoMEr`
   filtered_results <- passed_filters_per_term(unfiltered_df = enrichment_results,
                                               enrich_type = "MSEA",
                                               min_intersection = 5,
