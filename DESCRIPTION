@@ -27,7 +27,10 @@ Imports:
     ggridges,
     metap,
     yulab.utils,
-    DOSE
+    DOSE,
+    tibble,
+    stringr,
+    stats
 Depends: 
     ggplot2,
     dplyr,
@@ -37,6 +40,7 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
 LazyData: true
+LazyDataCompression: xz
 Suggests: 
     testthat (>= 3.0.0),
     knitr,
