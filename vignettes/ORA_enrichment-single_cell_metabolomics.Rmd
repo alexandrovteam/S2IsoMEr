@@ -22,12 +22,12 @@ Overrepresentation analysis (ORA) is the most common enrichment method for both 
 
 For MS1-based metabolomics datasets, particularly in imaging MS, the inherent molecular ambiguity in metabolite identification complicates downstream analyses, including enrichment. To our knowledge, no other metabolite enrichment method addresses isomeric/isobaric ambiguity in enrichment analyses.
 
-In this notebook, we demonstrate how to use `bmetenrichr` for ORA enrichment in single-cell metabolomics datasets while accounting for isomeric/isobaric ambiguity.
+In this notebook, we demonstrate how to use `S2IsoMEr` for ORA enrichment in single-cell metabolomics datasets while accounting for isomeric/isobaric ambiguity.
 
 ## Loading packages
 
 ```{r "load packages", message=FALSE}
-library(bmetenrichr) #TODO change package name
+library(S2IsoMEr)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
@@ -45,15 +45,15 @@ The data is freely available in [MetaboLights](https://www.ebi.ac.uk/metabolight
 
 ```{r "Download data", eval=FALSE}
 NASH_scm_tmp = tempfile()
-download.file("path/to/RDS", destfile = NASH_scm_tmp)
+download.file("https://zenodo.org/records/13318721/files/NASH_scm_dataset.rds", destfile = NASH_scm_tmp)
 NASH_scm = readRDS(NASH_scm_tmp)
 
 condition_metadata_tmp = tempfile()
-download.file("/path/to/RDS", destfile = condition_metadata_tmp)
+download.file("https://zenodo.org/records/13318721/files/spacem_scm_matrices.rds", destfile = condition_metadata_tmp)
 condition_metadata = readRDS(condition_metadata_tmp)[["metaspace_dataset_names"]]
 
 metaspace_annotations_tmp = tempfile()
-download.file("/path/to/RDS", destfile = metaspace_annotations_tmp)
+download.file("https://zenodo.org/records/13318721/files/SpaceM_metaspace_ds_annotations.rds", destfile = metaspace_annotations_tmp)
 metaspace_annotations = readRDS(metaspace_annotations)
 
 ```
@@ -107,7 +107,7 @@ input_scm = scm[annots_des_fdr,]
 
 ## Initialize enrichment object
 
-The first step is creating a `bmetenrichr` object which contains the input matrix in `scmatrix` and the conditions for each cell specified in `conditions`. We need to specify the `enrichment_type` as "ORA". `annot_db` corresponds to the annotation database used during the annotation, more relevant if annotation is performed using [METASPACE](https://metaspace2020.eu/). The databases supported are ("CoreMetabolome", "HMDB","SwissLipids","LipidMaps"), if you want to provide a custom annotation database, you can provide it using `annot_custom_db` argument. Here we will use "HMDB" as annotation database.
+The first step is creating a `S2IsoMEr` object which contains the input matrix in `scmatrix` and the conditions for each cell specified in `conditions`. We need to specify the `enrichment_type` as "ORA". `annot_db` corresponds to the annotation database used during the annotation, more relevant if annotation is performed using [METASPACE](https://metaspace2020.eu/). The databases supported are ("CoreMetabolome", "HMDB","SwissLipids","LipidMaps"), if you want to provide a custom annotation database, you can provide it using `annot_custom_db` argument. Here we will use "HMDB" as annotation database.
 
 Since we want to consider isomeric/isobaric ambiguity, we set either `consider_isomers` or `consider_isobars` to `TRUE`. If both were set to `FALSE`, it will run classic ORA with no bootstrapping. We also specify polarization_mode to `positive` since these datasets were acquired in `positive` mode.
 
