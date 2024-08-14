@@ -6,11 +6,8 @@
 
 ## Installation
 
-```{r, eval=FALSE}
-# If you don't have devtools installed yet, you can install it via:
+```         
 install.packages("devtools")
-
-# Install the development version from GitHub
 devtools::install_github("Bisho2122/S2IsoMEr")
 ```
 
