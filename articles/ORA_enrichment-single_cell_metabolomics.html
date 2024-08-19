@@ -346,7 +346,8 @@ filters.</p>
 <h3 id="barplot">Barplot<a class="anchor" aria-label="anchor" href="#barplot"></a>
 </h3>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p</span> <span class="op">=</span> <span class="fu"><a href="../reference/barplot_ORA_boot.html">barplot_ORA_boot</a></span><span class="op">(</span>ORA_boot_res <span class="op">=</span> <span class="va">ORA_boot_res</span>,collapse_multi_cond <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/barplot_ORA_boot.html">barplot_ORA_boot</a></span><span class="op">(</span>ORA_boot_res <span class="op">=</span> <span class="va">ORA_boot_res</span>,collapse_multi_cond <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
+<p><img src="images/ORA_bar.jpg" style="width:100.0%"></p>
 </div>
 <div class="section level3">
 <h3 id="dotplot">Dotplot<a class="anchor" aria-label="anchor" href="#dotplot"></a>
@@ -354,6 +355,7 @@ filters.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multi_cond_collapse</span> <span class="op">=</span> <span class="fu">collapse_ORA_boot_multi_cond</span><span class="op">(</span>ORA_boot_res_list <span class="op">=</span> <span class="va">ORA_boot_res</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/dotplot_ORA.html">dotplot_ORA</a></span><span class="op">(</span>ORA_res <span class="op">=</span> <span class="va">multi_cond_collapse</span><span class="op">$</span><span class="va">clean_enrich_res</span><span class="op">)</span></span></code></pre></div>
+<p><img src="images/ORA_dot.jpg" style="width:100.0%"></p>
 </div>
 <div class="section level3">
 <h3 id="ridge-plots">Ridge plots<a class="anchor" aria-label="anchor" href="#ridge-plots"></a>
@@ -368,6 +370,7 @@ the <strong>upregulated</strong> results only.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ridge_bootstraps.html">ridge_bootstraps</a></span><span class="op">(</span>enrich_res <span class="op">=</span> <span class="va">multi_cond_collapse</span><span class="op">$</span><span class="va">unfiltered_enrich_res</span>,</span>
 <span>                 terms_of_interest <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">multi_cond_collapse</span><span class="op">$</span><span class="va">clean_enrich_res</span><span class="op">$</span><span class="va">Term</span><span class="op">)</span>,</span>
 <span>                 condition <span class="op">=</span> <span class="st">"upregulated"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="images/ORA_ridge_up.jpg" style="width:100.0%"></p>
 </div>
 <div class="section level3">
 <h3 id="comparative-distribution-of-marker-ions">Comparative distribution of marker ions<a class="anchor" aria-label="anchor" href="#comparative-distribution-of-marker-ions"></a>
@@ -379,8 +382,7 @@ with a given term which correspond to the input ion in the
 <code class="sourceCode R"><span><span class="va">TP_ions</span> <span class="op">=</span> <span class="fu"><a href="../reference/get_TP_markers_per_Term.html">get_TP_markers_per_Term</a></span><span class="op">(</span>ORA_boot_df <span class="op">=</span> <span class="va">ORA_boot_res</span><span class="op">$</span><span class="va">downregulated</span><span class="op">$</span><span class="va">unfiltered_enrich_res</span>,</span>
 <span>                                  term_of_interest <span class="op">=</span> <span class="st">"Glycerophosphocholines"</span><span class="op">)</span></span>
 <span><span class="va">TP_ions</span> <span class="op">=</span> <span class="fu"><a href="../reference/map_TP_markers_to_ions.html">map_TP_markers_to_ions</a></span><span class="op">(</span>markers <span class="op">=</span> <span class="va">TP_ions</span>,</span>
-<span>                                 scm_ions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">input_scm</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">TP_ions</span></span></code></pre></div>
+<span>                                 scm_ions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">input_scm</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>We can then select an ion of interest to check distribution of
 intensities in the specified conditions using the
 <code>compare_metabo_distr</code> function which takes the
@@ -389,6 +391,7 @@ interest.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/compare_metabo_distr.html">compare_metabo_distr</a></span><span class="op">(</span><span class="va">ORA_boot_obj</span>, metabolite <span class="op">=</span> <span class="va">TP_ions</span><span class="op">[</span><span class="fl">5</span><span class="op">]</span>,</span>
 <span>                     conds_of_interest <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">cond_x</span>, <span class="va">cond_y</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="images/compare_distribution.jpg" style="width:100.0%"></p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

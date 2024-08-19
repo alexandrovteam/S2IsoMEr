@@ -168,12 +168,24 @@
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="va">marker_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"B1"</span>, <span class="st">"B3"</span>, <span class="st">"B5"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">background</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="st">"Term1"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"B1"</span>, <span class="st">"B2"</span>, <span class="st">"B3"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  <span class="st">"Term2"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"B4"</span>, <span class="st">"B5"</span>, <span class="st">"B6"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"example_ORA_markers"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"example_ORA_obj"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">object</span> <span class="op">=</span> <span class="va">example_ORA_obj</span></span></span>
+<span class="r-in"><span><span class="va">enrich_res</span> <span class="op">&lt;-</span> <span class="fu">Run_bootstrap_ORA</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  marker_list <span class="op">=</span> <span class="va">example_ORA_markers</span>,</span></span>
+<span class="r-in"><span>  background <span class="op">=</span> <span class="va">object</span><span class="op">$</span><span class="va">pathway_list</span>,</span></span>
+<span class="r-in"><span>  polarization_mode <span class="op">=</span> <span class="va">object</span><span class="op">$</span><span class="va">polarization_mode</span>,</span></span>
+<span class="r-in"><span>  mass_range_ppm <span class="op">=</span> <span class="va">object</span><span class="op">$</span><span class="va">mass_range_ppm</span>,</span></span>
+<span class="r-in"><span>  annot_db <span class="op">=</span> <span class="va">object</span><span class="op">$</span><span class="va">Annotation_database</span>,</span></span>
+<span class="r-in"><span>  annot_custom_db <span class="op">=</span> <span class="va">object</span><span class="op">$</span><span class="va">Custom_database</span>,</span></span>
+<span class="r-in"><span>  use_LION <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">object</span><span class="op">$</span><span class="va">background_name</span>, <span class="st">"LION"</span><span class="op">)</span>, <span class="cn">TRUE</span>, <span class="cn">FALSE</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  endogenous_only <span class="op">=</span> <span class="va">object</span><span class="op">$</span><span class="va">endogenous_only</span>,</span></span>
+<span class="r-in"><span>  pathway_assoc_only <span class="op">=</span> <span class="va">object</span><span class="op">$</span><span class="va">pathway_assoc_only</span>,</span></span>
+<span class="r-in"><span>  remove_expected_predicted <span class="op">=</span> <span class="va">object</span><span class="op">$</span><span class="va">remove_expected_predicted</span>,</span></span>
+<span class="r-in"><span>  annot_weights <span class="op">=</span> <span class="va">object</span><span class="op">$</span><span class="va">annotation.weights</span>,</span></span>
+<span class="r-in"><span>  consider_isobars <span class="op">=</span> <span class="va">object</span><span class="op">$</span><span class="va">consider_isobars</span>,</span></span>
+<span class="r-in"><span>  annot_list <span class="op">=</span> <span class="va">object</span><span class="op">$</span><span class="va">annotations</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">Run_bootstrap_ORA</span><span class="op">(</span><span class="va">marker_list</span>, <span class="va">background</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>

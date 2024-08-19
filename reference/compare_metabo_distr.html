@@ -68,9 +68,39 @@
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu">compare_metabo_distr</span><span class="op">(</span><span class="va">obj</span>, metabolite<span class="op">=</span><span class="st">"C6H8N2O3-H"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in obj$scmatrix[metabolite, ] %&gt;% as.data.frame():</span> could not find function "%&gt;%"</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"example_ORA_obj"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"example_ORA_custom_universe"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">input_scm</span> <span class="op">=</span> <span class="va">example_ORA_obj</span><span class="op">$</span><span class="va">scmatrix</span></span></span>
+<span class="r-in"><span><span class="va">conds</span> <span class="op">=</span> <span class="va">example_ORA_obj</span><span class="op">$</span><span class="va">conditions</span></span></span>
+<span class="r-in"><span><span class="va">cond_x</span> <span class="op">=</span> <span class="st">"U"</span></span></span>
+<span class="r-in"><span><span class="va">cond_y</span> <span class="op">=</span> <span class="st">"F"</span></span></span>
+<span class="r-in"><span><span class="va">ORA_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="initEnrichment.html">initEnrichment</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  scmatrix <span class="op">=</span> <span class="va">input_scm</span>,</span></span>
+<span class="r-in"><span>  conditions <span class="op">=</span> <span class="va">conds</span>,</span></span>
+<span class="r-in"><span>  enrichment_type <span class="op">=</span> <span class="st">"ORA"</span>,</span></span>
+<span class="r-in"><span>  annot_db <span class="op">=</span> <span class="st">"HMDB"</span>,</span></span>
+<span class="r-in"><span>  consider_isomers <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  consider_isobars <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  polarization_mode <span class="op">=</span> <span class="st">"positive"</span>,</span></span>
+<span class="r-in"><span>  background_type <span class="op">=</span> <span class="st">"sub_class"</span>,</span></span>
+<span class="r-in"><span>  molecule_type <span class="op">=</span> <span class="st">"Metabo"</span>,</span></span>
+<span class="r-in"><span>  condition.x <span class="op">=</span> <span class="va">cond_x</span>,</span></span>
+<span class="r-in"><span>  condition.y <span class="op">=</span> <span class="va">cond_y</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">ORA_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="Run_enrichment.html">Run_enrichment</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  object <span class="op">=</span> <span class="va">ORA_obj</span>,</span></span>
+<span class="r-in"><span>  custom_universe <span class="op">=</span> <span class="va">example_ORA_custom_universe</span>,</span></span>
+<span class="r-in"><span>  report_ambiguity_scores <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  DE_LFC_cutoff <span class="op">=</span> <span class="fl">0</span>,</span></span>
+<span class="r-in"><span>  min.pct.diff <span class="op">=</span> <span class="fl">0</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">TP_ions</span> <span class="op">=</span> <span class="fu"><a href="get_TP_markers_per_Term.html">get_TP_markers_per_Term</a></span><span class="op">(</span>ORA_boot_df <span class="op">=</span> <span class="va">ORA_res</span><span class="op">$</span><span class="va">downregulated</span><span class="op">$</span><span class="va">unfiltered_enrich_res</span>,</span></span>
+<span class="r-in"><span>                                 term_of_interest <span class="op">=</span> <span class="st">"Glycerophosphocholines"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">TP_ions</span> <span class="op">=</span> <span class="fu"><a href="map_TP_markers_to_ions.html">map_TP_markers_to_ions</a></span><span class="op">(</span>markers <span class="op">=</span> <span class="va">TP_ions</span>,scm_ions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">input_scm</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">p</span> <span class="op">=</span> <span class="fu">compare_metabo_distr</span><span class="op">(</span><span class="va">ORA_obj</span>, metabolite <span class="op">=</span> <span class="va">TP_ions</span><span class="op">[</span><span class="fl">5</span><span class="op">]</span>,</span></span>
+<span class="r-in"><span>                         conds_of_interest <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">cond_x</span>, <span class="va">cond_y</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
