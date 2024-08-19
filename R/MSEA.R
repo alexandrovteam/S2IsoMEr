@@ -234,6 +234,13 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,
   cat("Perform enrichment analysis...")
   cat("\n")
   if (object$gsea.method == "ks_signed"){
+
+    tmp = tempfile()
+    url <- "https://raw.githubusercontent.com/franapoli/signed-ks-test/master/signed-ks-test.R"
+    utils::download.file(url, destfile = tmp)
+    source(tmp)
+
+
     enrichment_analysis <-
       pbapply::pbsapply(seq(n_bootstraps), function(bootstrap_i){
         sapply(names(pathway_list_slim), function(term){
