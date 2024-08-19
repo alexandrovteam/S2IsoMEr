@@ -4,6 +4,8 @@
 
 `S2IsoMEr` is an R package for metabolite enrichment analysis in imaging MS. `S2IsoMEr` can be applied to spatial and single-cell metabolomics datasets and addresses the challenge of metabolite identification ambiguity. The key idea to handle molecular isomers and/or isobars is to propagate the molecular ambiguity to the enrichment results as follows: We apply iterative random sampling (bootstrapping), perform enrichment analysis for each iteration, and report summarized results.
 
+![](man/figures/Main_figure.jpg)
+
 ## Installation
 
 ```         

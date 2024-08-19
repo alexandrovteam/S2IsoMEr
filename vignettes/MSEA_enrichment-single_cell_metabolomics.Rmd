@@ -4,7 +4,7 @@ author:
   - name : Bishoy Wadie
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{MSEA_enrichment-single_cell_metabolomics}
+  %\VignetteIndexEntry{MSEA enrichment - single cell metabolomics}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -28,7 +28,7 @@ The data is freely available in [MetaboLights](https://www.ebi.ac.uk/metabolight
 
 ## Loading packages
 
-```{r "load packages", message=FALSE}
+```{r "load packages", message=FALSE, eval=FALSE}
 library(S2IsoMEr)
 library(dplyr)
 library(tidyr)
@@ -161,11 +161,16 @@ plot_MSEA_Multi_cond(combined_MSEA_res = Multi_cond_res,
                          alpha_cutoff = 0.05)
 ```
 
+![](images/MSEA_multicond.jpg){ width=100% }
+
+
 ### Barplot
 
 ```{r "barplot", eval=FALSE}
 barplot_MSEA_boot(object = MSEA_results[["F"]],
                   q.value.cutoff = 0.2, by.statistic = "ES")
 ```
+
+![](images/MSEA_bar.jpg){ width=100% }
 
 

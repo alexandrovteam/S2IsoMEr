@@ -4,7 +4,7 @@ author:
   - name : Bishoy Wadie
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{ORA_enrichment-single_cell_metabolomics}
+  %\VignetteIndexEntry{ORA enrichment - single cell metabolomic}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -26,7 +26,7 @@ In this notebook, we demonstrate how to use `S2IsoMEr` for ORA enrichment in sin
 
 ## Loading packages
 
-```{r "load packages", message=FALSE}
+```{r "load packages", message=FALSE, eval = FALSE}
 library(S2IsoMEr)
 library(dplyr)
 library(tidyr)
@@ -204,8 +204,10 @@ head(enrich_ORA_summary)
 ### Barplot
 
 ```{r Bar_plot, message=FALSE, eval=FALSE, echo=T}
-p = barplot_ORA_boot(ORA_boot_res = ORA_boot_res,collapse_multi_cond = T)
+barplot_ORA_boot(ORA_boot_res = ORA_boot_res,collapse_multi_cond = T)
 ```
+
+![](images/ORA_bar.jpg){ width=100% }
 
 ### Dotplot
 
@@ -213,6 +215,8 @@ p = barplot_ORA_boot(ORA_boot_res = ORA_boot_res,collapse_multi_cond = T)
 multi_cond_collapse = collapse_ORA_boot_multi_cond(ORA_boot_res_list = ORA_boot_res)
 dotplot_ORA(ORA_res = multi_cond_collapse$clean_enrich_res)
 ```
+
+![](images/ORA_dot.jpg){ width=100% }
 
 ### Ridge plots
 
@@ -224,6 +228,8 @@ ridge_bootstraps(enrich_res = multi_cond_collapse$unfiltered_enrich_res,
                  condition = "upregulated")
 ```
 
+![](images/ORA_ridge_up.jpg){ width=100% }
+
 ### Comparative distribution of marker ions
 
 We also provide a simple function to get the TP markers associated with a given term which correspond to the input ion in the `input_scm` matrix used as input.
@@ -233,7 +239,6 @@ TP_ions = get_TP_markers_per_Term(ORA_boot_df = ORA_boot_res$downregulated$unfil
                                   term_of_interest = "Glycerophosphocholines")
 TP_ions = map_TP_markers_to_ions(markers = TP_ions,
                                  scm_ions = rownames(input_scm))
-TP_ions
 ```
 
 We can then select an ion of interest to check distribution of intensities in the specified conditions using the `compare_metabo_distr` function which takes the `ORA_boot_obj` as input, the ions and the conditions of interest.
@@ -242,3 +247,5 @@ We can then select an ion of interest to check distribution of intensities in th
 compare_metabo_distr(ORA_boot_obj, metabolite = TP_ions[5],
                      conds_of_interest = c(cond_x, cond_y))
 ```
+
+![](images/compare_distribution.jpg){ width=100% }
