@@ -32,8 +32,11 @@ An object of class S2IsoMEr.
 rankScore() ranks metabolites of S2IsoMEr object to perform bootstrapping metabolite set enrichment analysis
 }
 \examples{
-myTestRun <-
-rankScore(object = myTestRun, ranking.by = 't.test')
+\dontrun{
+data("example_ORA_obj")
+example_ORA_obj <-
+rankScore(object = example_ORA_obj, ranking.by = 't.test')
+}
 
 
 }

@@ -354,9 +354,11 @@ get_TP_markers_per_Term = function(ORA_boot_df, term_of_interest){
 #'
 #'
 #' @examples
+#' \dontrun{
 #' markers <- c("sf.Na", "sf.H")
 #' scm_ions <- c("sf+Na", "sf+H")
 #' map_TP_markers_to_ions(markers, scm_ions)
+#' }
 #'
 #' @export
 map_TP_markers_to_ions = function(markers, scm_ions){

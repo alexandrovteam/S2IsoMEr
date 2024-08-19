@@ -45,13 +45,34 @@ The function adjusts p-values using the False Discovery Rate (FDR) method and ca
 }
 \examples{
 \dontrun{
-  enrichment_results = object$enrichment_results #object is of class `S2IsoMEr`
-  filtered_results <- passed_filters_per_term(unfiltered_df = enrichment_results,
-                                              enrich_type = "MSEA",
-                                              min_intersection = 5,
-                                              alpha_cutoff = 0.01,
-                                              q.val_cutoff = 0.1,
-                                              boot_fract_cutoff = 0.6)
+data("example_ORA_obj")
+data("example_ORA_custom_universe")
+input_scm = example_ORA_obj$scmatrix
+conds = example_ORA_obj$conditions
+cond_x = "U"
+cond_y = "F"
+ORA_obj <- initEnrichment(
+  scmatrix = input_scm,
+  conditions = conds,
+  enrichment_type = "ORA",
+  annot_db = "HMDB",
+  consider_isomers = TRUE,
+  consider_isobars = TRUE,
+  polarization_mode = "positive",
+  background_type = "sub_class",
+  molecule_type = "Metabo",
+  condition.x = cond_x,
+  condition.y = cond_y
+)
+ORA_res <- Run_enrichment(
+  object = ORA_obj,
+  custom_universe = example_ORA_custom_universe,
+  report_ambiguity_scores = TRUE,
+  DE_LFC_cutoff = 0,
+  min.pct.diff = 0
+)
+enrich_ORA_summary = passed_filters_per_term(unfiltered_df = ORA_res$upregulated$unfiltered_enrich_res,
+enrich_type = "ORA")
 }
 
 }

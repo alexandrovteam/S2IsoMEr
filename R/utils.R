@@ -109,10 +109,12 @@ check_feat_type = function(feats){
 #' @return List where each element name correspond to a given term and values are
 #' either metabolite names or sum formulas.
 #' @examples
-#' myTestRun <-
+#' \dontrun{
+#' bg <-
 #' Load_background(mol_type = "Metabo",
 #'                    bg_type = "main_class",
 #'                    feature_type = "name")
+#' }
 #'
 #'
 #' @export
@@ -170,8 +172,10 @@ Load_background = function(mol_type = c("Lipid", "Metabo"),
 #'
 #' @return An object of class `S2IsoMEr`.
 #' @examples
-#'
-#' setConditions(myTestRun, condition.x = 'CON', condition.y = "TREATMENT")
+#' \dontrun{
+#' data("example_MSEA_obj")
+#' example_MSEA_obj = setConditions(example_MSEA_obj, condition.x = 'U', condition.y = "FI")
+#' }
 #'
 #' @export
 setConditions <- function (object, condition.x = NULL, condition.y = NULL) {
@@ -268,13 +272,34 @@ calc_ambiguity = function(input_iso_list, weights = NULL){
 #'
 #' @examples
 #' \dontrun{
-#'   enrichment_results = object$enrichment_results #object is of class `S2IsoMEr`
-#'   filtered_results <- passed_filters_per_term(unfiltered_df = enrichment_results,
-#'                                               enrich_type = "MSEA",
-#'                                               min_intersection = 5,
-#'                                               alpha_cutoff = 0.01,
-#'                                               q.val_cutoff = 0.1,
-#'                                               boot_fract_cutoff = 0.6)
+#' data("example_ORA_obj")
+#' data("example_ORA_custom_universe")
+#' input_scm = example_ORA_obj$scmatrix
+#' conds = example_ORA_obj$conditions
+#' cond_x = "U"
+#' cond_y = "F"
+#' ORA_obj <- initEnrichment(
+#'   scmatrix = input_scm,
+#'   conditions = conds,
+#'   enrichment_type = "ORA",
+#'   annot_db = "HMDB",
+#'   consider_isomers = TRUE,
+#'   consider_isobars = TRUE,
+#'   polarization_mode = "positive",
+#'   background_type = "sub_class",
+#'   molecule_type = "Metabo",
+#'   condition.x = cond_x,
+#'   condition.y = cond_y
+#' )
+#' ORA_res <- Run_enrichment(
+#'   object = ORA_obj,
+#'   custom_universe = example_ORA_custom_universe,
+#'   report_ambiguity_scores = TRUE,
+#'   DE_LFC_cutoff = 0,
+#'   min.pct.diff = 0
+#' )
+#' enrich_ORA_summary = passed_filters_per_term(unfiltered_df = ORA_res$upregulated$unfiltered_enrich_res,
+#' enrich_type = "ORA")
 #' }
 #'
 #' @export

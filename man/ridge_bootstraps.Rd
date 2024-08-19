@@ -24,9 +24,36 @@ The function filters the enrichment results to include only the specified terms 
 }
 \examples{
 \dontrun{
-  plot <- ridge_bootstraps(enrich_res = enrichment_results,
-                           terms_of_interest = c("Term1", "Term2", "Term3"))
-  print(plot)
+data("example_ORA_obj")
+data("example_ORA_custom_universe")
+input_scm = example_ORA_obj$scmatrix
+conds = example_ORA_obj$conditions
+cond_x = "U"
+cond_y = "F"
+ORA_obj <- initEnrichment(
+  scmatrix = input_scm,
+  conditions = conds,
+  enrichment_type = "ORA",
+  annot_db = "HMDB",
+  consider_isomers = TRUE,
+  consider_isobars = TRUE,
+  polarization_mode = "positive",
+  background_type = "sub_class",
+  molecule_type = "Metabo",
+  condition.x = cond_x,
+  condition.y = cond_y
+)
+ORA_res <- Run_enrichment(
+  object = ORA_obj,
+  custom_universe = example_ORA_custom_universe,
+  report_ambiguity_scores = TRUE,
+  DE_LFC_cutoff = 0,
+  min.pct.diff = 0
+)
+multi_cond_res = collapse_ORA_boot_multi_cond(ORA_boot_res_list = ORA_res)
+p4 = ridge_bootstraps(enrich_res = multi_cond_res$unfiltered_enrich_res,
+                     terms_of_interest = c(multi_cond_res$clean_enrich_res$Term),
+                     condition = "upregulated")
 }
 
 }

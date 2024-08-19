@@ -11,8 +11,11 @@
 #'
 #' @return A ggplot2 object.
 #' @examples
-#'
-#' barplot_bootstrap(myTestRun)
+#' \dontrun{
+#' data("example_MSEA_obj")
+#' p = barplot_MSEA_boot(object = example_MSEA_obj,
+#'       q.value.cutoff = 0.2, by.statistic = "ES")
+#' }
 #'
 #' @export
 barplot_MSEA_boot <- function (object, min.annotations = 2, q.value.cutoff = 0.1,
@@ -164,7 +167,9 @@ barplot_MSEA_boot.S2IsoMEr <- function(object, min.annotations = 2, q.value.cuto
 #'
 #' @examples
 #' \dontrun{
-#'   plot_MSEA_Multi_cond(combined_MSEA_res = msea_results, alpha_cutoff = 0.05)
+#' data("example_MSEA_multicond")
+#' p = plot_MSEA_Multi_cond(combined_MSEA_res = example_MSEA_multicond,
+#'                          alpha_cutoff = 0.05)
 #' }
 #'
 #' @export
@@ -234,9 +239,12 @@ plot_MSEA_Multi_cond = function(combined_MSEA_res,
 #'
 #' @examples
 #' \dontrun{
-#'   plot <- barplot_ORA_simple(ORA_simple_res = ora_results, q_val_cutoff = 0.05)
-#'   print(plot)
+#' data("example_ORA_markers")
+#' bg = Load_background(mol_type = "Metabo",bg_type = "main_class",feature_type = "sf")
+#' enrich_res = Run_simple_ORA(marker_list = example_ORA_markers,background = bg)
+#' p = barplot_ORA_simple(enrich_res, q_val_cutoff = 0.2)
 #' }
+#'
 #'
 #' @export
 barplot_ORA_simple = function(ORA_simple_res, q_val_cutoff = 0.05){
@@ -270,8 +278,33 @@ barplot_ORA_simple = function(ORA_simple_res, q_val_cutoff = 0.05){
 #'
 #' @examples
 #' \dontrun{
-#'   plot <- barplot_ORA_boot(ORA_boot_res = ora_boot_results)
-#'   print(plot)
+#' data("example_ORA_obj")
+#' data("example_ORA_custom_universe")
+#' input_scm = example_ORA_obj$scmatrix
+#' conds = example_ORA_obj$conditions
+#' cond_x = "U"
+#' cond_y = "F"
+#' ORA_obj <- initEnrichment(
+#'   scmatrix = input_scm,
+#'   conditions = conds,
+#'   enrichment_type = "ORA",
+#'   annot_db = "HMDB",
+#'   consider_isomers = TRUE,
+#'   consider_isobars = TRUE,
+#'   polarization_mode = "positive",
+#'   background_type = "sub_class",
+#'   molecule_type = "Metabo",
+#'   condition.x = cond_x,
+#'   condition.y = cond_y
+#' )
+#' ORA_res <- Run_enrichment(
+#'   object = ORA_obj,
+#'   custom_universe = example_ORA_custom_universe,
+#'   report_ambiguity_scores = TRUE,
+#'   DE_LFC_cutoff = 0,
+#'   min.pct.diff = 0
+#' )
+#' p = barplot_ORA_boot(ORA_boot_res = ORA_res,collapse_multi_cond = T)
 #' }
 #'
 #' @export
@@ -341,8 +374,34 @@ barplot_ORA_boot = function(ORA_boot_res, collapse_multi_cond = F){
 #'
 #' @examples
 #' \dontrun{
-#'   plot <- dotplot_ORA(plot_data = ora_results, alpha_cutoff = 0.05, color_by = "Significance", facet_by = "condition")
-#'   print(plot)
+#' data("example_ORA_obj")
+#' data("example_ORA_custom_universe")
+#' input_scm = example_ORA_obj$scmatrix
+#' conds = example_ORA_obj$conditions
+#' cond_x = "U"
+#' cond_y = "F"
+#' ORA_obj <- initEnrichment(
+#'   scmatrix = input_scm,
+#'   conditions = conds,
+#'   enrichment_type = "ORA",
+#'   annot_db = "HMDB",
+#'   consider_isomers = TRUE,
+#'   consider_isobars = TRUE,
+#'   polarization_mode = "positive",
+#'   background_type = "sub_class",
+#'   molecule_type = "Metabo",
+#'   condition.x = cond_x,
+#'   condition.y = cond_y
+#' )
+#' ORA_res <- Run_enrichment(
+#'   object = ORA_obj,
+#'   custom_universe = example_ORA_custom_universe,
+#'   report_ambiguity_scores = TRUE,
+#'   DE_LFC_cutoff = 0,
+#'   min.pct.diff = 0
+#' )
+#' multi_cond_res = collapse_ORA_boot_multi_cond(ORA_boot_res_list = ORA_res)
+#' p = dotplot_ORA(ORA_res = multi_cond_res$clean_enrich_res)
 #' }
 #'
 #' @export
@@ -440,9 +499,36 @@ dotplot_ORA = function(ORA_res, alpha_cutoff = 0.05,
 #'
 #' @examples
 #' \dontrun{
-#'   plot <- ridge_bootstraps(enrich_res = enrichment_results,
-#'                            terms_of_interest = c("Term1", "Term2", "Term3"))
-#'   print(plot)
+#' data("example_ORA_obj")
+#' data("example_ORA_custom_universe")
+#' input_scm = example_ORA_obj$scmatrix
+#' conds = example_ORA_obj$conditions
+#' cond_x = "U"
+#' cond_y = "F"
+#' ORA_obj <- initEnrichment(
+#'   scmatrix = input_scm,
+#'   conditions = conds,
+#'   enrichment_type = "ORA",
+#'   annot_db = "HMDB",
+#'   consider_isomers = TRUE,
+#'   consider_isobars = TRUE,
+#'   polarization_mode = "positive",
+#'   background_type = "sub_class",
+#'   molecule_type = "Metabo",
+#'   condition.x = cond_x,
+#'   condition.y = cond_y
+#' )
+#' ORA_res <- Run_enrichment(
+#'   object = ORA_obj,
+#'   custom_universe = example_ORA_custom_universe,
+#'   report_ambiguity_scores = TRUE,
+#'   DE_LFC_cutoff = 0,
+#'   min.pct.diff = 0
+#' )
+#' multi_cond_res = collapse_ORA_boot_multi_cond(ORA_boot_res_list = ORA_res)
+#' p4 = ridge_bootstraps(enrich_res = multi_cond_res$unfiltered_enrich_res,
+#'                      terms_of_interest = c(multi_cond_res$clean_enrich_res$Term),
+#'                      condition = "upregulated")
 #' }
 #'
 #' @export
@@ -478,8 +564,39 @@ ridge_bootstraps = function(enrich_res, terms_of_interest, condition = NULL){
 #'
 #' @return  A `ggplot2` object displaying the density plot of metabolite intensities across conditions.
 #' @examples
-#'
-#' compare_metabo_distr(obj, metabolite="C6H8N2O3-H")
+#' \dontrun{
+#' data("example_ORA_obj")
+#' data("example_ORA_custom_universe")
+#' input_scm = example_ORA_obj$scmatrix
+#' conds = example_ORA_obj$conditions
+#' cond_x = "U"
+#' cond_y = "F"
+#' ORA_obj <- initEnrichment(
+#'   scmatrix = input_scm,
+#'   conditions = conds,
+#'   enrichment_type = "ORA",
+#'   annot_db = "HMDB",
+#'   consider_isomers = TRUE,
+#'   consider_isobars = TRUE,
+#'   polarization_mode = "positive",
+#'   background_type = "sub_class",
+#'   molecule_type = "Metabo",
+#'   condition.x = cond_x,
+#'   condition.y = cond_y
+#' )
+#' ORA_res <- Run_enrichment(
+#'   object = ORA_obj,
+#'   custom_universe = example_ORA_custom_universe,
+#'   report_ambiguity_scores = TRUE,
+#'   DE_LFC_cutoff = 0,
+#'   min.pct.diff = 0
+#' )
+#' TP_ions = get_TP_markers_per_Term(ORA_boot_df = ORA_res$downregulated$unfiltered_enrich_res,
+#'                                  term_of_interest = "Glycerophosphocholines")
+#' TP_ions = map_TP_markers_to_ions(markers = TP_ions,scm_ions = rownames(input_scm))
+#' p = compare_metabo_distr(ORA_obj, metabolite = TP_ions[5],
+#'                          conds_of_interest = c(cond_x, cond_y))
+#' }
 #'
 #' @export
 compare_metabo_distr = function(obj, metabolite, conds_of_interest = NULL){

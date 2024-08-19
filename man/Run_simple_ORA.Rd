@@ -31,11 +31,8 @@ This function performs a simple over-representation analysis (ORA) on a given li
 }
 \examples{
 \dontrun{
-marker_list <- c("B1", "B3", "B5")
-background <- list(
-  "Term1" = c("B1", "B2", "B3"),
-  "Term2" = c("B4", "B5", "B6")
-)
-results <- Run_simple_ORA(marker_list, background)
+data("example_ORA_markers")
+bg = Load_background(mol_type = "Metabo",bg_type = "main_class",feature_type = "sf")
+enrich_res = Run_simple_ORA(marker_list = example_ORA_markers,background = bg)
 }
 }

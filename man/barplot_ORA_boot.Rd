@@ -23,8 +23,33 @@ The function creates a bar plot where the terms are reordered by their median en
 }
 \examples{
 \dontrun{
-  plot <- barplot_ORA_boot(ORA_boot_res = ora_boot_results)
-  print(plot)
+data("example_ORA_obj")
+data("example_ORA_custom_universe")
+input_scm = example_ORA_obj$scmatrix
+conds = example_ORA_obj$conditions
+cond_x = "U"
+cond_y = "F"
+ORA_obj <- initEnrichment(
+  scmatrix = input_scm,
+  conditions = conds,
+  enrichment_type = "ORA",
+  annot_db = "HMDB",
+  consider_isomers = TRUE,
+  consider_isobars = TRUE,
+  polarization_mode = "positive",
+  background_type = "sub_class",
+  molecule_type = "Metabo",
+  condition.x = cond_x,
+  condition.y = cond_y
+)
+ORA_res <- Run_enrichment(
+  object = ORA_obj,
+  custom_universe = example_ORA_custom_universe,
+  report_ambiguity_scores = TRUE,
+  DE_LFC_cutoff = 0,
+  min.pct.diff = 0
+)
+p = barplot_ORA_boot(ORA_boot_res = ORA_res,collapse_multi_cond = T)
 }
 
 }

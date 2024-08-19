@@ -22,7 +22,9 @@ The function checks for the presence of required columns and ensures there are e
 }
 \examples{
 \dontrun{
-  plot_MSEA_Multi_cond(combined_MSEA_res = msea_results, alpha_cutoff = 0.05)
+data("example_MSEA_multicond")
+p = plot_MSEA_Multi_cond(combined_MSEA_res = example_MSEA_multicond,
+                         alpha_cutoff = 0.05)
 }
 
 }

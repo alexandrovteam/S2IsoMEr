@@ -31,7 +31,10 @@ A ggplot2 object.
 Plot bootstrap enrichment analysis
 }
 \examples{
-
-barplot_bootstrap(myTestRun)
+\dontrun{
+data("example_MSEA_obj")
+p = barplot_MSEA_boot(object = example_MSEA_obj,
+      q.value.cutoff = 0.2, by.statistic = "ES")
+}
 
 }

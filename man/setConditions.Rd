@@ -20,7 +20,9 @@ An object of class \code{S2IsoMEr}.
 Set conditions for enrichment analysis
 }
 \examples{
-
-setConditions(myTestRun, condition.x = 'CON', condition.y = "TREATMENT")
+\dontrun{
+data("example_MSEA_obj")
+example_MSEA_obj = setConditions(example_MSEA_obj, condition.x = 'U', condition.y = "FI")
+}
 
 }

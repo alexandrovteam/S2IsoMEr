@@ -87,13 +87,26 @@ An object of class S2IsoMEr.
 initEnrichment() creates object to perform bootstrapping metabolite set enrichment analysis
 }
 \examples{
-myTestRun <-
-initEnrichment(scmatrix = scMatrix,
-                   annotations = my_annotations,
-                   annotation.weights = my_weights,
-                   conditions = my_conditions,
-                   condition.x = "A",
-                   condition.y = "B" )
+\dontrun{
+data("example_ORA_obj")
+input_scm = example_ORA_obj$scmatrix
+conds = example_ORA_obj$conditions
+cond_x = "U"
+cond_y = "F"
+ORA_obj <- initEnrichment(
+  scmatrix = input_scm,
+  conditions = conds,
+  enrichment_type = "ORA",
+  annot_db = "HMDB",
+  consider_isomers = TRUE,
+  consider_isobars = TRUE,
+  polarization_mode = "positive",
+  background_type = "sub_class",
+  molecule_type = "Metabo",
+  condition.x = cond_x,
+  condition.y = cond_y
+)
+}
 
 
 }

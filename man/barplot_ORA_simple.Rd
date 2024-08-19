@@ -22,8 +22,11 @@ The function creates a bar plot where the terms are reordered by their scores in
 }
 \examples{
 \dontrun{
-  plot <- barplot_ORA_simple(ORA_simple_res = ora_results, q_val_cutoff = 0.05)
-  print(plot)
+data("example_ORA_markers")
+bg = Load_background(mol_type = "Metabo",bg_type = "main_class",feature_type = "sf")
+enrich_res = Run_simple_ORA(marker_list = example_ORA_markers,background = bg)
+p = barplot_ORA_simple(enrich_res, q_val_cutoff = 0.2)
 }
+
 
 }

@@ -18,8 +18,10 @@ A character vector containing the ions that match the given true positive marker
 This function maps true positive markers to their corresponding ions by modifying and matching the marker and ion names.
 }
 \examples{
+\dontrun{
 markers <- c("sf.Na", "sf.H")
 scm_ions <- c("sf+Na", "sf+H")
 map_TP_markers_to_ions(markers, scm_ions)
+}
 
 }

@@ -21,8 +21,11 @@
 #' @return An object of class S2IsoMEr.
 #'
 #' @examples
-#' myTestRun <-
-#' rankScore(object = myTestRun, ranking.by = 't.test')
+#' \dontrun{
+#' data("example_ORA_obj")
+#' example_ORA_obj <-
+#' rankScore(object = example_ORA_obj, ranking.by = 't.test')
+#' }
 #'
 #'
 #' @export
@@ -153,9 +156,10 @@ calculate_wilcox_statistic <- function(x, y = NULL, paired = FALSE) {
 #' @details This method computes the mean expression levels of metabolites for two conditions specified in the \code{S2IsoMEr} object. The LFC is calculated as the difference in log2-transformed mean expression levels between the two conditions.
 #'
 #' @examples
-#' # Assuming `myS2IsoMEr` is a valid S2IsoMEr object
-#' lfc_values <- calc_LFC_scmat(myS2IsoMEr)
-#' print(lfc_values)
+#' \dontrun{
+#' data("example_ORA_obj")
+#' lfc_values <- calc_LFC_scmat(example_ORA_obj)
+#' }
 #'
 #' @export
 calc_LFC_scmat <- function (object) {

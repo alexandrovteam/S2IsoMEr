@@ -34,10 +34,12 @@ Load_background() retrieves a list of terms and associated metabolites for enric
 molecule type, background type and input feature type.
 }
 \examples{
-myTestRun <-
+\dontrun{
+bg <-
 Load_background(mol_type = "Metabo",
                    bg_type = "main_class",
                    feature_type = "name")
+}
 
 
 }

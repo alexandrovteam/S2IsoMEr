@@ -10,12 +10,9 @@
 #' @return A dataframe containing the ORA results for each group of markers.
 #' @examples
 #' \dontrun{
-#' marker_list <- c("B1", "B3", "B5")
-#' background <- list(
-#'   "Term1" = c("B1", "B2", "B3"),
-#'   "Term2" = c("B4", "B5", "B6")
-#' )
-#' results <- Run_simple_ORA(marker_list, background)
+#' data("example_ORA_markers")
+#' bg = Load_background(mol_type = "Metabo",bg_type = "main_class",feature_type = "sf")
+#' enrich_res = Run_simple_ORA(marker_list = example_ORA_markers,background = bg)
 #' }
 #' @export
 Run_simple_ORA = function(marker_list, background, custom_universe = NULL,
@@ -95,12 +92,24 @@ Run_simple_ORA = function(marker_list, background, custom_universe = NULL,
 #' @return A list containing the ORA results for each group of markers. Both filtered and per-bootstrap results are provided.
 #' @examples
 #' \dontrun{
-#' marker_list <- c("B1", "B3", "B5")
-#' background <- list(
-#'   "Term1" = c("B1", "B2", "B3"),
-#'   "Term2" = c("B4", "B5", "B6")
+#' data("example_ORA_markers")
+#' data("example_ORA_obj")
+#' object = example_ORA_obj
+#' enrich_res <- Run_bootstrap_ORA(
+#'   marker_list = example_ORA_markers,
+#'   background = object$pathway_list,
+#'   polarization_mode = object$polarization_mode,
+#'   mass_range_ppm = object$mass_range_ppm,
+#'   annot_db = object$Annotation_database,
+#'   annot_custom_db = object$Custom_database,
+#'   use_LION = ifelse(stringr::str_detect(object$background_name, "LION"), TRUE, FALSE),
+#'   endogenous_only = object$endogenous_only,
+#'   pathway_assoc_only = object$pathway_assoc_only,
+#'   remove_expected_predicted = object$remove_expected_predicted,
+#'   annot_weights = object$annotation.weights,
+#'   consider_isobars = object$consider_isobars,
+#'   annot_list = object$annotations
 #' )
-#' results <- Run_bootstrap_ORA(marker_list, background)
 #' }
 #' @export
 Run_bootstrap_ORA = function(marker_list, background, custom_universe = NULL,

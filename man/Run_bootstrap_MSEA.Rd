@@ -43,8 +43,8 @@ It handles both \href{https://github.com/franapoli/signed-ks-test/blob/master/si
 }
 \examples{
 \dontrun{
-# Assuming `my_data` is a properly formatted object of class `S2IsoMEr` initialized by \code{\link{initEnrichment}}
-result <- Run_bootstrap_MSEA(object = my_data, n_bootstraps = 100)
+data("example_MSEA_obj")
+result <- Run_bootstrap_MSEA(object = example_MSEA_obj, n_bootstraps = 50)
 }
 }
 \references{

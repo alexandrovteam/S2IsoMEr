@@ -34,13 +34,26 @@
 #'
 #' @return An object of class S2IsoMEr.
 #' @examples
-#' myTestRun <-
-#' initEnrichment(scmatrix = scMatrix,
-#'                    annotations = my_annotations,
-#'                    annotation.weights = my_weights,
-#'                    conditions = my_conditions,
-#'                    condition.x = "A",
-#'                    condition.y = "B" )
+#' \dontrun{
+#' data("example_ORA_obj")
+#' input_scm = example_ORA_obj$scmatrix
+#' conds = example_ORA_obj$conditions
+#' cond_x = "U"
+#' cond_y = "F"
+#' ORA_obj <- initEnrichment(
+#'   scmatrix = input_scm,
+#'   conditions = conds,
+#'   enrichment_type = "ORA",
+#'   annot_db = "HMDB",
+#'   consider_isomers = TRUE,
+#'   consider_isobars = TRUE,
+#'   polarization_mode = "positive",
+#'   background_type = "sub_class",
+#'   molecule_type = "Metabo",
+#'   condition.x = cond_x,
+#'   condition.y = cond_y
+#' )
+#' }
 #'
 #'
 #' @export
@@ -420,6 +433,34 @@ print.S2IsoMEr <- function(x, ...){
 #' Consult the specific function documentation for details on these arguments.
 #' @return Data.frame with enrichment results
 #' @examples
+#' \dontrun{
+#' data("example_ORA_obj")
+#' data("example_ORA_custom_universe")
+#' input_scm = example_ORA_obj$scmatrix
+#' conds = example_ORA_obj$conditions
+#' cond_x = "U"
+#' cond_y = "F"
+#' ORA_obj <- initEnrichment(
+#'   scmatrix = input_scm,
+#'   conditions = conds,
+#'   enrichment_type = "ORA",
+#'   annot_db = "HMDB",
+#'   consider_isomers = TRUE,
+#'   consider_isobars = TRUE,
+#'   polarization_mode = "positive",
+#'   background_type = "sub_class",
+#'   molecule_type = "Metabo",
+#'   condition.x = cond_x,
+#'   condition.y = cond_y
+#' )
+#' ORA_res <- Run_enrichment(
+#'   object = ORA_obj,
+#'   custom_universe = example_ORA_custom_universe,
+#'   report_ambiguity_scores = TRUE,
+#'   DE_LFC_cutoff = 0,
+#'   min.pct.diff = 0
+#' )
+#' }
 #' myTestRun <-
 #' Run_enrichment(object = object,
 #'                    Run_DE = TRUE)
@@ -483,7 +524,7 @@ Run_enrichment <- function(object, Run_DE = FALSE,
                                      mass_range_ppm = object$mass_range_ppm,
                                      annot_db = object$Annotation_database,
                                      annot_custom_db = object$Custom_database,
-                                     use_LION = ifelse(stringr::str_detect(LION_ORA_obj$background_name, "LION"), T, F),
+                                     use_LION = ifelse(stringr::str_detect(object$background_name, "LION"), T, F),
                                      endogenous_only = object$endogenous_only,
                                      pathway_assoc_only = object$pathway_assoc_only,
                                      remove_expected_predicted = object$remove_expected_predicted,

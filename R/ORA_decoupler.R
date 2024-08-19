@@ -73,7 +73,7 @@
     dplyr::mutate(score = -log10(p_value)) %>%
     tibble::add_column(statistic = "ora", .before = 1) %>%
     dplyr::select(statistic, source, condition, score, p_value,
-                  TP, FP, FN, TN)
+                  TP, FP, FN, TN,TP_markers)
 }
 
 .ora_fisher_exact_test <- function(dat,pbar, ...) {
