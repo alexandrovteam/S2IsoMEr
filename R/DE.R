@@ -63,7 +63,7 @@ seurat_wilcoxDETest <- function(data.use,cells.1,cells.2,verbose = TRUE,...){
     p_val <- my.sapply(
       X = 1:nrow(x = data.use),
       FUN = function(x) {
-        return(wilcox.test(data.use[x, ] ~ group.info[, "group"], ...)$p.value)
+        return(stats::wilcox.test(data.use[x, ] ~ group.info[, "group"], ...)$p.value)
       }
     )
   }

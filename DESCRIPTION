@@ -1,12 +1,14 @@
 Package: S2IsoMEr
-Title: Spatial and single-cell Isomeric metabolite enrichment in R
+Title: Spatial and Single-Cell Isomeric Metabolite Enrichment in R
 Version: 0.3.0
 Authors@R: 
     c(
     person("Bishoy", "Wadie", role = c("aut", "cre"), email = "bishoy.wadie@embl.de",
            comment = c(ORCID = "0000-0001-8692-1107")),
     person("Martijn", "Molenaar", role = c("aut"), email = "m.r.molenaar@protonmail.com",
-           comment = c(ORCID = "0000-0001-5221-608X"))
+           comment = c(ORCID = "0000-0001-5221-608X")),
+    person("Theodore", "Alexandrov", role = c("cph", "fnd"), email = "talexandrov@health.ucsd.edu",
+           comment = c(ORCID = "0000-0001-9464-6125"))
            )       
 Description: R package performing Overrepresentation analysis (ORA) and Metabolite Set Enrichment Analysis (MSEA) on Spatial and single-cell metabolomics datasets using bootstrapping of isomeric/isobaric molecules.
 Imports: 
@@ -34,7 +36,8 @@ Imports:
     limma,
     plyr,
     dplyr,
-    ggplot2
+    ggplot2,
+    magrittr
 Depends: 
     R (>= 2.10)
 License: MIT + file LICENSE

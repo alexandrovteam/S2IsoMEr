@@ -39,7 +39,7 @@ The columns are the following:
 \item ES -- enrichment score, same as in Broad GSEA implementation;
 \item NES -- enrichment score normalized to mean enrichment of random samples of the same size;
 \item nMoreExtreme\verb{-- a number of times a random gene set had a more extreme enrichment score value; \\item size -- size of the pathway after removing genes not present in}names(stats)`.
-\item leadingEdge -- vector with indexes of leading edge genes that drive the enrichment, see \url{http://software.broadinstitute.org/gsea/doc/GSEAUserGuideTEXT.htm#_Running_a_Leading}.
+\item leadingEdge -- vector with indexes of leading edge genes that drive the enrichment, see \url{https://www.gsea-msigdb.org/gsea/doc/GSEAUserGuideTEXT.htm#_Running_a_Leading}.
 }
 }
 \description{

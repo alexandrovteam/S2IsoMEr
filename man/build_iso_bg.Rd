@@ -39,7 +39,13 @@ This function builds an isomer/isobar background by either using the specified a
 \dontrun{
 iso_bg <- build_iso_bg(annot_db = "HMDB", use_LION = FALSE, endogenous_only = TRUE,
                        pathway_assoc_only = FALSE, remove_expected_predicted = TRUE)
-custom_db <- data.frame(ID = 1:3, Name = c("Met1", "Met2", "Met3"), Endogenous = "Yes", Pathway_assoc = "Yes", HMDB_status = "known")
+custom_db <- data.frame(
+  ID = 1:3,
+  Name = c("Met1", "Met2", "Met3"),
+  Endogenous = "Yes",
+  Pathway_assoc = "Yes",
+  HMDB_status = "known"
+)
 iso_bg_custom <- build_iso_bg(annot_custom_db = custom_db)
 }
 }

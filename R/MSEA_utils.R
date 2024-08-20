@@ -57,7 +57,7 @@ rankScore.S2IsoMEr <- function(object,
     #Conditions are switched so that ranking matches the interpretation of logFC
     rank_score <-
       apply(object$scmatrix, 1, function(i){
-        t.test(x = i[object$conditions == object$condition.y],
+        stats::t.test(x = i[object$conditions == object$condition.y],
                y = i[object$conditions == object$condition.x], alternative = alternative)$statistic
       })
 
@@ -82,8 +82,9 @@ rankScore.S2IsoMEr <- function(object,
     #Conditions are switched so that ranking matches the interpretation of logFC and BWS
     rank_score <-
       apply(object$scmatrix, 1, function(i){
-        BWStest::bws_stat(x = i[object$conditions == object$condition.y],
-                          y = i[object$conditions == object$condition.x])
+        BWStest::murakami_stat(x = i[object$conditions == object$condition.y],
+                          y = i[object$conditions == object$condition.x],
+                          flavor = 2)
       })
     rank_score = rank_score * sign(LFC)
   }

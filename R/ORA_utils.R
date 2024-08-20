@@ -14,7 +14,13 @@
 #' \dontrun{
 #' iso_bg <- build_iso_bg(annot_db = "HMDB", use_LION = FALSE, endogenous_only = TRUE,
 #'                        pathway_assoc_only = FALSE, remove_expected_predicted = TRUE)
-#' custom_db <- data.frame(ID = 1:3, Name = c("Met1", "Met2", "Met3"), Endogenous = "Yes", Pathway_assoc = "Yes", HMDB_status = "known")
+#' custom_db <- data.frame(
+#'   ID = 1:3,
+#'   Name = c("Met1", "Met2", "Met3"),
+#'   Endogenous = "Yes",
+#'   Pathway_assoc = "Yes",
+#'   HMDB_status = "known"
+#' )
 #' iso_bg_custom <- build_iso_bg(annot_custom_db = custom_db)
 #' }
 #' @export
@@ -85,7 +91,12 @@ build_iso_bg = function(annot_db = "HMDB",annot_custom_db = NULL,
 #' @examples
 #' \dontrun{
 #' sf_vec <- c("C6H12O6+H", "C6H12O6-H")
-#' results <- get_metabo_iso(sf_vec, consider_isobars = TRUE, polarization_mode = "positive", mass_range_ppm = 5)
+#' results <- get_metabo_iso(
+#'   sf_vec,
+#'   consider_isobars = TRUE,
+#'   polarization_mode = "positive",
+#'   mass_range_ppm = 5
+#' )
 #' }
 #' @export
 get_metabo_iso = function(sf_vec, consider_isobars = T,
@@ -148,7 +159,7 @@ get_metabo_iso = function(sf_vec, consider_isobars = T,
           character(0)
         } else {
           exact_masses_slim$formula_adduct[
-            between(exact_masses_slim$mass,
+            dplyr::between(exact_masses_slim$mass,
                     left = mass_i - (mass_range_ppm * mass_i / 1e6),
                     right = mass_i + (mass_range_ppm * mass_i / 1e6))]
         }
@@ -335,8 +346,8 @@ adjust_conting_iso = function(observed, obs_iso,
 #' @export
 get_TP_markers_per_Term = function(ORA_boot_df, term_of_interest){
   markers = ORA_boot_df %>%
-    dplyr::filter(Term == term_of_interest) %>%
-    dplyr::pull(TP_markers) %>%
+    dplyr::filter(.data$Term == term_of_interest) %>%
+    dplyr::pull(.data$TP_markers) %>%
     strsplit(split = ";") %>%
     unlist() %>%
     unique()

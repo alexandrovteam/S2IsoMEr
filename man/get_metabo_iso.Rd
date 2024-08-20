@@ -50,6 +50,11 @@ This function processes a vector of metabolite formulas and retrieves the corres
 \examples{
 \dontrun{
 sf_vec <- c("C6H12O6+H", "C6H12O6-H")
-results <- get_metabo_iso(sf_vec, consider_isobars = TRUE, polarization_mode = "positive", mass_range_ppm = 5)
+results <- get_metabo_iso(
+  sf_vec,
+  consider_isobars = TRUE,
+  polarization_mode = "positive",
+  mass_range_ppm = 5
+)
 }
 }

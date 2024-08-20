@@ -63,9 +63,6 @@ ORA_res <- Run_enrichment(
   min.pct.diff = 0
 )
 }
-myTestRun <-
-Run_enrichment(object = object,
-                   Run_DE = TRUE)
 
 
 }

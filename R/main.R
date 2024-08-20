@@ -325,7 +325,7 @@ initEnrichment <- function(scmatrix,
           character(0)
         } else {
           exact_masses_slim$formula_adduct[
-            between(exact_masses_slim$mass,
+            dplyr::between(exact_masses_slim$mass,
                     left = mass_i - (mass_range_ppm * mass_i / 1e6),
                     right = mass_i + (mass_range_ppm * mass_i / 1e6))]
         }
@@ -461,9 +461,6 @@ print.S2IsoMEr <- function(x, ...){
 #'   min.pct.diff = 0
 #' )
 #' }
-#' myTestRun <-
-#' Run_enrichment(object = object,
-#'                    Run_DE = TRUE)
 #'
 #'
 #' @export
@@ -499,16 +496,16 @@ Run_enrichment <- function(object, Run_DE = FALSE,
       DE_res$pct.exp.1 = pct.exp_cond_x
       DE_res$pct.exp.2 = pct.exp_cond_y
       DE_res$pct.diff = DE_res$pct.exp.2 - DE_res$pct.exp.1
-      sel_markers = DE_res %>% dplyr::filter(p.val < DE_pval_cutoff,
-                                             abs(LFC) >= DE_LFC_cutoff,
-                                             abs(pct.diff) >= min.pct.diff)
+      sel_markers = DE_res %>% dplyr::filter(.data$p.val < DE_pval_cutoff,
+                                             abs(.data$LFC) >= DE_LFC_cutoff,
+                                             abs(.data$pct.diff) >= min.pct.diff)
     }
     else{
       DE_res = cbind(LFC, pct.exp_cond_x, pct.exp_cond_y) %>% as.data.frame()
       colnames(DE_res) = c("LFC", "pct.exp.1", "pct.exp.2")
       DE_res$pct.diff = DE_res$pct.exp.2 - DE_res$pct.exp.1
-      sel_markers = DE_res %>% dplyr::filter(abs(LFC) >= DE_LFC_cutoff,
-                                             abs(pct.diff) >= min.pct.diff)
+      sel_markers = DE_res %>% dplyr::filter(abs(.data$LFC) >= DE_LFC_cutoff,
+                                             abs(.data$pct.diff) >= min.pct.diff)
     }
     if (nrow(sel_markers) == 0){
       message("No differential markers were found, maybe consider less strict cutoffs")

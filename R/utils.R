@@ -13,62 +13,12 @@ mismatch_df = function (x, y, on = NULL){
   x[keys$x %nin% keys$y, , drop = FALSE]
 }
 
+#' @importFrom rlang :=
 rename_if_exists <- function(data, old_name, new_name) {
   if (old_name %in% colnames(data)) {
-    data <- rename(data, !!new_name := !!old_name)
+    data <- dplyr::rename(data, !!new_name := !!old_name)
   }
   data
-}
-
-
-to_ORA_query = function(dat, metadata = NULL, DE_data = T,
-                        min.pct.exp = 0.5){
-  if (DE_data){
-    #TODO Check if we need to filer by LFC and pval first
-    final_markers_per_cond = dat %>%
-      dplyr::group_by(condition) %>%
-      dplyr::summarise(
-        markers = rlang::set_names(list(markers), condition[1]),
-        .groups = "drop"
-      ) %>%
-      dplyr::pull(markers)
-  }
-  else{
-    if (is.matrix(dat) & !is.null(metadata)){
-      message("We recommend performing differential expression before ORA enrichment")
-      final_markers_per_cond = list()
-      for (cond in unique(metadata$condition)){
-        cond_cells = metadata$cell[which(metadata$condition == cond)]
-        subset = dat[,which(colnames(dat) %in% cond_cells)]
-        pct_detected = data.frame(marker = rownames(subset),
-                                  pct.exp = apply(subset, 1, function(x){
-                                    length(which(x != 0)) / length(x)
-                                  }),
-                                  condition = cond)
-        markers_per_cond = pct_detected$marker[which(pct_detected$pct.exp >= min.pct.exp)]
-        if (length(markers_per_cond) == 0){
-          final_markers_per_cond[[cond]] = character(0)
-        }
-        else{
-          final_markers_per_cond[[cond]] = markers_per_cond
-        }
-      }
-    }
-    else if (is.data.frame(dat)){
-      final_markers_per_cond = dat %>%
-        dplyr::group_by(condition) %>%
-        dplyr::summarise(
-          markers = rlang::set_names(list(markers), condition[1]),
-          .groups = "drop"
-        ) %>%
-        dplyr::pull(markers)
-    }
-    else if (is.matrix(dat) & is.null(metadata)){
-      stop("Cannot map cells to condition, please provide cell metadata")
-    }
-  }
-
-  return(final_markers_per_cond)
 }
 
 list_backgrounds = function(feat_type){
@@ -298,8 +248,10 @@ calc_ambiguity = function(input_iso_list, weights = NULL){
 #'   DE_LFC_cutoff = 0,
 #'   min.pct.diff = 0
 #' )
-#' enrich_ORA_summary = passed_filters_per_term(unfiltered_df = ORA_res$upregulated$unfiltered_enrich_res,
-#' enrich_type = "ORA")
+#' enrich_ORA_summary <- passed_filters_per_term(
+#'   unfiltered_df = ORA_res$upregulated$unfiltered_enrich_res,
+#'   enrich_type = "ORA"
+#' )
 #' }
 #'
 #' @export
@@ -320,21 +272,21 @@ passed_filters_per_term = function(unfiltered_df,
 
 
   pass_filts = unfiltered_df %>%
-    dplyr::group_by(bootstrap) %>%
-    dplyr::mutate(q.value = p.adjust(p_value, method = "fdr"))  %>%
+    dplyr::group_by(.data$bootstrap) %>%
+    dplyr::mutate(q.value = stats::p.adjust(.data$p_value, method = "fdr"))  %>%
     dplyr::ungroup() %>%
-    dplyr::group_by(Term) %>%
-    dplyr::mutate(n = median(TP, na.rm = T),
-                  p.value_combined = metap::sumlog(p_value)[["p"]],
-                  q.value_combined = metap::sumlog(q.value)[["p"]],
-                  min_TP = ifelse(n >= min_intersection, 1, 0),
-                  significant_adj_boot = ifelse(p.value_combined < alpha_cutoff, 1, 0),
-                  significant_adj_terms = ifelse(q.value_combined < alpha_cutoff, 1, 0),
-                  pass_boot_fraction = ifelse(fraction > boot_fract_cutoff,1,0)) %>%
+    dplyr::group_by(.data$Term) %>%
+    dplyr::mutate(n = stats::median(.data$TP, na.rm = T),
+                  p.value_combined = metap::sumlog(.data$p_value)[["p"]],
+                  q.value_combined = metap::sumlog(.data$q.value)[["p"]],
+                  min_TP = ifelse(.data$n >= min_intersection, 1, 0),
+                  significant_adj_boot = ifelse(.data$p.value_combined < alpha_cutoff, 1, 0),
+                  significant_adj_terms = ifelse(.data$q.value_combined < alpha_cutoff, 1, 0),
+                  pass_boot_fraction = ifelse(.data$fraction > boot_fract_cutoff,1,0)) %>%
     dplyr::ungroup() %>%
-    dplyr::filter(Term != "") %>%
-    dplyr::select(Term, min_TP, significant_adj_boot,
-                  significant_adj_terms, pass_boot_fraction) %>%
+    dplyr::filter(.data$Term != "") %>%
+    dplyr::select(.data$Term, .data$min_TP, .data$significant_adj_boot,
+                  .data$significant_adj_terms, .data$pass_boot_fraction) %>%
     dplyr::distinct()
 
   pass_all = rowSums(pass_filts[,-1]) / (ncol(pass_filts) - 1)
@@ -352,9 +304,9 @@ match_LUT_to_Term = function(df, LUT){
   else{
     updated_df = df %>%
       dplyr::left_join(LUT, by = c("Term" = "ID")) %>%
-      dplyr::select(-Term) %>%
+      dplyr::select(-.data$Term) %>%
       dplyr::rename("Term" = "name") %>%
-      dplyr::relocate(Term)
+      dplyr::relocate(.data$Term)
 
     return(updated_df)
   }

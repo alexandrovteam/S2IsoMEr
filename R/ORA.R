@@ -55,8 +55,8 @@ Run_simple_ORA = function(marker_list, background, custom_universe = NULL,
   ORA_res = ORA_res[[1]]
   ORA_final = ORA_conting %>% dplyr::left_join(ORA_res)
   ORA_final = ORA_final %>%
-    mutate(q.value = p.adjust(p_value, "BH")) %>%
-    dplyr::filter(TP >= min_intersection, p_value < alpha_cutoff)
+    dplyr::mutate(q.value = stats::p.adjust(.data$p_value, "BH")) %>%
+    dplyr::filter(.data$TP >= min_intersection, .data$p_value < alpha_cutoff)
 
   colnames(ORA_final)[which(colnames(ORA_final) == "source")] = "Term"
 
@@ -239,28 +239,28 @@ simplify_hypergeom_bootstrap = function(bootstrap_list,term_list,universe = NULL
 
   boot_enrich_res = boot_conting_res %>%
     dplyr::left_join(enrich_res, by = c("Term","bootstrap")) %>%
-    dplyr::mutate(padj = p.adjust(p_value, "BH")) %>%
-    dplyr::group_by(Term) %>%
-    dplyr::mutate(fraction = length(Term) / length(bootstrap_list)) %>%
+    dplyr::mutate(padj = stats::p.adjust(.data$p_value, "BH")) %>%
+    dplyr::group_by(.data$Term) %>%
+    dplyr::mutate(fraction = length(.data$Term) / length(bootstrap_list)) %>%
     dplyr::ungroup()
 
 
   final_enrich_res = boot_enrich_res %>%
-    dplyr::filter(fraction > boot_fract_cutoff) %>%
-    dplyr::group_by(bootstrap) %>%
-    dplyr::mutate(q.value = p.adjust(p_value, method = "fdr"))  %>%
-    dplyr::group_by(Term) %>%
-    dplyr::summarise(n = median(TP, na.rm = T),
-                     ES_median = median(OR, na.rm = T),
-                     ES_sd = sd(OR, na.rm = T),
-                     p.value_combined = metap::sumlog(p_value)[["p"]],
-                     q.value_combined = metap::sumlog(q.value)[["p"]],
-                     fraction.bootstrap.presence = median(fraction, na.rm = T)) %>%
-    dplyr::arrange(q.value_combined) %>%
-    dplyr::filter(n >= min_intersection,
-                  q.value_combined < q.val_cutoff,
-                  p.value_combined < alpha_cutoff,
-                  Term != "") %>%
+    dplyr::filter(.data$fraction > boot_fract_cutoff) %>%
+    dplyr::group_by(.data$bootstrap) %>%
+    dplyr::mutate(q.value = stats::p.adjust(.data$p_value, method = "fdr"))  %>%
+    dplyr::group_by(.data$Term) %>%
+    dplyr::summarise(n = stats::median(.data$TP, na.rm = T),
+                     ES_median = stats::median(.data$OR, na.rm = T),
+                     ES_sd = stats::sd(.data$OR, na.rm = T),
+                     p.value_combined = metap::sumlog(.data$p_value)[["p"]],
+                     q.value_combined = metap::sumlog(.data$q.value)[["p"]],
+                     fraction.bootstrap.presence = stats::median(.data$fraction, na.rm = T)) %>%
+    dplyr::arrange(.data$q.value_combined) %>%
+    dplyr::filter(.data$n >= min_intersection,
+                  .data$q.value_combined < q.val_cutoff,
+                  .data$p.value_combined < alpha_cutoff,
+                  .data$Term != "") %>%
     dplyr::ungroup() %>%
     as.data.frame()
 

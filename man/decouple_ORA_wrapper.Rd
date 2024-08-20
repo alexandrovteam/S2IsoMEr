@@ -46,9 +46,12 @@ term_list <- list(
   "Term2" = c("B4", "B5", "B6", "B9")
 )
 universe <- c("B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9")
-results <- decouple_ORA_wrapper(marker_list, term_list, universe, pass_adjust = TRUE, seed = 42, ORA_boot = FALSE)
+results <- decouple_ORA_wrapper(
+  marker_list, term_list, universe,
+  pass_adjust = TRUE, seed = 42, ORA_boot = FALSE
+)
 }
 }
 \references{
-Badia-i-Mompel, P., Nagai, J. S., & Saez-Rodriguez, J. (2022). decoupleR: A flexible tool to handle various modes of biological network analysis. \emph{Bioinformatics Advances}, 2(1), vbac016. \href{https://academic.oup.com/bioinformaticsadvances/article/2/1/vbac016/6544613?login=true}{https://doi.org/10.1093/bioadv/vbac016}
+Badia-i-Mompel, P., Nagai, J. S., & Saez-Rodriguez, J. (2022). decoupleR: A flexible tool to handle various modes of biological network analysis. \emph{Bioinformatics Advances}, 2(1), vbac016. \href{https://academic.oup.com/bioinformaticsadvances/article/2/1/vbac016/6544613}{https://doi.org/10.1093/bioadv/vbac016}
 }

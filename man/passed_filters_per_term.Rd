@@ -71,8 +71,10 @@ ORA_res <- Run_enrichment(
   DE_LFC_cutoff = 0,
   min.pct.diff = 0
 )
-enrich_ORA_summary = passed_filters_per_term(unfiltered_df = ORA_res$upregulated$unfiltered_enrich_res,
-enrich_type = "ORA")
+enrich_ORA_summary <- passed_filters_per_term(
+  unfiltered_df = ORA_res$upregulated$unfiltered_enrich_res,
+  enrich_type = "ORA"
+)
 }
 
 }

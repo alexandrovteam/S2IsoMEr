@@ -1,4 +1,4 @@
-^bmetenrichr\.Rproj$
+^S2IsoMEr\.Rproj$
 ^\.Rproj\.user$
 ^doc$
 ^Meta$
@@ -7,3 +7,4 @@
 ^docs$
 ^pkgdown$
 ^\.github$
+^cran-comments\.md$

@@ -20,13 +20,13 @@
   pb = progress::progress_bar$new(total = n, incomplete = " ")
 
   tidyr::expand_grid(source = names(regulons), condition = names(targets)) %>%
-    dplyr::rowwise(source, condition) %>%
+    dplyr::rowwise(.data$source, .data$condition) %>%
     dplyr::summarise(.ora_fisher_exact_test(
       dat = adjust_conting_iso(
-        expected = regulons[[source]],
-        exp_iso = exp_iso_list[[source]],
-        observed = targets[[condition]],
-        obs_iso = obs_iso_list[[condition]],
+        expected = regulons[[.data$source]],
+        exp_iso = exp_iso_list[[.data$source]],
+        observed = targets[[.data$condition]],
+        obs_iso = obs_iso_list[[.data$condition]],
         universe_iso = univ_iso,
         pass = pass_adjust
       ),
@@ -35,13 +35,14 @@
     ),
     .groups = "drop"
     ) %>%
-    dplyr::select(source, condition,
-                  p_value = p.value, everything()
+    dplyr::select(.data$source, .data$condition,
+                  p_value = p.value, dplyr::everything()
     ) %>%
-    dplyr::mutate(score = -log10(p_value)) %>%
+    dplyr::mutate(score = -log10(.data$p_value)) %>%
     tibble::add_column(statistic = "ora", .before = 1) %>%
-    dplyr::select(statistic, source, condition, score, p_value,
-                  TP, FP, FN, TN, TP_markers)
+    dplyr::select(.data$statistic, .data$source, .data$condition, .data$score,
+                  .data$p_value,
+                  .data$TP, .data$FP, .data$FN, .data$TN, .data$TP_markers)
 }
 .ora_analysis_simple <- function(regulons, targets, universe,pass_adjust = F, ...) {
 
@@ -57,23 +58,24 @@
   n_univ = length(unique(universe))
 
   tidyr::expand_grid(source = names(regulons), condition = names(targets)) %>%
-    dplyr::rowwise(source, condition) %>%
+    dplyr::rowwise(.data$source, .data$condition) %>%
     dplyr::summarise(.ora_fisher_exact_test(
-      dat = list("obs" = targets[[condition]],
-                 "exp" = regulons[[source]],
+      dat = list("obs" = targets[[.data$condition]],
+                 "exp" = regulons[[.data$source]],
                  "n_bg" = n_univ),
       pbar = pb,
       ...
       ),
     .groups = "drop"
     ) %>%
-    dplyr::select(source, condition,
-                  p_value = p.value, everything()
+    dplyr::select(.data$source, .data$condition,
+                  p_value = p.value, dplyr::everything()
     ) %>%
-    dplyr::mutate(score = -log10(p_value)) %>%
+    dplyr::mutate(score = -log10(.data$p_value)) %>%
     tibble::add_column(statistic = "ora", .before = 1) %>%
-    dplyr::select(statistic, source, condition, score, p_value,
-                  TP, FP, FN, TN,TP_markers)
+    dplyr::select(.data$statistic, .data$source, .data$condition, .data$score,
+                  .data$p_value,
+                  .data$TP, .data$FP, .data$FN, .data$TN,.data$TP_markers)
 }
 
 .ora_fisher_exact_test <- function(dat,pbar, ...) {
@@ -132,7 +134,7 @@ ora_conting_decoupleR = function(dat, as_matrix = T) {
 #' \item{ORA_conting}{A data frame with the ORA contingency table, including columns for source, condition, TP, FP, FN, and TN.}
 #' @details This function is a wrapper around the `run_ora` function from the `decoupleR` package. For more details, please refer to the [decoupleR documentation](https://saezlab.github.io/decoupleR/reference/run_ora.html).
 #' @references
-#' Badia-i-Mompel, P., Nagai, J. S., & Saez-Rodriguez, J. (2022). decoupleR: A flexible tool to handle various modes of biological network analysis. *Bioinformatics Advances*, 2(1), vbac016. [https://doi.org/10.1093/bioadv/vbac016](https://academic.oup.com/bioinformaticsadvances/article/2/1/vbac016/6544613?login=true)
+#' Badia-i-Mompel, P., Nagai, J. S., & Saez-Rodriguez, J. (2022). decoupleR: A flexible tool to handle various modes of biological network analysis. *Bioinformatics Advances*, 2(1), vbac016. [https://doi.org/10.1093/bioadv/vbac016](https://academic.oup.com/bioinformaticsadvances/article/2/1/vbac016/6544613)
 #' @examples
 #' \dontrun{
 #' marker_list <- c("B2", "B5", "B8")
@@ -141,7 +143,10 @@ ora_conting_decoupleR = function(dat, as_matrix = T) {
 #'   "Term2" = c("B4", "B5", "B6", "B9")
 #' )
 #' universe <- c("B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9")
-#' results <- decouple_ORA_wrapper(marker_list, term_list, universe, pass_adjust = TRUE, seed = 42, ORA_boot = FALSE)
+#' results <- decouple_ORA_wrapper(
+#'   marker_list, term_list, universe,
+#'   pass_adjust = TRUE, seed = 42, ORA_boot = FALSE
+#' )
 #' }
 #' @export
 decouple_ORA_wrapper = function(marker_list,term_list, universe,
@@ -157,8 +162,11 @@ decouple_ORA_wrapper = function(marker_list,term_list, universe,
   }
 
 
-  ORA_conting = ORA_res %>% dplyr::select(source, condition, TP, FP, FN, TN, TP_markers)
-  ORA_res = ORA_res %>% dplyr::select(statistic, source, condition, score, p_value)
+  ORA_conting = ORA_res %>% dplyr::select(.data$source, .data$condition, .data$TP,
+                                          .data$FP, .data$FN, .data$TN, .data$TP_markers)
+  ORA_res = ORA_res %>% dplyr::select(.data$statistic,
+                                      .data$source, .data$condition, .data$score,
+                                      .data$p_value)
 
   return(list(ORA_res, ORA_conting))
 }

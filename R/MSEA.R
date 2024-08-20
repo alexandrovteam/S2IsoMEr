@@ -36,6 +36,8 @@ Run_simple_MSEA = function(object,min_pathway_size = 3){
     utils::download.file(url, destfile = tmp)
     source(tmp)
 
+    utils::globalVariables("ks.test.2")
+
     enrichment_analysis = sapply(names(bg), function(term){
 
       members_logi <- rownames(scmat_data) %in% bg[[term]]
@@ -58,7 +60,7 @@ Run_simple_MSEA = function(object,min_pathway_size = 3){
                    p_value = ks_results$p.value)
       }
 
-    }, simplify = F) %>% bind_rows()
+    }, simplify = F) %>% dplyr::bind_rows()
   }
   else{
     mols = names(object$annotations)
@@ -77,7 +79,8 @@ Run_simple_MSEA = function(object,min_pathway_size = 3){
     fgsea_res = simple_fgsea(pathways = bg,
                                stats    = mols_ranks,
                                minSize  = min_pathway_size, scoreType = "std")
-    fgsea_res = fgsea_res %>% dplyr::select(pathway, size, ES, pval, padj, NES)
+    fgsea_res = fgsea_res %>% dplyr::select(.data$pathway, .data$size, .data$ES,
+                                            .data$pval, .data$padj, .data$NES)
     enrichment_analysis = fgsea_res
   }
 
@@ -86,7 +89,7 @@ Run_simple_MSEA = function(object,min_pathway_size = 3){
   colnames(enrichment_analysis)[which(colnames(enrichment_analysis) == "pathway")] = "Term"
 
   enrichment_analysis = enrichment_analysis %>%
-    dplyr::filter(Term != "all")
+    dplyr::filter(.data$Term != "all")
 
   enrichment_analysis$Term <-
     object$LUT$name[match(enrichment_analysis$Term, object$LUT$ID)]
@@ -212,7 +215,7 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,
 
   message(paste0(
     format(
-      weighted.mean(fraction_matched_to_pathway) * 100,
+      stats::weighted.mean(fraction_matched_to_pathway) * 100,
       digits = 4,
       nsmall = 1
     ),
@@ -239,6 +242,8 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,
     url <- "https://raw.githubusercontent.com/franapoli/signed-ks-test/master/signed-ks-test.R"
     utils::download.file(url, destfile = tmp)
     source(tmp)
+
+    utils::globalVariables("ks.test.2")
 
 
     enrichment_analysis <-
@@ -268,8 +273,8 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,
                        p_value = ks_results$p.value)
           }
 
-        }, simplify = F) %>% bind_rows()
-      },simplify = F) %>% bind_rows()
+        }, simplify = F) %>% dplyr::bind_rows()
+      },simplify = F) %>% dplyr::bind_rows()
   }
   else if (object$gsea.method == "fgsea"){
     enrichment_analysis <-
@@ -299,7 +304,9 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,
                                  minSize  = min_pathway_size,
                                  scoreType = ifelse(any(boot_ranks < 0), "std", "pos"))
         fgsea_res$bootstrap = bootstrap_i
-        fgsea_res = fgsea_res %>% dplyr::select(pathway, bootstrap, size, ES, pval, NES)
+        fgsea_res = fgsea_res %>% dplyr::select(.data$pathway, .data$bootstrap,
+                                                .data$size, .data$ES, .data$pval,
+                                                .data$NES)
         fgsea_res
       }) %>% dplyr::bind_rows()
     colnames(enrichment_analysis)[which(colnames(enrichment_analysis) == "pval")] = "p_value"
@@ -308,25 +315,25 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,
   }
 
   enrichment_analysis = enrichment_analysis %>%
-    dplyr::group_by(Term) %>%
-    dplyr::mutate(fraction = length(Term) / length(bootstrapped_sublist)) %>%
+    dplyr::group_by(.data$Term) %>%
+    dplyr::mutate(fraction = length(.data$Term) / length(bootstrapped_sublist)) %>%
     dplyr::ungroup()
 
   enrichment_analysis$Term <-
     object$LUT$name[match(enrichment_analysis$Term, object$LUT$ID)]
 
   summarized_enrichment_results <- enrichment_analysis %>%
-    dplyr::filter(fraction > boot_fract_cutoff, !is.na(NES)) %>%
-    dplyr::group_by(bootstrap) %>%
-    dplyr::mutate(q.value = p.adjust(p_value, method = "fdr"))  %>%
-    dplyr::group_by(Term) %>%
-    dplyr::summarise(n = median(n, na.rm = T),
-              ES_median = median(NES, na.rm = T),
-              ES_sd = sd(NES, na.rm = T),
-              p.value_combined = metap::sumlog(p_value)[["p"]],
-              q.value_combined = metap::sumlog(q.value)[["p"]],
-              fraction.bootstrap.presence = median(fraction, na.rm = T)) %>%
-    dplyr::arrange(q.value_combined)
+    dplyr::filter(.data$fraction > boot_fract_cutoff, !is.na(.data$NES)) %>%
+    dplyr::group_by(.data$bootstrap) %>%
+    dplyr::mutate(q.value = stats::p.adjust(.data$p_value, method = "fdr"))  %>%
+    dplyr::group_by(.data$Term) %>%
+    dplyr::summarise(n = stats::median(.data$n, na.rm = T),
+              ES_median = stats::median(.data$NES, na.rm = T),
+              ES_sd = stats::sd(.data$NES, na.rm = T),
+              p.value_combined = metap::sumlog(.data$p_value)[["p"]],
+              q.value_combined = metap::sumlog(.data$q.value)[["p"]],
+              fraction.bootstrap.presence = stats::median(.data$fraction, na.rm = T)) %>%
+    dplyr::arrange(.data$q.value_combined)
 
   object$enrichment_analysis <- list(enrichment_results = summarized_enrichment_results,
                                      per_bootstrap_enrich_results = enrichment_analysis,
