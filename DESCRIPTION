@@ -1,6 +1,6 @@
 Package: S2IsoMEr
 Title: Spatial and Single-Cell Isomeric Metabolite Enrichment in R
-Version: 0.3.0
+Version: 0.4.0
 Authors@R: 
     c(
     person("Bishoy", "Wadie", role = c("aut", "cre"), email = "bishoy.wadie@embl.de",
