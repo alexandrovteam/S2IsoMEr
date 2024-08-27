@@ -14,12 +14,12 @@ Load_background(
 \item{mol_type}{Character indicating molecule type. Can be either \code{Lipid} for Lipids and \code{Metabo} for small molecules}
 
 \item{bg_type}{Character indicating background type :
-\itemize{
-\item{\verb{LION : }}{LION ontology for Lipids only}
-\item{\verb{main_class : }}{Level 1 classification - finer classification compared to super_class}
-\item{\verb{super_class : }}{Level 0 classification}
-\item{\verb{sub_class : }}{Level 2 classification - finer classification compared to main_class}
-\item{\verb{pathways : }}{Biological pathways based upon KEGG, Reactome, and SMPDB}
+\describe{
+\item{\code{"LION"}}{LION ontology for lipids only.}
+\item{\code{"main_class"}}{Level 1 classification - finer classification compared to super_class.}
+\item{\code{"super_class"}}{Level 0 classification.}
+\item{\code{"sub_class"}}{Level 2 classification - finer classification compared to main_class.}
+\item{\code{"pathways"}}{Biological pathways based on KEGG, Reactome, and SMPDB.}
 }}
 
 \item{feature_type}{Character indicating input feature type. Can be either \code{sf} for sum formula or ion

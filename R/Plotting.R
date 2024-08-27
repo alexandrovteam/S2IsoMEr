@@ -543,7 +543,7 @@ ridge_bootstraps = function(enrich_res, terms_of_interest, condition = NULL){
   }
 
   ggplot2::ggplot(plot_data, ggplot2::aes(x = .data$TP, y = .data$Term,
-                                 fill = ggplot2::after_stat(density))) +
+                                 fill = ggplot2::after_stat(stats::density))) +
     ggridges::stat_density_ridges(geom = "density_ridges_gradient",calc_ecdf = T,
                                   scale = 0.95) +
     ggplot2::scale_fill_viridis_c(name = "Density", direction = 1) +

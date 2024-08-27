@@ -46,13 +46,13 @@ check_feat_type = function(feats){
 #'
 #' @param mol_type Character indicating molecule type. Can be either `Lipid` for Lipids and `Metabo` for small molecules
 #' @param bg_type Character indicating background type :
-#' \itemize{
-#'  \item{`LION : `}{LION ontology for Lipids only}
-#'  \item{`main_class : `}{Level 1 classification - finer classification compared to super_class}
-#'  \item{`super_class : `}{Level 0 classification}
-#'  \item{`sub_class : `}{Level 2 classification - finer classification compared to main_class}
-#'  \item{`pathways : `}{Biological pathways based upon KEGG, Reactome, and SMPDB}
-#'  }
+#' \describe{
+#'  \item{`"LION"`}{LION ontology for lipids only.}
+#'  \item{`"main_class"`}{Level 1 classification - finer classification compared to super_class.}
+#'  \item{`"super_class"`}{Level 0 classification.}
+#'  \item{`"sub_class"`}{Level 2 classification - finer classification compared to main_class.}
+#'  \item{`"pathways"`}{Biological pathways based on KEGG, Reactome, and SMPDB.}
+#' }
 #' @param feature_type Character indicating input feature type. Can be either `sf` for sum formula or ion
 #' and `name` for molecule name.
 #'

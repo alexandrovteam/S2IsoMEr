@@ -31,6 +31,7 @@ Run_simple_MSEA = function(object,min_pathway_size = 3){
 
   if (object$gsea.method == "ks.signed"){
 
+    ks.test.2 = NULL
     tmp = tempfile()
     url <- "https://raw.githubusercontent.com/franapoli/signed-ks-test/master/signed-ks-test.R"
     utils::download.file(url, destfile = tmp)
@@ -238,12 +239,11 @@ Run_bootstrap_MSEA = function(object,n_bootstraps = 50,
   cat("\n")
   if (object$gsea.method == "ks_signed"){
 
+    ks.test.2 = NULL
     tmp = tempfile()
     url <- "https://raw.githubusercontent.com/franapoli/signed-ks-test/master/signed-ks-test.R"
     utils::download.file(url, destfile = tmp)
     source(tmp)
-
-    utils::globalVariables("ks.test.2")
 
 
     enrichment_analysis <-
