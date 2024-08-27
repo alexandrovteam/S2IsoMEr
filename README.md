@@ -23,4 +23,5 @@ devtools::install_github("alexandrovteam/S2IsoMEr")
 
 ## Citation
 
-bioRxiv paper coming soon.
+Check out our preprint on bioRxiv: [Enrichment analysis for spatial and single-cell metabolomics accounting for molecular ambiguity](https://www.biorxiv.org/content/10.1101/2024.08.23.609355v1).
+
