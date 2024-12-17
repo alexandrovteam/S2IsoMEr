@@ -253,8 +253,8 @@ simplify_hypergeom_bootstrap = function(bootstrap_list,term_list,universe = NULL
     dplyr::summarise(n = stats::median(.data$TP, na.rm = T),
                      ES_median = stats::median(.data$OR, na.rm = T),
                      ES_sd = stats::sd(.data$OR, na.rm = T),
-                     p.value_combined = metap::sumlog(.data$p_value)[["p"]],
-                     q.value_combined = metap::sumlog(.data$q.value)[["p"]],
+                     p.value_combined = metap_sumlog_pvals(.data$p_value)[["p"]],
+                     q.value_combined = metap_sumlog_pvals(.data$q.value)[["p"]],
                      fraction.bootstrap.presence = stats::median(.data$fraction, na.rm = T)) %>%
     dplyr::arrange(.data$q.value_combined) %>%
     dplyr::filter(.data$n >= min_intersection,

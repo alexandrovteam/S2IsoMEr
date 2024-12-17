@@ -69,8 +69,8 @@ barplot_MSEA_boot.S2IsoMEr <- function(object, min.annotations = 2, q.value.cuto
     dplyr::mutate(q.value = stats::p.adjust(.data$p_value, method = "fdr")) %>%
     dplyr::ungroup() %>%
     dplyr::group_by(.data$Term) %>%
-    dplyr::mutate(p.value_combined = metap::sumlog(.data$p_value)[["p"]],
-                  q.value_combined = metap::sumlog(.data$q.value)[["p"]]) %>%
+    dplyr::mutate(p.value_combined = metap_sumlog_pvals(.data$p_value)[["p"]],
+                  q.value_combined = metap_sumlog_pvals(.data$q.value)[["p"]]) %>%
     dplyr::arrange(.data$q.value_combined) %>%
     dplyr::ungroup()%>%
     dplyr::filter(.data$n > min.annotations,

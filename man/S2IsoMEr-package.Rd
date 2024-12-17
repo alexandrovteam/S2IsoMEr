@@ -12,6 +12,7 @@ R package performing Overrepresentation analysis (ORA) and Metabolite Set Enrich
 Useful links:
 \itemize{
   \item \url{https://alexandrovteam.github.io/S2IsoMEr/}
+  \item Report bugs at \url{https://github.com/alexandrovteam/S2IsoMEr/issues}
 }
 
 }

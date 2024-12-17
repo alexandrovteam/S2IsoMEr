@@ -88,7 +88,7 @@
     alternative='greater',
     !!!list(...)
   ) %>%
-    broom::glance() %>%
+    generics::glance() %>%
     cbind(conting)
 }
 ora_conting_decoupleR = function(dat, as_matrix = T) {

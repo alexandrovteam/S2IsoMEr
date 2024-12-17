@@ -40,6 +40,10 @@ simple_fgsea = function(pathways,
                         scoreType   = c("std", "pos", "neg"),
                         nPermSimple = 1000){
 
+  if (!requireNamespace("fgsea", quietly = TRUE)) {
+    stop("The 'fgsea' package is required for this function. Please install it with BiocManager::install('fgsea').")
+  }
+
   ties <- sum(duplicated(stats[stats != 0]))
   if (ties != 0) {
     warning("There are ties in the preranked stats (", paste(round(ties *

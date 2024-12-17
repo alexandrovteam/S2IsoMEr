@@ -218,7 +218,7 @@ calc_ambiguity = function(input_iso_list, weights = NULL){
 #'     \item pass_all_filts (Whether term passes all filters)
 #'   }
 #'
-#' @details The function adjusts p-values using the False Discovery Rate (FDR) method and calculates combined p-values using the `metap::sumlog` function. It then applies several filters to determine which terms pass all criteria.
+#' @details The function adjusts p-values using the False Discovery Rate (FDR) method and calculates combined p-values using the `metap_sumlog_pvals` function. It then applies several filters to determine which terms pass all criteria.
 #'
 #' @examples
 #' \dontrun{
@@ -277,8 +277,8 @@ passed_filters_per_term = function(unfiltered_df,
     dplyr::ungroup() %>%
     dplyr::group_by(.data$Term) %>%
     dplyr::mutate(n = stats::median(.data$TP, na.rm = T),
-                  p.value_combined = metap::sumlog(.data$p_value)[["p"]],
-                  q.value_combined = metap::sumlog(.data$q.value)[["p"]],
+                  p.value_combined = metap_sumlog_pvals(.data$p_value)[["p"]],
+                  q.value_combined = metap_sumlog_pvals(.data$q.value)[["p"]],
                   min_TP = ifelse(.data$n >= min_intersection, 1, 0),
                   significant_adj_boot = ifelse(.data$p.value_combined < alpha_cutoff, 1, 0),
                   significant_adj_terms = ifelse(.data$q.value_combined < alpha_cutoff, 1, 0),
@@ -345,4 +345,103 @@ convert_to_log10 <- function(vec) {
   return(vec)
 }
 
+limma_ranksumtestwithcor <- function (index, statistics, correlation = 0, df = Inf){
+  n <- length(statistics)
+  r <- rank(statistics)
+  r1 <- r[index]
+  n1 <- length(r1)
+  n2 <- n - n1
+  U <- n1 * n2 + n1 * (n1 + 1)/2 - sum(r1)
+  mu <- n1 * n2/2
+  if (correlation == 0 || n1 == 1) {
+    sigma2 <- n1 * n2 * (n + 1)/12
+  }
+  else {
+    sigma2 <- asin(1) * n1 * n2 + asin(0.5) * n1 * n2 *
+      (n2 - 1) + asin(correlation/2) * n1 * (n1 - 1) *
+      n2 * (n2 - 1) + asin((correlation + 1)/2) * n1 *
+      (n1 - 1) * n2
+    sigma2 <- sigma2/2/pi
+  }
+  TIES <- (length(r) != length(unique(r)))
+  if (TIES) {
+    NTIES <- table(r)
+    adjustment <- sum(NTIES * (NTIES + 1) * (NTIES - 1))/(n *
+                                                            (n + 1) * (n - 1))
+    sigma2 <- sigma2 * (1 - adjustment)
+  }
+  zlowertail <- (U + 0.5 - mu)/sqrt(sigma2)
+  zuppertail <- (U - 0.5 - mu)/sqrt(sigma2)
+  pvalues <- c(less = stats::pt(zuppertail, df = df, lower.tail = FALSE),
+               greater = stats::pt(zlowertail, df = df))
+  pvalues
+}
 
+#' Combine p-values Using the Sum of Logs Method
+#'
+#' This function combines multiple p-values using Fisher's method (sum of logarithms of p-values),
+#' which is often used in meta-analysis. It computes a chi-squared statistic and the corresponding
+#' p-value, based on the assumption that the input p-values are independent. This function is adapted
+#' from the \code{sumlog} function in the \code{metap} package.
+#'
+#' @param p A numeric vector of p-values. Each p-value must lie in the range (0, 1].
+#'          Invalid values (e.g., <= 0 or > 1) are excluded.
+#' @param log.p Logical. If \code{TRUE}, the returned p-value is given as \code{log(p)}.
+#'
+#' @return A list with the following components:
+#' \describe{
+#'   \item{\code{chisq}}{The chi-squared statistic computed as \code{-2 * sum(log(p))}.}
+#'   \item{\code{df}}{The degrees of freedom, equal to \code{2 * length(validp)}.}
+#'   \item{\code{p}}{The combined p-value corresponding to the chi-squared statistic.}
+#'   \item{\code{validp}}{A vector of valid p-values after filtering out invalid ones.}
+#' }
+#'
+#' @details
+#' This function applies Fisher's method for combining p-values. It first filters out invalid
+#' p-values (values <= 0 or > 1). If fewer than two valid p-values remain, a warning is issued,
+#' and \code{NA} values are returned. If some p-values are filtered out, the function issues a
+#' warning indicating that some studies were omitted.
+#'
+#' Fisher's method is based on the chi-squared distribution, with degrees of freedom
+#' proportional to the number of valid p-values (2 * number of valid p-values).
+#'
+#' For further details on the original implementation, please refer to the
+#' \code{sumlog} function in the \code{metap} package:
+#' \url{https://cran.r-project.org/web/packages/metap/metap.pdf}
+#'
+#' @examples
+#' # Example with valid p-values
+#' pvals <- c(0.01, 0.03, 0.05, 0.2)
+#' result <- metap_sumlog_pvals(pvals)
+#' print(result)
+#'
+#' # Example with some invalid p-values
+#' pvals <- c(0.01, 0, 1.2, 0.05)
+#' result <- metap_sumlog_pvals(pvals)
+#' print(result)
+#'
+#' @references
+#' \code{sumlog} function from the \code{metap} package:
+#' \url{https://cran.r-project.org/web/packages/metap/metap.pdf}
+#'
+#' @export
+metap_sumlog_pvals <- function(p, log.p = FALSE) {
+  keep <- (p > 0) & (p <= 1)
+  invalid <- sum(1L * keep) < 2
+  if (invalid) {
+    warning("Must have at least two valid p values")
+    res <- list(chisq = NA_real_, df = NA_integer_, p = NA_real_,
+                validp = p[keep])
+  }
+  else {
+    lnp <- log(p[keep])
+    chisq <- (-2) * sum(lnp)
+    df <- 2 * length(lnp)
+    if (length(lnp) != length(p)) {
+      warning("Some studies omitted")
+    }
+    res <- list(chisq = chisq, df = df, p = stats::pchisq(chisq,
+                                                          df, lower.tail = FALSE, log.p = log.p), validp = p[keep])
+  }
+  res
+}

@@ -22,11 +22,7 @@ seurat_wilcoxDETest <- function(data.use,cells.1,cells.2,verbose = TRUE,...){
   data.use <- data.use[, c(cells.1, cells.2), drop = FALSE]
   j <- seq_len(length.out = length(x = cells.1))
 
-  my.sapply <- ifelse(
-    test = verbose && future::nbrOfWorkers() == 1,
-    yes = pbapply::pbsapply,
-    no = future.apply::future_sapply
-  )
+  my.sapply <- pbapply::pbsapply
   overflow.check <- ifelse(
     test = is.na(x = suppressWarnings(length(x = data.use[1, ]) * length(x = data.use[1, ]))),
     yes = FALSE,
@@ -37,7 +33,7 @@ seurat_wilcoxDETest <- function(data.use,cells.1,cells.2,verbose = TRUE,...){
     p_val <- my.sapply(
       X = 1:nrow(x = data.use),
       FUN = function(x) {
-        return(min(2 * min(limma::rankSumTestWithCorrelation(index = j, statistics = data.use[x, ])), 1))
+        return(min(2 * min(limma_ranksumtestwithcor(index = j, statistics = data.use[x, ])), 1))
       }
     )
   } else {

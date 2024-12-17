@@ -41,7 +41,7 @@ A data frame with binary columns indicating which terms pass the specified crite
 This function filters enrichment results based on various criteria, such as minimum intersection, significance thresholds, and bootstrapping fractions, reporting which terms passed / didn't pass which filter.
 }
 \details{
-The function adjusts p-values using the False Discovery Rate (FDR) method and calculates combined p-values using the \code{metap::sumlog} function. It then applies several filters to determine which terms pass all criteria.
+The function adjusts p-values using the False Discovery Rate (FDR) method and calculates combined p-values using the \code{metap_sumlog_pvals} function. It then applies several filters to determine which terms pass all criteria.
 }
 \examples{
 \dontrun{
