@@ -8,8 +8,8 @@
 <title>MSEA enrichment - single cell metabolomics • S2IsoMEr</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="MSEA enrichment - single cell metabolomics">
 </head>
 <body>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">S2IsoMEr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,6 +43,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/alexandrovteam/S2IsoMEr/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -61,7 +62,7 @@
 Wadie</h4>
                         
       
-
+      <small class="dont-index">Source: <a href="https://github.com/alexandrovteam/S2IsoMEr/blob/main/vignettes/MSEA_enrichment-single_cell_metabolomics.Rmd" class="external-link"><code>vignettes/MSEA_enrichment-single_cell_metabolomics.Rmd</code></a></small>
       <div class="d-none name"><code>MSEA_enrichment-single_cell_metabolomics.Rmd</code></div>
     </div>
 
@@ -261,7 +262,7 @@ that must be present in a given term for it to be considered</p></li>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_MSEA_Multi_cond.html">plot_MSEA_Multi_cond</a></span><span class="op">(</span>combined_MSEA_res <span class="op">=</span> <span class="va">Multi_cond_res</span>,</span>
 <span>                         alpha_cutoff <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span></code></pre></div>
-<p><img src="images/MSEA_multicond.jpg" style="width:100.0%"></p>
+<p><img src="images%2FMSEA_multicond.jpg" style="width:100.0%"></p>
 </div>
 <div class="section level3">
 <h3 id="barplot">Barplot<a class="anchor" aria-label="anchor" href="#barplot"></a>
@@ -269,7 +270,7 @@ that must be present in a given term for it to be considered</p></li>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/barplot_MSEA_boot.html">barplot_MSEA_boot</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">MSEA_results</span><span class="op">[[</span><span class="st">"F"</span><span class="op">]</span><span class="op">]</span>,</span>
 <span>                  q.value.cutoff <span class="op">=</span> <span class="fl">0.2</span>, by.statistic <span class="op">=</span> <span class="st">"ES"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="images/MSEA_bar.jpg" style="width:100.0%"></p>
+<p><img src="images%2FMSEA_bar.jpg" style="width:100.0%"></p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -283,7 +284,7 @@ that must be present in a given term for it to be considered</p></li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>

@@ -8,8 +8,8 @@
 <title>ORA enrichment - single cell metabolomics • S2IsoMEr</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="ORA enrichment - single cell metabolomics">
 </head>
 <body>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">S2IsoMEr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,6 +43,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/alexandrovteam/S2IsoMEr/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -61,7 +62,7 @@
 Wadie</h4>
                         
       
-
+      <small class="dont-index">Source: <a href="https://github.com/alexandrovteam/S2IsoMEr/blob/main/vignettes/ORA_enrichment-single_cell_metabolomics.Rmd" class="external-link"><code>vignettes/ORA_enrichment-single_cell_metabolomics.Rmd</code></a></small>
       <div class="d-none name"><code>ORA_enrichment-single_cell_metabolomics.Rmd</code></div>
     </div>
 
@@ -348,7 +349,7 @@ filters.</p>
 </h3>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/barplot_ORA_boot.html">barplot_ORA_boot</a></span><span class="op">(</span>ORA_boot_res <span class="op">=</span> <span class="va">ORA_boot_res</span>,collapse_multi_cond <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
-<p><img src="images/ORA_bar.jpg" style="width:100.0%"></p>
+<p><img src="images%2FORA_bar.jpg" style="width:100.0%"></p>
 </div>
 <div class="section level3">
 <h3 id="dotplot">Dotplot<a class="anchor" aria-label="anchor" href="#dotplot"></a>
@@ -356,7 +357,7 @@ filters.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multi_cond_collapse</span> <span class="op">=</span> <span class="fu">collapse_ORA_boot_multi_cond</span><span class="op">(</span>ORA_boot_res_list <span class="op">=</span> <span class="va">ORA_boot_res</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/dotplot_ORA.html">dotplot_ORA</a></span><span class="op">(</span>ORA_res <span class="op">=</span> <span class="va">multi_cond_collapse</span><span class="op">$</span><span class="va">clean_enrich_res</span><span class="op">)</span></span></code></pre></div>
-<p><img src="images/ORA_dot.jpg" style="width:100.0%"></p>
+<p><img src="images%2FORA_dot.jpg" style="width:100.0%"></p>
 </div>
 <div class="section level3">
 <h3 id="ridge-plots">Ridge plots<a class="anchor" aria-label="anchor" href="#ridge-plots"></a>
@@ -371,7 +372,7 @@ the <strong>upregulated</strong> results only.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ridge_bootstraps.html">ridge_bootstraps</a></span><span class="op">(</span>enrich_res <span class="op">=</span> <span class="va">multi_cond_collapse</span><span class="op">$</span><span class="va">unfiltered_enrich_res</span>,</span>
 <span>                 terms_of_interest <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">multi_cond_collapse</span><span class="op">$</span><span class="va">clean_enrich_res</span><span class="op">$</span><span class="va">Term</span><span class="op">)</span>,</span>
 <span>                 condition <span class="op">=</span> <span class="st">"upregulated"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="images/ORA_ridge_up.jpg" style="width:100.0%"></p>
+<p><img src="images%2FORA_ridge_up.jpg" style="width:100.0%"></p>
 </div>
 <div class="section level3">
 <h3 id="comparative-distribution-of-marker-ions">Comparative distribution of marker ions<a class="anchor" aria-label="anchor" href="#comparative-distribution-of-marker-ions"></a>
@@ -392,7 +393,7 @@ interest.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/compare_metabo_distr.html">compare_metabo_distr</a></span><span class="op">(</span><span class="va">ORA_boot_obj</span>, metabolite <span class="op">=</span> <span class="va">TP_ions</span><span class="op">[</span><span class="fl">5</span><span class="op">]</span>,</span>
 <span>                     conds_of_interest <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">cond_x</span>, <span class="va">cond_y</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="images/compare_distribution.jpg" style="width:100.0%"></p>
+<p><img src="images%2Fcompare_distribution.jpg" style="width:100.0%"></p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -406,7 +407,7 @@ interest.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>
