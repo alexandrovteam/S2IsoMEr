@@ -12,6 +12,7 @@ Authors@R:
            )       
 Description: R package performing Overrepresentation analysis (ORA) and Metabolite Set Enrichment Analysis (MSEA) on Spatial and single-cell metabolomics datasets using bootstrapping of isomeric/isobaric molecules.
 Imports: 
+    S2IsoMErData,
     pbapply,
     tidyr,
     BWStest,
@@ -34,7 +35,6 @@ Imports:
     magrittr
 Depends: 
     R (>= 3.5.0)
-    S2IsoMErData
 Remotes:
     git::https://github.com/alexandrovteam/S2IsoMErData.git
 License: MIT + file LICENSE

@@ -89,6 +89,14 @@ initEnrichment <- function(scmatrix,
                                           "BWS", "logFC"),
                            gsea.method = c("fgsea","ks_signed")){
 
+  data("metaspace_databases", package = "S2IsoMErData", envir = environment())
+  data("LION_LUT", package = "S2IsoMErData", envir = environment())
+  data("exact_masses", package = "S2IsoMErData", envir = environment())
+
+  metaspace_databases = metaspace_databases
+  LION_LUT = LION_LUT
+  exact_masses = exact_masses
+
 
   if (!is.null(annotations) & dim(scmatrix)[1] !=  length(annotations)){
     stop("single-cell matrix and annotations do not have the same length")

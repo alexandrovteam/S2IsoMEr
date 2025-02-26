@@ -4,6 +4,8 @@
 ## usethis namespace: start
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
+#' @importFrom utils data
+#' @import S2IsoMErData
 ## usethis namespace: end
 NULL
 

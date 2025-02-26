@@ -27,6 +27,8 @@
 build_iso_bg = function(annot_db = "HMDB",annot_custom_db = NULL,
                         use_LION = F, endogenous_only = T,
                         pathway_assoc_only = F,remove_expected_predicted = T){
+  data("metaspace_databases", package = "S2IsoMErData", envir = environment())
+  metaspace_databases = metaspace_databases
   if (!is.null(annot_custom_db)){
     iso_bg = .check_annot_custom_db(annot_custom_db)
     iso_bg$db = "CustomDB"
@@ -105,6 +107,9 @@ get_metabo_iso = function(sf_vec, consider_isobars = T,
                           use_LION = F, endogenous_only = T,
                           pathway_assoc_only = F,
                           remove_expected_predicted = T){
+
+  data("exact_masses", package = "S2IsoMErData", envir = environment())
+  exact_masses = exact_masses
 
   annotation_formulas_adduct <- gsub("\\+|\\-",".",sf_vec)
   annotation_formulas <- gsub("\\..+$","",annotation_formulas_adduct)

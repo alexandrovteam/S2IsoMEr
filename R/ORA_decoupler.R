@@ -1,7 +1,9 @@
 .ora_analysis <- function(regulons, targets, universe,pass_adjust = F, ...) {
 
+  data("metaspace_databases", package = "S2IsoMErData", envir = environment())
   # NSE vs. R CMD check workaround
   p.value <- NULL
+  metaspace_databases = metaspace_databases
 
   message("\nRunning ORA analysis ... \n")
 

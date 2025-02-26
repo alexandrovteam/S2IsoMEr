@@ -30,6 +30,9 @@ list_backgrounds = function(feat_type){
 }
 
 check_feat_type = function(feats){
+  data("metaspace_databases", package = "S2IsoMErData", envir = environment())
+  metaspace_databases = metaspace_databases
+
   if (length(intersect(feats,metaspace_databases$name)) > 1 ){
     feat_type = "name"
   }
@@ -84,32 +87,36 @@ Load_background = function(mol_type = c("Lipid", "Metabo"),
   if (bg_name %nin% list_backgrounds(feature_type)){
     stop("Background not found, please check list_backgrounds()")
   }
+
+  data(list = bg_name, package = "S2IsoMErData", envir = environment())
+  bg = get(bg_name)
+
   # if(bg_name == "Lipid_LION_name"){
   #
   # }
-  if (feature_type == "sf"){
-   bg = switch(bg_name,
-               "Lipid_super_class_sf" = LipidMaps_category_sf,
-               "Lipid_main_class_sf" = LipidMaps_main_class_sf,
-               "Lipid_sub_class_sf" = LipidMaps_sub_class_sf,
-               "Lipid_pathways_sf" = LipidMaps_pathway_sf,
-               "Metabo_super_class_sf" = Metabo_super_class_sf,
-               "Metabo_main_class_sf" = Metabo_class_sf,
-               "Metabo_sub_class_sf" = Metabo_sub_class_sf,
-               "Metabo_pathways_sf" = Metabo_pathway_sf)
-  }
-  if (feature_type == "name"){
-    bg = switch(bg_name,
-                "Lipid_super_class_name" = LipidMaps_category_name,
-                "Lipid_main_class_name" = LipidMaps_main_class_name,
-                "Lipid_sub_class_name" = LipidMaps_sub_class_name,
-                "Lipid_pathways_name" = LipidMaps_pathway_name,
-                "Lipid_LION_name" = pathway_list_LION,
-                "Metabo_super_class_name" = Metabo_super_class_name,
-                "Metabo_main_class_name" = Metabo_class_name,
-                "Metabo_sub_class_name" = Metabo_sub_class_name,
-                "Metabo_pathways_name" = Metabo_pathway_name)
-  }
+  # if (feature_type == "sf"){
+  #  bg = switch(bg_name,
+  #              "Lipid_super_class_sf" = LipidMaps_category_sf,
+  #              "Lipid_main_class_sf" = LipidMaps_main_class_sf,
+  #              "Lipid_sub_class_sf" = LipidMaps_sub_class_sf,
+  #              "Lipid_pathways_sf" = LipidMaps_pathway_sf,
+  #              "Metabo_super_class_sf" = Metabo_super_class_sf,
+  #              "Metabo_main_class_sf" = Metabo_class_sf,
+  #              "Metabo_sub_class_sf" = Metabo_sub_class_sf,
+  #              "Metabo_pathways_sf" = Metabo_pathway_sf)
+  # }
+  # if (feature_type == "name"){
+  #   bg = switch(bg_name,
+  #               "Lipid_super_class_name" = LipidMaps_category_name,
+  #               "Lipid_main_class_name" = LipidMaps_main_class_name,
+  #               "Lipid_sub_class_name" = LipidMaps_sub_class_name,
+  #               "Lipid_pathways_name" = LipidMaps_pathway_name,
+  #               "Lipid_LION_name" = pathway_list_LION,
+  #               "Metabo_super_class_name" = Metabo_super_class_name,
+  #               "Metabo_main_class_name" = Metabo_class_name,
+  #               "Metabo_sub_class_name" = Metabo_sub_class_name,
+  #               "Metabo_pathways_name" = Metabo_pathway_name)
+  # }
   return(bg)
 }
 
