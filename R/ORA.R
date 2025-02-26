@@ -8,6 +8,8 @@
 #' @param alpha_cutoff A numeric value indicating the alpha cutoff for significance.
 #' @param min_intersection An integer specifying the minimum intersection required between input list and a given term in background.
 #' @return A dataframe containing the ORA results for each group of markers.
+#' @references
+#' Badia-i-Mompel, P., Nagai, J. S., & Saez-Rodriguez, J. (2022). decoupleR: A flexible tool to handle various modes of biological network analysis. *Bioinformatics Advances*, 2(1), vbac016. [https://doi.org/10.1093/bioadv/vbac016](https://academic.oup.com/bioinformaticsadvances/article/2/1/vbac016/6544613)
 #' @examples
 #' \dontrun{
 #' data("example_ORA_markers")
@@ -31,6 +33,7 @@ Run_simple_ORA = function(marker_list, background, custom_universe = NULL,
   }
 
   if (!is.null(custom_universe)){
+    custom_universe = sub("[.+-].*","", custom_universe) %>% unique()
     pathway_list_slim <- sapply(background, function(i){
       i[i %in% custom_universe]
     }, simplify = F)
@@ -90,6 +93,8 @@ Run_simple_ORA = function(marker_list, background, custom_universe = NULL,
 #' @param adjust_contingency A logical indicating whether to adjust the contingency table to account for isomeric ambiguity.
 #' @param report_ambiguity_scores A logical indicating whether to report ambiguity scores. If TRUE, ambiguity scores will be included in the results.
 #' @return A list containing the ORA results for each group of markers. Both filtered and per-bootstrap results are provided.
+#' @references
+#' Badia-i-Mompel, P., Nagai, J. S., & Saez-Rodriguez, J. (2022). decoupleR: A flexible tool to handle various modes of biological network analysis. *Bioinformatics Advances*, 2(1), vbac016. [https://doi.org/10.1093/bioadv/vbac016](https://academic.oup.com/bioinformaticsadvances/article/2/1/vbac016/6544613)
 #' @examples
 #' \dontrun{
 #' data("example_ORA_markers")
