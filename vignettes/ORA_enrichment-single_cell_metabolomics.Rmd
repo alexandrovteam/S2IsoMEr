@@ -51,10 +51,12 @@ NASH_scm = readRDS(NASH_scm_tmp)
 condition_metadata_tmp = tempfile()
 download.file("https://zenodo.org/records/13318721/files/spacem_scm_matrices.rds", destfile = condition_metadata_tmp)
 condition_metadata = readRDS(condition_metadata_tmp)[["metaspace_dataset_names"]]
+condition_metadata$dataset_name = sub(".ibd.*", "", condition_metadata$dataset_name)
+
 
 metaspace_annotations_tmp = tempfile()
 download.file("https://zenodo.org/records/13318721/files/SpaceM_metaspace_ds_annotations.rds", destfile = metaspace_annotations_tmp)
-metaspace_annotations = readRDS(metaspace_annotations)
+metaspace_annotations = readRDS(metaspace_annotations_tmp)
 
 ```
 
