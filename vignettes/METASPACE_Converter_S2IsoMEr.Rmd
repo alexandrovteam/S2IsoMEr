@@ -94,7 +94,7 @@ write.csv(Dss_id_conds, "path/to/dir/Ds_ids_for_METASPACE_converter.csv", row.na
 
 Now you can use the exported metadata with dataset IDs and use METASPACE converter to get the merged AnnData object. You’ll need to run the following python chunk in your own python environment to export the AnnData object to an H5AD file, which you’ll then import back into R in the next step.
 
-```{python, eval=FALSE}
+```{python, eval=FALSE, python.reticulate=FALSE }
 from metaspace_converter import metaspace_to_anndata
 import scanpy as sc
 import pandas as pd
