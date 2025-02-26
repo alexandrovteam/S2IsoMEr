@@ -43,7 +43,7 @@ It handles both \href{https://github.com/franapoli/signed-ks-test/blob/master/si
 }
 \examples{
 \dontrun{
-data("example_MSEA_obj")
+data("example_MSEA_obj", package = "S2IsoMErData")
 result <- Run_bootstrap_MSEA(object = example_MSEA_obj, n_bootstraps = 50)
 }
 }

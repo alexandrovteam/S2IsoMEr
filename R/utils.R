@@ -123,7 +123,7 @@ Load_background = function(mol_type = c("Lipid", "Metabo"),
 #' @return An object of class `S2IsoMEr`.
 #' @examples
 #' \dontrun{
-#' data("example_MSEA_obj")
+#' data("example_MSEA_obj", package = "S2IsoMErData")
 #' example_MSEA_obj = setConditions(example_MSEA_obj, condition.x = 'U', condition.y = "FI")
 #' }
 #'
@@ -222,8 +222,8 @@ calc_ambiguity = function(input_iso_list, weights = NULL){
 #'
 #' @examples
 #' \dontrun{
-#' data("example_ORA_obj")
-#' data("example_ORA_custom_universe")
+#' data("example_ORA_obj", package = "S2IsoMErData")
+#' data("example_ORA_custom_universe", package = "S2IsoMErData")
 #' input_scm = example_ORA_obj$scmatrix
 #' conds = example_ORA_obj$conditions
 #' cond_x = "U"

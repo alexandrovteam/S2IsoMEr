@@ -19,7 +19,7 @@
 #' Napoli F (2017). “signed-ks-test.” \url{https://github.com/franapoli/signed-ks-test/blob/master/signed-ks-test.R}.
 #' @examples
 #' \dontrun{
-#' data("example_MSEA_obj")
+#' data("example_MSEA_obj", package = "S2IsoMErData")
 #' result <- Run_simple_MSEA(object = example_MSEA_obj, n_bootstraps = 50)
 #' }
 #' @export
@@ -129,7 +129,7 @@ Run_simple_MSEA = function(object,min_pathway_size = 3){
 #'
 #' @examples
 #' \dontrun{
-#' data("example_MSEA_obj")
+#' data("example_MSEA_obj", package = "S2IsoMErData")
 #' result <- Run_bootstrap_MSEA(object = example_MSEA_obj, n_bootstraps = 50)
 #' }
 #' @export

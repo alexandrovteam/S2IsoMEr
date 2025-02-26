@@ -12,7 +12,7 @@
 #' Badia-i-Mompel, P., Nagai, J. S., & Saez-Rodriguez, J. (2022). decoupleR: A flexible tool to handle various modes of biological network analysis. *Bioinformatics Advances*, 2(1), vbac016. [https://doi.org/10.1093/bioadv/vbac016](https://academic.oup.com/bioinformaticsadvances/article/2/1/vbac016/6544613)
 #' @examples
 #' \dontrun{
-#' data("example_ORA_markers")
+#' data("example_ORA_markers", package = "S2IsoMErData")
 #' bg = Load_background(mol_type = "Metabo",bg_type = "main_class",feature_type = "sf")
 #' enrich_res = Run_simple_ORA(marker_list = example_ORA_markers,background = bg)
 #' }
@@ -97,8 +97,8 @@ Run_simple_ORA = function(marker_list, background, custom_universe = NULL,
 #' Badia-i-Mompel, P., Nagai, J. S., & Saez-Rodriguez, J. (2022). decoupleR: A flexible tool to handle various modes of biological network analysis. *Bioinformatics Advances*, 2(1), vbac016. [https://doi.org/10.1093/bioadv/vbac016](https://academic.oup.com/bioinformaticsadvances/article/2/1/vbac016/6544613)
 #' @examples
 #' \dontrun{
-#' data("example_ORA_markers")
-#' data("example_ORA_obj")
+#' data("example_ORA_markers", package = "S2IsoMErData")
+#' data("example_ORA_obj", package = "S2IsoMErData")
 #' object = example_ORA_obj
 #' enrich_res <- Run_bootstrap_ORA(
 #'   marker_list = example_ORA_markers,

@@ -32,7 +32,7 @@ Plot bootstrap enrichment analysis
 }
 \examples{
 \dontrun{
-data("example_MSEA_obj")
+data("example_MSEA_obj", package = "S2IsoMErData")
 p = barplot_MSEA_boot(object = example_MSEA_obj,
       q.value.cutoff = 0.2, by.statistic = "ES")
 }

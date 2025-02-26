@@ -21,7 +21,7 @@ Set conditions for enrichment analysis
 }
 \examples{
 \dontrun{
-data("example_MSEA_obj")
+data("example_MSEA_obj", package = "S2IsoMErData")
 example_MSEA_obj = setConditions(example_MSEA_obj, condition.x = 'U', condition.y = "FI")
 }
 

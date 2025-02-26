@@ -82,8 +82,8 @@ This function performs a bootstrap-based over-representation analysis (ORA) on a
 }
 \examples{
 \dontrun{
-data("example_ORA_markers")
-data("example_ORA_obj")
+data("example_ORA_markers", package = "S2IsoMErData")
+data("example_ORA_obj", package = "S2IsoMErData")
 object = example_ORA_obj
 enrich_res <- Run_bootstrap_ORA(
   marker_list = example_ORA_markers,
@@ -101,4 +101,7 @@ enrich_res <- Run_bootstrap_ORA(
   annot_list = object$annotations
 )
 }
+}
+\references{
+Badia-i-Mompel, P., Nagai, J. S., & Saez-Rodriguez, J. (2022). decoupleR: A flexible tool to handle various modes of biological network analysis. \emph{Bioinformatics Advances}, 2(1), vbac016. \href{https://academic.oup.com/bioinformaticsadvances/article/2/1/vbac016/6544613}{https://doi.org/10.1093/bioadv/vbac016}
 }

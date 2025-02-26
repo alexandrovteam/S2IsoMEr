@@ -40,3 +40,6 @@ rankScore(object = example_ORA_obj, ranking.by = 't.test')
 
 
 }
+\references{
+Murakami, Hidetoshi. (2012). Modified Baumgartner Statistics for the Two-Sample and Multisample Problems: A Numerical Comparison. \emph{Journal of Statistical Computation and Simulation} 82 (5): 711–28. \href{https://www.tandfonline.com/doi/pdf/10.1080/00949655.2010.551516}{https://doi.org/10.1080/00949655.2010.551516}
+}

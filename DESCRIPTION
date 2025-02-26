@@ -34,6 +34,9 @@ Imports:
     magrittr
 Depends: 
     R (>= 3.5.0)
+    S2IsoMErData
+Remotes:
+    git::https://github.com/alexandrovteam/S2IsoMErData.git
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

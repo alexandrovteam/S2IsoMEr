@@ -41,7 +41,7 @@
 #' Murakami, Hidetoshi. (2012). Modified Baumgartner Statistics for the Two-Sample and Multisample Problems: A Numerical Comparison. *Journal of Statistical Computation and Simulation* 82 (5): 711–28. [https://doi.org/10.1080/00949655.2010.551516](https://www.tandfonline.com/doi/pdf/10.1080/00949655.2010.551516)
 #' @examples
 #' \dontrun{
-#' data("example_ORA_obj")
+#' data("example_ORA_obj", package = "S2IsoMErData")
 #' input_scm = example_ORA_obj$scmatrix
 #' conds = example_ORA_obj$conditions
 #' cond_x = "U"
@@ -442,8 +442,8 @@ print.S2IsoMEr <- function(x, ...){
 #' Badia-i-Mompel, P., Nagai, J. S., & Saez-Rodriguez, J. (2022). decoupleR: A flexible tool to handle various modes of biological network analysis. *Bioinformatics Advances*, 2(1), vbac016. [https://doi.org/10.1093/bioadv/vbac016](https://academic.oup.com/bioinformaticsadvances/article/2/1/vbac016/6544613)
 #' @examples
 #' \dontrun{
-#' data("example_ORA_obj")
-#' data("example_ORA_custom_universe")
+#' data("example_ORA_obj", package = "S2IsoMErData")
+#' data("example_ORA_custom_universe", package = "S2IsoMErData")
 #' input_scm = example_ORA_obj$scmatrix
 #' conds = example_ORA_obj$conditions
 #' cond_x = "U"

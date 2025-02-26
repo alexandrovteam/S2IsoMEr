@@ -31,8 +31,11 @@ This function performs a simple over-representation analysis (ORA) on a given li
 }
 \examples{
 \dontrun{
-data("example_ORA_markers")
+data("example_ORA_markers", package = "S2IsoMErData")
 bg = Load_background(mol_type = "Metabo",bg_type = "main_class",feature_type = "sf")
 enrich_res = Run_simple_ORA(marker_list = example_ORA_markers,background = bg)
 }
+}
+\references{
+Badia-i-Mompel, P., Nagai, J. S., & Saez-Rodriguez, J. (2022). decoupleR: A flexible tool to handle various modes of biological network analysis. \emph{Bioinformatics Advances}, 2(1), vbac016. \href{https://academic.oup.com/bioinformaticsadvances/article/2/1/vbac016/6544613}{https://doi.org/10.1093/bioadv/vbac016}
 }

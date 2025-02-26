@@ -23,8 +23,8 @@ The function creates a bar plot where the terms are reordered by their median en
 }
 \examples{
 \dontrun{
-data("example_ORA_obj")
-data("example_ORA_custom_universe")
+data("example_ORA_obj", package = "S2IsoMErData")
+data("example_ORA_custom_universe", package = "S2IsoMErData")
 input_scm = example_ORA_obj$scmatrix
 conds = example_ORA_obj$conditions
 cond_x = "U"

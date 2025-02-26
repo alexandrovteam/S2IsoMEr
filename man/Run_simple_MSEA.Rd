@@ -28,7 +28,7 @@ It handles both KS-signed method](https://github.com/franapoli/signed-ks-test/bl
 }
 \examples{
 \dontrun{
-data("example_MSEA_obj")
+data("example_MSEA_obj", package = "S2IsoMErData")
 result <- Run_simple_MSEA(object = example_MSEA_obj, n_bootstraps = 50)
 }
 }

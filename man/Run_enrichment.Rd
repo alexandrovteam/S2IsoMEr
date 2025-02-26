@@ -36,8 +36,8 @@ Run_enrichment() A wrapper to run either ORA or MSEA based on the initialized en
 }
 \examples{
 \dontrun{
-data("example_ORA_obj")
-data("example_ORA_custom_universe")
+data("example_ORA_obj", package = "S2IsoMErData")
+data("example_ORA_custom_universe", package = "S2IsoMErData")
 input_scm = example_ORA_obj$scmatrix
 conds = example_ORA_obj$conditions
 cond_x = "U"
@@ -65,4 +65,7 @@ ORA_res <- Run_enrichment(
 }
 
 
+}
+\references{
+Badia-i-Mompel, P., Nagai, J. S., & Saez-Rodriguez, J. (2022). decoupleR: A flexible tool to handle various modes of biological network analysis. \emph{Bioinformatics Advances}, 2(1), vbac016. \href{https://academic.oup.com/bioinformaticsadvances/article/2/1/vbac016/6544613}{https://doi.org/10.1093/bioadv/vbac016}
 }

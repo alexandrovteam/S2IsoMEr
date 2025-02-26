@@ -88,7 +88,7 @@ initEnrichment() creates object to perform bootstrapping metabolite set enrichme
 }
 \examples{
 \dontrun{
-data("example_ORA_obj")
+data("example_ORA_obj", package = "S2IsoMErData")
 input_scm = example_ORA_obj$scmatrix
 conds = example_ORA_obj$conditions
 cond_x = "U"
@@ -109,4 +109,11 @@ ORA_obj <- initEnrichment(
 }
 
 
+}
+\references{
+Korotkevich G, Sukhov V, Sergushichev A (2019). “Fast gene set enrichment analysis.” bioRxiv. doi:10.1101/060012, \url{http://biorxiv.org/content/early/2016/06/20/060012}.
+
+Napoli F (2017). “signed-ks-test.” \url{https://github.com/franapoli/signed-ks-test/blob/master/signed-ks-test.R}.
+
+Murakami, Hidetoshi. (2012). Modified Baumgartner Statistics for the Two-Sample and Multisample Problems: A Numerical Comparison. \emph{Journal of Statistical Computation and Simulation} 82 (5): 711–28. \href{https://www.tandfonline.com/doi/pdf/10.1080/00949655.2010.551516}{https://doi.org/10.1080/00949655.2010.551516}
 }

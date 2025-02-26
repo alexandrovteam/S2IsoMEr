@@ -12,7 +12,7 @@
 #' @return A ggplot2 object.
 #' @examples
 #' \dontrun{
-#' data("example_MSEA_obj")
+#' data("example_MSEA_obj", package = "S2IsoMErData")
 #' p = barplot_MSEA_boot(object = example_MSEA_obj,
 #'       q.value.cutoff = 0.2, by.statistic = "ES")
 #' }
@@ -164,7 +164,7 @@ barplot_MSEA_boot.S2IsoMEr <- function(object, min.annotations = 2, q.value.cuto
 #'
 #' @examples
 #' \dontrun{
-#' data("example_MSEA_multicond")
+#' data("example_MSEA_multicond", package = "S2IsoMErData")
 #' p = plot_MSEA_Multi_cond(combined_MSEA_res = example_MSEA_multicond,
 #'                          alpha_cutoff = 0.05)
 #' }
@@ -236,7 +236,7 @@ plot_MSEA_Multi_cond = function(combined_MSEA_res,
 #'
 #' @examples
 #' \dontrun{
-#' data("example_ORA_markers")
+#' data("example_ORA_markers", package = "S2IsoMErData")
 #' bg = Load_background(mol_type = "Metabo",bg_type = "main_class",feature_type = "sf")
 #' enrich_res = Run_simple_ORA(marker_list = example_ORA_markers,background = bg)
 #' p = barplot_ORA_simple(enrich_res, q_val_cutoff = 0.2)
@@ -275,8 +275,8 @@ barplot_ORA_simple = function(ORA_simple_res, q_val_cutoff = 0.05){
 #'
 #' @examples
 #' \dontrun{
-#' data("example_ORA_obj")
-#' data("example_ORA_custom_universe")
+#' data("example_ORA_obj", package = "S2IsoMErData")
+#' data("example_ORA_custom_universe", package = "S2IsoMErData")
 #' input_scm = example_ORA_obj$scmatrix
 #' conds = example_ORA_obj$conditions
 #' cond_x = "U"
@@ -371,8 +371,8 @@ barplot_ORA_boot = function(ORA_boot_res, collapse_multi_cond = F){
 #'
 #' @examples
 #' \dontrun{
-#' data("example_ORA_obj")
-#' data("example_ORA_custom_universe")
+#' data("example_ORA_obj", package = "S2IsoMErData")
+#' data("example_ORA_custom_universe", package = "S2IsoMErData")
 #' input_scm = example_ORA_obj$scmatrix
 #' conds = example_ORA_obj$conditions
 #' cond_x = "U"
@@ -496,8 +496,8 @@ dotplot_ORA = function(ORA_res, alpha_cutoff = 0.05,
 #'
 #' @examples
 #' \dontrun{
-#' data("example_ORA_obj")
-#' data("example_ORA_custom_universe")
+#' data("example_ORA_obj", package = "S2IsoMErData")
+#' data("example_ORA_custom_universe", package = "S2IsoMErData")
 #' input_scm = example_ORA_obj$scmatrix
 #' conds = example_ORA_obj$conditions
 #' cond_x = "U"
@@ -562,8 +562,8 @@ ridge_bootstraps = function(enrich_res, terms_of_interest, condition = NULL){
 #' @return  A `ggplot2` object displaying the density plot of metabolite intensities across conditions.
 #' @examples
 #' \dontrun{
-#' data("example_ORA_obj")
-#' data("example_ORA_custom_universe")
+#' data("example_ORA_obj", package = "S2IsoMErData")
+#' data("example_ORA_custom_universe", package = "S2IsoMErData")
 #' input_scm = example_ORA_obj$scmatrix
 #' conds = example_ORA_obj$conditions
 #' cond_x = "U"
