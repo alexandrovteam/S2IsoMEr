@@ -1,11 +1,11 @@
 pandoc: 3.1.11
-pkgdown: 2.1.1
+pkgdown: 2.1.3
 pkgdown_sha: ~
 articles:
   METASPACE_Converter_S2IsoMEr: METASPACE_Converter_S2IsoMEr.html
   MSEA_enrichment-single_cell_metabolomics: MSEA_enrichment-single_cell_metabolomics.html
   ORA_enrichment-single_cell_metabolomics: ORA_enrichment-single_cell_metabolomics.html
-last_built: 2025-02-26T20:13Z
+last_built: 2025-08-06T09:25Z
 urls:
   reference: https://alexandrovteam.github.io/S2IsoMEr/reference
   article: https://alexandrovteam.github.io/S2IsoMEr/articles
