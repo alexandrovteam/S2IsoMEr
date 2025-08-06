@@ -100,6 +100,9 @@ ora_conting_decoupleR = function(dat, as_matrix = T) {
   n_background = dat[["n_bg"]]
 
   TP_mols = observed[observed %fin% expected]
+  if(!is.null(names(TP_mols))){
+    TP_mols = names(TP_mols)
+  }
 
   true_positive <- length(TP_mols)
   false_negative <- setdiff(expected, observed) %>% length()
@@ -114,7 +117,7 @@ ora_conting_decoupleR = function(dat, as_matrix = T) {
     conting = data.frame(TP = true_positive, FP = false_positive,
                          FN = false_negative , TN = true_negative,
                          TP_markers = ifelse(true_positive != 0,
-                                             paste(names(TP_mols), collapse = ";"),
+                                             paste(TP_mols, collapse = ";"),
                                              NA))
   }
   return(conting)
