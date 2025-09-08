@@ -384,3 +384,73 @@ map_TP_markers_to_ions = function(markers, scm_ions){
   marker_ions = scm_ions[match_markers]
   return(marker_ions)
 }
+
+#' Calculate Term ambiguity score per ion for bootstrap ORA
+#'
+#' This function calculate an ambiguity score for each ion having at least one molecule overlapping with a given term.
+#' The score ranges from 0-1,indicating how molecular annotation ambiguity affects bootstrap ORA enrichment results.
+#'
+#' @param object A S2IsoMEr object used for bootstrap-based ORA.
+#' @param ORA_boot_res A list of results per condition. This is the output of \code{\link{Run_bootstrap_ORA}} or \code{\link{Run_enrichment}}.
+#' @param condition character indicating the name of condition. It's the names of elements in input list of markers used in \code{\link{Run_bootstrap_ORA}}.
+#' If no conditions were specified, it will either be `upregulated`, `downregulated` or `all`.
+#' @param term_of_interest A character specifying the term for which true positive markers should be extracted.
+#'
+#' @return Named numeric vector of ambiguity scores for given term. Names indicate ions having at least one molecule overlapping with a given term.
+#'
+#' @details
+#' The function calculates the ambiguity score based on the proportion of a marker's annotations
+#' that intersect with the term's molecular set, weighted by the ambiguity of the marker itself.
+#' The ambiguity score ranges from 0-1. A low score (< 0.5) would suggest that a term was not enriched due to high ambiguity,
+#' reflected by high dispersion in the bootstrapping results.
+#'
+#' @examples
+#' \dontrun{
+#' data("example_ORA_markers", package = "S2IsoMErData")
+#' data("example_ORA_obj", package = "S2IsoMErData")
+#' object = example_ORA_obj
+#' enrich_res <- Run_bootstrap_ORA(
+#'   marker_list = example_ORA_markers,
+#'   background = object$pathway_list,
+#'   polarization_mode = object$polarization_mode,
+#'   mass_range_ppm = object$mass_range_ppm,
+#'   annot_db = object$Annotation_database,
+#'   annot_custom_db = object$Custom_database,
+#'   use_LION = ifelse(stringr::str_detect(object$background_name, "LION"), TRUE, FALSE),
+#'   endogenous_only = object$endogenous_only,
+#'   pathway_assoc_only = object$pathway_assoc_only,
+#'   remove_expected_predicted = object$remove_expected_predicted,
+#'   annot_weights = object$annotation.weights,
+#'   consider_isobars = object$consider_isobars,
+#'   annot_list = object$annotations,
+#'   report_ambiguity_scores = T
+#' )
+#' TOI = "Lineolic acids and derivatives"
+#'
+#' ambig_scores = Term_ambig_score(object = object, ORA_boot_res = enrich_res,
+#' condition = "Condition", term_of_interest = TOI)
+#' }
+#' @export
+Term_ambig_score = function(object,ORA_boot_res,condition,term_of_interest){
+
+  TP_markers = get_TP_markers_per_Term(ORA_boot_df = ORA_boot_res[[condition]]$unfiltered_enrich_res,
+                                       term_of_interest = term_of_interest)
+  TP_markers = TP_markers[!is.na(TP_markers)]
+  TP_markers_ambig = ORA_boot_res[[condition]]$`Query ambiguity`
+  TP_markers_ambig = TP_markers_ambig[TP_markers] %>% as.numeric()
+  TP_annots = object$annotations[TP_markers]
+  Term_mols = object$pathway_list[[term_of_interest]]
+
+  TP_annots_Intersect = lapply(TP_annots, function(x){
+    length(intersect(x,Term_mols)) / length(unique(x))
+  }) %>% as.numeric()
+  TP_annots_Intersect[is.nan(TP_annots_Intersect)] = 0
+
+  entropy_norm = softmax_func(TP_markers_ambig)
+
+  per_ion_ambig_score = TP_annots_Intersect * ((1-entropy_norm)^(1-TP_annots_Intersect))
+  names(per_ion_ambig_score) = TP_markers
+
+  return(per_ion_ambig_score)
+}
+
