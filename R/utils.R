@@ -22,8 +22,8 @@ rename_if_exists <- function(data, old_name, new_name) {
 }
 
 list_backgrounds = function(feat_type){
-  all_bgs = c("Lipid_LION","Lipid_super_class", "Lipid_main_class", "Lipid_sub_class","Lipid_pathways",
-    "Metabo_super_class", "Metabo_main_class", "Metabo_sub_class", "Metabo_pathways")
+  all_bgs = c("Lipid_LION","Lipid_super_class", "Lipid_main_class", "Lipid_sub_class","Lipid_pathway",
+    "Metabo_super_class", "Metabo_class", "Metabo_sub_class", "Metabo_pathway")
   all_bgs = paste0(all_bgs, "_" ,feat_type)
   all_bgs = all_bgs[all_bgs %nin% c("Lipid_LION_sf")]
   return(all_bgs)
@@ -73,50 +73,36 @@ check_feat_type = function(feats){
 #' @export
 Load_background = function(mol_type = c("Lipid", "Metabo"),
                            bg_type = c("LION","main_class","super_class", "sub_class",
-                                       "pathways"),
+                                       "pathway"),
                            feature_type = c("sf","name")){
 
   mol_type = match.arg(mol_type)
   bg_type = match.arg(bg_type)
   feature_type = match.arg(feature_type)
 
+  orig_bg_name = paste0(mol_type, "_", bg_type, "_", feature_type)
+  if (orig_bg_name %nin% list_backgrounds(feature_type)){
+    stop("Background not found, please check list_backgrounds()")
+  }
   if (mol_type == "Metabo" & bg_type == "LION"){
     stop("LION ontology is for Lipids only, please check molecule type")
   }
-  bg_name = paste0(mol_type, "_", bg_type, "_", feature_type)
-  if (bg_name %nin% list_backgrounds(feature_type)){
-    stop("Background not found, please check list_backgrounds()")
+  if(mol_type == "Metabo" & bg_type == "main_class"){
+    bg_type = "class"
   }
+  if(mol_type == "Lipid"){
+    mol_type = "LipidMaps"
+    if(bg_type == "super_class"){
+      bg_type = "category"
+    }
+  }
+
+  bg_name = paste0(mol_type, "_", bg_type, "_", feature_type)
+
 
   data(list = bg_name, package = "S2IsoMErData", envir = environment())
   bg = get(bg_name)
 
-  # if(bg_name == "Lipid_LION_name"){
-  #
-  # }
-  # if (feature_type == "sf"){
-  #  bg = switch(bg_name,
-  #              "Lipid_super_class_sf" = LipidMaps_category_sf,
-  #              "Lipid_main_class_sf" = LipidMaps_main_class_sf,
-  #              "Lipid_sub_class_sf" = LipidMaps_sub_class_sf,
-  #              "Lipid_pathways_sf" = LipidMaps_pathway_sf,
-  #              "Metabo_super_class_sf" = Metabo_super_class_sf,
-  #              "Metabo_main_class_sf" = Metabo_class_sf,
-  #              "Metabo_sub_class_sf" = Metabo_sub_class_sf,
-  #              "Metabo_pathways_sf" = Metabo_pathway_sf)
-  # }
-  # if (feature_type == "name"){
-  #   bg = switch(bg_name,
-  #               "Lipid_super_class_name" = LipidMaps_category_name,
-  #               "Lipid_main_class_name" = LipidMaps_main_class_name,
-  #               "Lipid_sub_class_name" = LipidMaps_sub_class_name,
-  #               "Lipid_pathways_name" = LipidMaps_pathway_name,
-  #               "Lipid_LION_name" = pathway_list_LION,
-  #               "Metabo_super_class_name" = Metabo_super_class_name,
-  #               "Metabo_main_class_name" = Metabo_class_name,
-  #               "Metabo_sub_class_name" = Metabo_sub_class_name,
-  #               "Metabo_pathways_name" = Metabo_pathway_name)
-  # }
   return(bg)
 }
 
@@ -452,3 +438,10 @@ metap_sumlog_pvals <- function(p, log.p = FALSE) {
   }
   res
 }
+
+softmax_func <- function(x) {
+  exp_x <- exp(x - max(x))
+  return(exp_x / sum(exp_x))
+}
+
+

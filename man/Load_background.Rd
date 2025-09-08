@@ -6,7 +6,7 @@
 \usage{
 Load_background(
   mol_type = c("Lipid", "Metabo"),
-  bg_type = c("LION", "main_class", "super_class", "sub_class", "pathways"),
+  bg_type = c("LION", "main_class", "super_class", "sub_class", "pathway"),
   feature_type = c("sf", "name")
 )
 }
