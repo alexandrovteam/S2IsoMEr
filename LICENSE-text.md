@@ -1,0 +1,4 @@
+# License
+
+    YEAR: 2024
+    COPYRIGHT HOLDER: S2IsoMEr authors

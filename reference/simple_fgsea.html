@@ -107,14 +107,14 @@ The columns are the following:</p><ul><li><p>pathway – name of the pathway as 
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">mol_ranks</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">bg</span><span class="op">)</span><span class="op">)</span>, <span class="fl">10</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">mol_ranks</span> <span class="op">=</span> <span class="va">mol_ranks</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">mol_ranks</span><span class="op">)</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="fu">simple_fgsea</span><span class="op">(</span>pathways <span class="op">=</span> <span class="va">bg</span>, stats <span class="op">=</span> <span class="va">mol_ranks</span>, minSize <span class="op">=</span> <span class="fl">3</span>, scoreType <span class="op">=</span> <span class="st">"std"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    pathway      pval      padj         ES        NES nMoreExtreme  size</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;char&gt;     &lt;num&gt;     &lt;num&gt;      &lt;num&gt;      &lt;num&gt;        &lt;num&gt; &lt;int&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:  Term_A 0.5565476 0.5565476 -0.4115199 -0.8739822          186     7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:  Term_B 0.1550633 0.3101266  0.8419135  1.2978051           97     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                 leadingEdge</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                      &lt;list&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: mol_70,mol_1,mol_56,mol_35,mol_51,mol_33</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:                             mol_6,mol_42</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    pathway      pval      padj         ES       NES nMoreExtreme  size</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;char&gt;     &lt;num&gt;     &lt;num&gt;      &lt;num&gt;     &lt;num&gt;        &lt;num&gt; &lt;int&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:  Term_A 0.1153846 0.1236443  0.8000000  1.484242           65     5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:  Term_B 0.1236443 0.1236443 -0.7664702 -1.448042           56     5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                           leadingEdge</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                &lt;list&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: mol_45,mol_55,mol_79,mol_84,mol_73</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:         mol_53,mol_7,mol_96,mol_70</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -126,7 +126,7 @@ The columns are the following:</p><ul><li><p>pathway – name of the pathway as 
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

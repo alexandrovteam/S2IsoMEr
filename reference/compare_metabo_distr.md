@@ -1,0 +1,67 @@
+# Plot intensity distribution of metabolite across conditions
+
+Plot intensity distribution of metabolite across conditions
+
+## Usage
+
+``` r
+compare_metabo_distr(obj, metabolite, conds_of_interest = NULL)
+```
+
+## Arguments
+
+- obj:
+
+  A S2IsoMEr object after enrichment analysis.
+
+- metabolite:
+
+  A character indicating metabolite name
+
+- conds_of_interest:
+
+  Optional. A character vector specifying which conditions to include in
+  the plot. If `NULL` (the default), all conditions are included.
+
+## Value
+
+A `ggplot2` object displaying the density plot of metabolite intensities
+across conditions.
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+data("example_ORA_obj", package = "S2IsoMErData")
+data("example_ORA_custom_universe", package = "S2IsoMErData")
+input_scm = example_ORA_obj$scmatrix
+conds = example_ORA_obj$conditions
+cond_x = "U"
+cond_y = "F"
+ORA_obj <- initEnrichment(
+  scmatrix = input_scm,
+  conditions = conds,
+  enrichment_type = "ORA",
+  annot_db = "HMDB",
+  consider_isomers = TRUE,
+  consider_isobars = TRUE,
+  polarization_mode = "positive",
+  background_type = "sub_class",
+  molecule_type = "Metabo",
+  condition.x = cond_x,
+  condition.y = cond_y
+)
+ORA_res <- Run_enrichment(
+  object = ORA_obj,
+  custom_universe = example_ORA_custom_universe,
+  report_ambiguity_scores = TRUE,
+  DE_LFC_cutoff = 0,
+  min.pct.diff = 0
+)
+TP_ions = get_TP_markers_per_Term(ORA_boot_df = ORA_res$downregulated$unfiltered_enrich_res,
+                                 term_of_interest = "Glycerophosphocholines")
+TP_ions = map_TP_markers_to_ions(markers = TP_ions,scm_ions = rownames(input_scm))
+p = compare_metabo_distr(ORA_obj, metabolite = TP_ions[5],
+                         conds_of_interest = c(cond_x, cond_y))
+} # }
+```
