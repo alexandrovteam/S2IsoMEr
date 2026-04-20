@@ -173,7 +173,7 @@ From the additional list of arguments to `Run_bootstrap_ORA` we recommend defini
 -   `n_bootstraps`: Number of bootstrap iterations. The default is 50, but increasing this number generally improves accuracy, though it will slow down the process. Adjust according to your needs. We recommend a minimum of 50 and a maximum of 1000. 100 is acceptable.
 
 ```{r "Run ORA boot", eval = FALSE}
-ORA_boot_res = Run_enrichment(object = ORA_obj,
+ORA_boot_res = Run_enrichment(object = ORA_boot_obj,
                          custom_universe = custom_univ,
                          report_ambiguity_scores = T,
                          DE_LFC_cutoff = 0,min.pct.diff = 0)

@@ -90,7 +90,7 @@
     alternative='greater',
     !!!list(...)
   ) %>%
-    generics::glance() %>%
+    generics::tidy() %>%
     cbind(conting)
 }
 ora_conting_decoupleR = function(dat, as_matrix = T) {
